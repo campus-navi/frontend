@@ -1,4 +1,4 @@
-import { BackIcon } from '@/features/signup/components/SignupIcons';
+import { AppHeader } from '@/components/ui/AppHeader';
 
 type SignupHeaderProps = {
   progressValue?: number;
@@ -7,17 +7,8 @@ type SignupHeaderProps = {
 
 export function SignupHeader({ progressValue, onBack }: SignupHeaderProps) {
   return (
-    <header className="pt-[max(20px,env(safe-area-inset-top))]">
-      <div className="flex h-[60px] items-center px-5">
-        <button
-          type="button"
-          onClick={onBack}
-          className="flex h-10 w-10 items-center justify-center text-[#2B2B2B]"
-          aria-label="뒤로 가기"
-        >
-          <BackIcon />
-        </button>
-      </div>
+    <header>
+      <AppHeader onBack={onBack} />
       {typeof progressValue === 'number' ? (
         <div className="h-[3px] w-full bg-[#D9D9D9]">
           <div
