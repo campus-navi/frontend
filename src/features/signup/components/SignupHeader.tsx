@@ -7,7 +7,7 @@ type SignupHeaderProps = {
 
 export function SignupHeader({ progressValue, onBack }: SignupHeaderProps) {
   return (
-    <header>
+    <div>
       <AppHeader onBack={onBack} />
       {typeof progressValue === 'number' ? (
         <div className="h-[3px] w-full bg-[#D9D9D9]">
@@ -17,6 +17,6 @@ export function SignupHeader({ progressValue, onBack }: SignupHeaderProps) {
           />
         </div>
       ) : null}
-    </header>
+    </div>
   );
 }
