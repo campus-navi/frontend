@@ -15,7 +15,7 @@ export function CtaButton({
   ...props
 }: CtaButtonProps) {
   const baseClassName =
-    'rounded-[20px] px-4 py-[clamp(16px,4.5vw,20px)] text-[clamp(15px,4vw,16px)] font-semibold leading-none tracking-[0.015em] transition-colors duration-200';
+    'rounded-[8px] px-4 py-[clamp(16px,4.5vw,20px)] text-[clamp(15px,4vw,16px)] font-semibold leading-none tracking-[0.015em] transition-colors duration-200';
   const widthClassName = fullWidth ? 'w-full' : '';
   const stateClassName = active
     ? 'bg-[#565656] text-white hover:bg-[#4b4b4b]'
