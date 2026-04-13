@@ -129,14 +129,6 @@ export default function LoginPage() {
                 비밀번호 찾기
               </button>
             </div>
-
-            <button
-              type="button"
-              onClick={() => navigate('/signup')}
-              className="mt-5 block w-full text-center text-[15px] font-medium text-[#6D6D6D] transition-colors hover:text-[#333333]"
-            >
-              회원가입
-            </button>
           </div>
         </section>
       </div>
