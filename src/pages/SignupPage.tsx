@@ -1,8 +1,10 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { CtaButton } from '@/components/ui/CtaButton';
 import { SignupHeader } from '@/features/signup/components/SignupHeader';
 import { useSignupFlow } from '@/features/signup/hooks/useSignupFlow';
+import { useSignupFlowStore } from '@/features/signup/store/signupFlowStore';
 import { AdmissionYearStep } from '@/features/signup/steps/AdmissionYearStep';
 import { DepartmentStep } from '@/features/signup/steps/DepartmentStep';
 import { EmailVerificationStep } from '@/features/signup/steps/EmailVerificationStep';
@@ -14,8 +16,25 @@ import { UsernameStep } from '@/features/signup/steps/UsernameStep';
 
 export default function SignupPage() {
   const navigate = useNavigate();
-  const { state, emailDomain, filteredUniversities, filteredDepartments, isCurrentStepValid, progressValue, admissionYears, timeLeft, actions } =
-    useSignupFlow();
+  const {
+    state,
+    emailDomain,
+    filteredUniversities,
+    filteredDepartments,
+    isCurrentStepValid,
+    progressValue,
+    admissionYears,
+    timeLeft,
+    universitySearch,
+    isUniversitySearchVisible,
+    actions,
+  } = useSignupFlow();
+
+  useEffect(() => {
+    return () => {
+      useSignupFlowStore.getState().actions.resetFlow();
+    };
+  }, []);
 
   const handleBack = () => {
     if (state.step === 0) {
@@ -27,23 +46,28 @@ export default function SignupPage() {
   };
 
   return (
-    <main className="min-h-[100svh] bg-white">
-      <div className="mx-auto flex min-h-[100svh] w-full max-w-[393px] flex-col bg-white">
+    <main className="h-[100svh] overflow-hidden bg-white">
+      <div className="mx-auto flex h-[100svh] w-full max-w-[393px] flex-col overflow-hidden bg-white">
         {state.step < 7 ? <SignupHeader progressValue={progressValue} onBack={handleBack} /> : <SignupHeader onBack={handleBack} />}
 
         <section
           className={[
-            'flex flex-1 flex-col px-5 pb-[max(24px,env(safe-area-inset-bottom))]',
+            'flex min-h-0 flex-1 flex-col overflow-hidden px-5 pb-[max(24px,env(safe-area-inset-bottom))]',
             state.step < 7 ? 'pt-12' : 'py-10',
           ].join(' ')}
         >
-          <div className="flex-1">
+          <div className="min-h-0 flex-1 overflow-hidden">
             {state.step === 0 ? (
               <UniversityStep
+                isLoading={universitySearch.isLoading}
+                isResultsVisible={isUniversitySearchVisible}
                 query={state.universityQuery}
+                selectedUniversity={state.form.selectedUniversity}
                 suggestions={filteredUniversities}
+                errorMessage={universitySearch.isError ? universitySearch.error.message : undefined}
                 onChange={actions.updateUniversityQuery}
                 onClear={actions.clearUniversityQuery}
+                onRetry={() => void universitySearch.refetch()}
                 onSelect={actions.selectUniversity}
               />
             ) : null}
