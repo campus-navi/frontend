@@ -109,6 +109,16 @@ function shouldRefreshUnauthorizedError(config: InternalAxiosRequestConfig) {
   return config.requiresAuth !== false && !config.skipAuthRefresh && !config._retry;
 }
 
+const REFRESH_AUTHENTICATION_ERROR_CODES: ReadonlySet<string> = new Set([
+  AUTH_ERROR_CODES.UNAUTHORIZED,
+  AUTH_ERROR_CODES.REFRESH_TOKEN_EXPIRED,
+  AUTH_ERROR_CODES.REFRESH_TOKEN_MISSING,
+]);
+
+function isRefreshAuthenticationFailure(status: number | null, code: string) {
+  return status === 401 || status === 403 || REFRESH_AUTHENTICATION_ERROR_CODES.has(code);
+}
+
 async function refreshAccessToken() {
   const refreshToken = getRefreshTokenOrThrow();
   const response = await refreshClient.post<ApiSuccessResponse<RefreshResponseData>>(
@@ -177,7 +187,14 @@ apiClient.interceptors.response.use(
       await replayQueuedRequests(accessToken);
       applyAccessToken(originalConfig, accessToken);
       return await apiClient.request(originalConfig);
-    } catch {
+    } catch (refreshError) {
+      const normalizedRefreshError = normalizeApiError(refreshError);
+
+      if (!isRefreshAuthenticationFailure(normalizedRefreshError.status, normalizedRefreshError.code)) {
+        clearQueuedRequests(normalizedRefreshError);
+        return Promise.reject(normalizedRefreshError);
+      }
+
       const sessionExpiredError = createApiError({
         code: AUTH_ERROR_CODES.SESSION_EXPIRED,
         message: '로그인 세션이 만료되었습니다.',
