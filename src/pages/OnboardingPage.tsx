@@ -20,8 +20,8 @@ export default function OnboardingPage() {
               머시기머시기, 머시기머시기 머시기해서 만나보세요
             </SubTitle>
             <div className="flex flex-wrap items-center gap-[6px]">
-              {onboardingTags.map((label) => (
-                <TagChip key={label} label={label} />
+              {onboardingTags.map((label, index) => (
+                <TagChip key={`${label}-${index}`} label={label} />
               ))}
             </div>
           </div>
