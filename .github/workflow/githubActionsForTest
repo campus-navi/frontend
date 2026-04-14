@@ -1,0 +1,30 @@
+name: frontend CI
+
+#PR 이 올라오거나 main 브랜치에 push 될 때마다 실행
+on: 
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main] 
+
+jobs:
+  builds:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: setup with node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      
+      - name: Install Dependency
+        run: npm install
+      - name: run lint
+        run: npm run lint
+      - name: build
+        run: npm run build
+    
+
+
