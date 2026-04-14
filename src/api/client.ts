@@ -105,6 +105,10 @@ function extractAccessToken(data: RefreshResponseData) {
   return accessToken;
 }
 
+function shouldRefreshUnauthorizedError(config: InternalAxiosRequestConfig) {
+  return config.requiresAuth !== false && !config.skipAuthRefresh && !config._retry;
+}
+
 async function refreshAccessToken() {
   const refreshToken = getRefreshTokenOrThrow();
   const response = await refreshClient.post<ApiSuccessResponse<RefreshResponseData>>(
@@ -156,7 +160,7 @@ apiClient.interceptors.response.use(
       return Promise.reject(normalizedError);
     }
 
-    if (originalConfig.skipAuthRefresh || error.response?.status !== 401 || originalConfig._retry) {
+    if (error.response?.status !== 401 || !shouldRefreshUnauthorizedError(originalConfig)) {
       return Promise.reject(normalizedError);
     }
 
