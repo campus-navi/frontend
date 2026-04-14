@@ -109,8 +109,14 @@ function shouldRefreshUnauthorizedError(config: InternalAxiosRequestConfig) {
   return config.requiresAuth !== false && !config.skipAuthRefresh && !config._retry;
 }
 
-function isRefreshAuthenticationFailure(status: number | null) {
-  return status === 401 || status === 403;
+const REFRESH_AUTHENTICATION_ERROR_CODES: ReadonlySet<string> = new Set([
+  AUTH_ERROR_CODES.UNAUTHORIZED,
+  AUTH_ERROR_CODES.REFRESH_TOKEN_EXPIRED,
+  AUTH_ERROR_CODES.REFRESH_TOKEN_MISSING,
+]);
+
+function isRefreshAuthenticationFailure(status: number | null, code: string) {
+  return status === 401 || status === 403 || REFRESH_AUTHENTICATION_ERROR_CODES.has(code);
 }
 
 async function refreshAccessToken() {
@@ -184,7 +190,7 @@ apiClient.interceptors.response.use(
     } catch (refreshError) {
       const normalizedRefreshError = normalizeApiError(refreshError);
 
-      if (!isRefreshAuthenticationFailure(normalizedRefreshError.status)) {
+      if (!isRefreshAuthenticationFailure(normalizedRefreshError.status, normalizedRefreshError.code)) {
         clearQueuedRequests(normalizedRefreshError);
         return Promise.reject(normalizedRefreshError);
       }
