@@ -23,7 +23,9 @@ export function SuccessStep({ form, emailDomain }: SuccessStepProps) {
 
           <div className="mt-8 rounded-[24px] border border-white/70 bg-white/85 p-5 backdrop-blur">
             <div className="flex flex-wrap gap-2">
-              <span className="rounded-full bg-[#F1F5FF] px-3 py-1.5 text-sm font-medium text-[#4460A8]">{form.university}</span>
+              <span className="rounded-full bg-[#F1F5FF] px-3 py-1.5 text-sm font-medium text-[#4460A8]">
+                {form.selectedUniversity?.universityName ?? '대학교 미선택'}
+              </span>
               <span className="rounded-full bg-[#F4F6F8] px-3 py-1.5 text-sm font-medium text-[#556070]">{form.department}</span>
               <span className="rounded-full bg-[#EDF9EF] px-3 py-1.5 text-sm font-medium text-[#2F7A45]">{form.admissionYear}학번</span>
             </div>

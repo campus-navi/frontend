@@ -4,8 +4,14 @@ export const totalSignupSteps = 7;
 
 export type SignupStep = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
+export type SelectedUniversity = {
+  campusId: number | string;
+  emailDomain?: string;
+  universityName: string;
+};
+
 export type SignupForm = {
-  university: string;
+  selectedUniversity: SelectedUniversity | null;
   emailLocalPart: string;
   emailVerified: boolean;
   department: string;
