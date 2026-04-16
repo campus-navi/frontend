@@ -6,7 +6,7 @@ import { AUTH_ERROR_CODES } from '@/api/constants/errorCodes';
 import { apiConfig } from '@/api/config';
 import { createApiError, normalizeApiError } from '@/api/errors';
 import { validateApiResponse } from '@/api/response';
-import type { ApiObjectData, ApiRequestConfig, ApiResponse, ApiSuccessResponse, QueuedRequest } from '@/api/types';
+import type { ApiObjectData, ApiRequestConfig, ApiResponse, ApiResponseData, ApiSuccessResponse, QueuedRequest } from '@/api/types';
 
 declare module 'axios' {
   interface InternalAxiosRequestConfig {
@@ -212,7 +212,7 @@ apiClient.interceptors.response.use(
   },
 );
 
-export async function request<TData extends ApiObjectData = ApiObjectData>(config: ApiRequestConfig) {
+export async function request<TData extends ApiResponseData = ApiObjectData>(config: ApiRequestConfig) {
   const response = await apiClient.request<ApiResponse<TData>>(config);
   return validateApiResponse(response.status, response.data);
 }

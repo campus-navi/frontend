@@ -1,8 +1,8 @@
 import { COMMON_ERROR_CODES } from '@/api/constants/errorCodes';
 import { createApiError } from '@/api/errors';
-import type { ApiFailureResponse, ApiObjectData, ApiResponse, ApiSuccessResponse } from '@/api/types';
+import type { ApiFailureResponse, ApiResponse, ApiResponseData, ApiSuccessResponse } from '@/api/types';
 
-export function isSuccessResponse<TData extends ApiObjectData>(response: unknown): response is ApiSuccessResponse<TData> {
+export function isSuccessResponse<TData extends ApiResponseData>(response: unknown): response is ApiSuccessResponse<TData> {
   if (!response || typeof response !== 'object') {
     return false;
   }
@@ -10,11 +10,8 @@ export function isSuccessResponse<TData extends ApiObjectData>(response: unknown
   const success = response as Partial<ApiSuccessResponse<TData>>;
 
   return Boolean(
-    typeof success.code === 'string' &&
-      typeof success.message === 'string' &&
-      success.data &&
-      typeof success.data === 'object' &&
-      !Array.isArray(success.data) &&
+    'data' in success &&
+      (success.data === null || typeof success.data === 'object') &&
       success.success !== false,
   );
 }
@@ -28,7 +25,7 @@ export function isFailureResponse(response: unknown): response is ApiFailureResp
   return failure.success === false && typeof failure.code === 'string' && typeof failure.message === 'string';
 }
 
-export function validateApiResponse<TData extends ApiObjectData>(status: number, response: ApiResponse<TData>) {
+export function validateApiResponse<TData extends ApiResponseData>(status: number, response: ApiResponse<TData>) {
   if (status >= 200 && status < 300 && isSuccessResponse<TData>(response)) {
     return response;
   }
