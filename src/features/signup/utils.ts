@@ -1,6 +1,6 @@
-import type { SignupForm, SignupStep } from '@/features/signup/types';
+import type { EmailVerificationState, SignupForm, SignupStep } from '@/features/signup/types';
 
-export function getSuggestions(items: string[], query: string) {
+export function getSuggestions(items: readonly string[], query: string) {
   const keyword = query.trim().toLowerCase();
 
   if (!keyword) {
@@ -98,9 +98,9 @@ export function matchesUniversityName(universityName: string, query: string) {
   return initialsQuery.length > 0 && extractInitials(normalizedName).includes(initialsQuery);
 }
 
-export function isSignupStepValid(step: SignupStep, form: SignupForm) {
+export function isSignupStepValid(step: SignupStep, form: SignupForm, emailVerification?: EmailVerificationState) {
   if (step === 0) return Boolean(form.selectedUniversity);
-  if (step === 1) return form.emailVerified;
+  if (step === 1) return Boolean(emailVerification?.verifiedToken.isVerified);
   if (step === 2) return Boolean(form.department);
   if (step === 3) return Boolean(form.admissionYear);
   if (step === 4) return /^[a-z0-9_]{4,20}$/.test(form.username);

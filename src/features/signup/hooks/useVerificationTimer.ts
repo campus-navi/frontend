@@ -1,7 +1,19 @@
 import { useEffect, useState } from 'react';
 
-export function useVerificationTimer(initialSeconds: number) {
-  const [timeLeft, setTimeLeft] = useState(0);
+function getRemainingTime(targetTime: number | null) {
+  if (!targetTime) {
+    return 0;
+  }
+
+  return Math.max(0, Math.ceil((targetTime - Date.now()) / 1000));
+}
+
+export function useVerificationTimer(targetTime: number | null) {
+  const [timeLeft, setTimeLeft] = useState(() => getRemainingTime(targetTime));
+
+  useEffect(() => {
+    setTimeLeft(getRemainingTime(targetTime));
+  }, [targetTime]);
 
   useEffect(() => {
     if (timeLeft <= 0) {
@@ -9,19 +21,14 @@ export function useVerificationTimer(initialSeconds: number) {
     }
 
     const timer = window.setInterval(() => {
-      setTimeLeft((current) => (current > 0 ? current - 1 : 0));
+      setTimeLeft(getRemainingTime(targetTime));
     }, 1000);
 
     return () => window.clearInterval(timer);
-  }, [timeLeft]);
-
-  const start = () => setTimeLeft(initialSeconds);
-  const reset = () => setTimeLeft(0);
+  }, [targetTime, timeLeft]);
 
   return {
     timeLeft,
     isRunning: timeLeft > 0,
-    start,
-    reset,
   };
 }

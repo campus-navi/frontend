@@ -1,14 +1,18 @@
+import { useEffect, useRef, useState } from 'react';
+
 import { SignupTextField } from '@/features/signup/components/SignupTextField';
 import { formatRemainingTime } from '@/features/signup/utils';
+import type { EmailVerificationState } from '@/features/signup/types';
 
 type EmailVerificationStepProps = {
+  email: string;
   emailLocalPart: string;
   emailDomain: string;
-  emailVerified: boolean;
-  verificationCode: string;
-  verificationSent: boolean;
-  verificationError: string;
-  timeLeft: number;
+  sendBlockedSecondsLeft: number;
+  verifyBlockedSecondsLeft: number;
+  verification: EmailVerificationState;
+  resendCooldownSecondsLeft: number;
+  verificationSecondsLeft: number;
   onEmailChange: (value: string) => void;
   onVerificationCodeChange: (value: string) => void;
   onSendVerification: () => void;
@@ -16,22 +20,81 @@ type EmailVerificationStepProps = {
 };
 
 export function EmailVerificationStep({
+  email,
   emailLocalPart,
   emailDomain,
-  emailVerified,
-  verificationCode,
-  verificationSent,
-  verificationError,
-  timeLeft,
+  sendBlockedSecondsLeft,
+  verifyBlockedSecondsLeft,
+  verification,
+  resendCooldownSecondsLeft,
+  verificationSecondsLeft,
   onEmailChange,
   onVerificationCodeChange,
   onSendVerification,
   onSubmitVerification,
 }: EmailVerificationStepProps) {
-  const isCodeReady = verificationCode.length === 6;
-  const isSendEnabled = Boolean(emailLocalPart.trim());
-  const timerLabel = emailVerified ? null : timeLeft > 0 ? `남은시간 ${formatRemainingTime(timeLeft)}` : '시간 만료';
-  const isVerifyButtonEnabled = !emailVerified && isCodeReady;
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const verificationCodeInputRef = useRef<HTMLInputElement>(null);
+  const [isEmailFocused, setIsEmailFocused] = useState(false);
+  const [isVerificationCodeFocused, setIsVerificationCodeFocused] = useState(false);
+  const isVerified = verification.verifiedToken.isVerified;
+  const isCodeSent = Boolean(verification.send.lastSentEmail) || isVerified;
+  const isSending = verification.send.status === 'loading';
+  const isVerifying = verification.verify.status === 'loading';
+  const isCodeReady = verification.verify.code.length === 6;
+  const isEmailChangedAfterSend = verification.send.emailChangedAfterSend;
+  const isSendVerifyBlocked = verification.send.errorReason === 'verify_blocked';
+  const isVerifyBlocked = verifyBlockedSecondsLeft > 0;
+  const isVerificationExpired =
+    isCodeSent && !isVerified && !isSending && !isVerifyBlocked && !isSendVerifyBlocked && !isEmailChangedAfterSend && verificationSecondsLeft <= 0;
+  const isSendBlocked = sendBlockedSecondsLeft > 0;
+  const isSendEnabled = Boolean(emailLocalPart.trim()) && !isSending && !isSendBlocked && resendCooldownSecondsLeft <= 0;
+  const isVerifyButtonEnabled =
+    isCodeSent && !isVerified && !isVerifying && !isVerifyBlocked && !isVerificationExpired && !isEmailChangedAfterSend && isCodeReady;
+  const sendButtonLabel = isSending ? '전송중' : isCodeSent ? '재전송' : '인증전송';
+  const verifyButtonLabel = isVerified ? '인증완료' : isVerifying ? '확인중' : '인증하기';
+  const verificationTimerLabel =
+    isVerified || !isCodeSent || isSending || isVerifyBlocked || isSendVerifyBlocked || isEmailChangedAfterSend
+      ? null
+      : verificationSecondsLeft > 0
+        ? `남은시간 ${formatRemainingTime(verificationSecondsLeft)}`
+        : '유효시간 만료';
+  const hasEmailInput = Boolean(emailLocalPart.trim());
+  const emailLineBorderClassName = isEmailFocused || hasEmailInput ? 'border-[#707070]' : 'border-[#E8E8E8]';
+  const hasVerificationCodeInput = Boolean(verification.verify.code.trim());
+  const verificationCodeLineBorderClassName =
+    isVerificationCodeFocused || hasVerificationCodeInput ? 'border-[#707070]' : 'border-[#E8E8E8]';
+  const sendButtonClassName = isSendEnabled ? 'bg-[#333333] text-white' : 'bg-[#E7E7E7] text-[#BBBBBB]';
+  const labelClassName = 'text-[14px] font-medium leading-[140%] text-[#5C5C5C]';
+  const codeHelperMessage =
+    verification.verify.errorReason === 'invalid_code'
+      ? verification.verify.errorMessage
+      : isEmailChangedAfterSend
+        ? '이메일이 변경되었습니다. 인증을 다시 진행해주세요.'
+      : !isSendVerifyBlocked && (isVerificationExpired || verification.verify.errorReason === 'code_not_found')
+        ? '유효시간이 만료되었습니다. 인증코드를 다시 전송해주세요.'
+        : null;
+  const emailHelperMessage = isCodeSent && !isEmailChangedAfterSend ? `${email}로 인증번호를 전송했습니다.` : null;
+
+  useEffect(() => {
+    const focusTimer = window.setTimeout(() => {
+      emailInputRef.current?.focus();
+    }, 0);
+
+    return () => window.clearTimeout(focusTimer);
+  }, []);
+
+  useEffect(() => {
+    if (!isCodeSent || isVerified) {
+      return undefined;
+    }
+
+    const focusTimer = window.setTimeout(() => {
+      verificationCodeInputRef.current?.focus();
+    }, 220);
+
+    return () => window.clearTimeout(focusTimer);
+  }, [isCodeSent, isVerified]);
 
   return (
     <div>
@@ -41,51 +104,80 @@ export function EmailVerificationStep({
         이메일을 입력해주세요
       </h1>
 
-      {verificationSent ? (
-        <div className="mt-10">
-          <p className="text-[15px] font-medium leading-none text-[#7E7E7E]">인증번호</p>
-          <div className="mt-5 flex items-center gap-3 border-b border-[#1F1F1F] pb-3">
+      {isCodeSent ? (
+        <div className="signup-slide-down mt-10">
+          <p className={labelClassName}>인증코드</p>
+          <div className={['mt-5 flex items-center gap-3 border-b-2 pb-3 transition-colors', verificationCodeLineBorderClassName].join(' ')}>
             <input
+              ref={verificationCodeInputRef}
               type="text"
               inputMode="numeric"
               maxLength={6}
-              value={verificationCode}
+              value={verification.verify.code}
               onChange={(event) => onVerificationCodeChange(event.target.value)}
-              readOnly={emailVerified}
+              onBlur={() => setIsVerificationCodeFocused(false)}
+              onFocus={() => setIsVerificationCodeFocused(true)}
+              readOnly={isVerified || isVerifyBlocked}
+              placeholder="6자리 숫자 입력"
               className={[
-                'min-w-0 flex-1 border-0 bg-transparent px-0 text-[22px] tracking-[0.28em] focus:outline-none',
-                emailVerified ? 'cursor-default text-[#3A7A44]' : 'text-[#111111]',
+                'min-w-0 flex-1 border-0 bg-transparent px-0 text-[22px] tracking-[0.28em] placeholder:text-[15px] placeholder:tracking-normal focus:outline-none',
+                isVerified ? 'cursor-default text-[#3A7A44]' : 'text-[#111111]',
               ].join(' ')}
             />
-            {timerLabel ? <span className="text-[14px] text-[#8E8E8E]">{timerLabel}</span> : null}
+            {verificationTimerLabel ? <span className="text-[14px] text-[#8E8E8E]">{verificationTimerLabel}</span> : null}
             <button
               type="button"
               disabled={!isVerifyButtonEnabled}
               onClick={onSubmitVerification}
               className={[
-                'rounded-[14px] px-4 py-3 text-[16px] font-semibold transition-colors',
-                emailVerified
+                'flex h-[34px] w-[82px] shrink-0 items-center justify-center rounded-[8px] px-3 py-[10px] text-[14px] font-semibold leading-none tracking-[0.015em] transition-colors',
+                isVerified
                   ? 'bg-[#E8F4EA] text-[#3A7A44]'
-                  : isCodeReady
+                  : isVerifyButtonEnabled
                     ? 'bg-[#3F4045] text-white'
                     : 'bg-[#E6E6E6] text-[#B8B8B8]',
               ].join(' ')}
             >
-              {emailVerified ? '인증완료' : '인증하기'}
+              {verifyButtonLabel}
             </button>
           </div>
-          {verificationError ? <p className="mt-2 text-sm text-[#D34B4B]">{verificationError}</p> : null}
-          {emailVerified ? <p className="mt-2 text-sm text-[#3A7A44]">이메일 인증이 완료되었습니다.</p> : null}
+          {codeHelperMessage ? (
+            <p className="mt-3 text-[12px] font-medium leading-[140%] text-[#5C5C5C]">{codeHelperMessage}</p>
+          ) : null}
         </div>
       ) : null}
 
-      <div className="mt-10">
-        <p className="text-[15px] font-medium leading-none text-[#7E7E7E]">학교 이메일</p>
-        <div className="mt-5 flex items-end gap-2">
-          <div className="min-w-0 flex-1">
-            <SignupTextField label="" value={emailLocalPart} placeholder="이메일 아이디" onChange={onEmailChange} />
+      <div className={isCodeSent ? 'mt-8' : 'mt-10'}>
+        <p className={labelClassName}>학교 이메일</p>
+        <div className="mt-2 flex items-end gap-2">
+          <div className={['min-w-0 flex-1 border-b-2 transition-colors', emailLineBorderClassName].join(' ')}>
+            <SignupTextField
+              label=""
+              value={emailLocalPart}
+              placeholder="이메일 아이디"
+              autoCapitalize="none"
+              autoComplete="email"
+              autoCorrect="off"
+              containerClassName="!mt-0 !border-b-0 !border-transparent focus-within:!border-transparent"
+              inputMode="email"
+              inputClassName={[
+                'h-[62px] px-0 pb-4 pt-6 text-[16px] font-medium leading-[140%] text-[#333333]',
+                'placeholder:text-[16px] placeholder:font-medium placeholder:leading-[140%] placeholder:text-[#5C5C5C] placeholder:opacity-50',
+              ].join(' ')}
+              inputRef={emailInputRef}
+              lang="en"
+              spellCheck={false}
+              onBlur={() => setIsEmailFocused(false)}
+              onChange={onEmailChange}
+              onFocus={() => setIsEmailFocused(true)}
+            />
           </div>
-          <div className="w-[108px] border-b border-[#1F1F1F] pb-[11px] text-[17px] leading-none text-[#5B5B5B]">
+          <div
+            className={[
+              'flex h-[62px] w-[107px] shrink-0 items-start border-b-2 px-1 pb-4 pt-6 text-[16px] font-medium leading-[140%] tracking-[0.02em] text-[#707070] transition-colors',
+              emailLineBorderClassName,
+            ].join(' ')}
+          >
             @{emailDomain}
           </div>
           <button
@@ -93,14 +185,15 @@ export function EmailVerificationStep({
             disabled={!isSendEnabled}
             onClick={onSendVerification}
             className={[
-              'shrink-0 rounded-[14px] border px-4 py-3 text-[15px] font-semibold transition-colors',
-              isSendEnabled ? 'border-[#2F2F2F] bg-white text-[#2F2F2F]' : 'border-[#E6E6E6] bg-[#E6E6E6] text-[#B9B9B9]',
+              'flex h-[34px] w-[82px] shrink-0 items-center justify-center rounded-[8px] px-3 py-[10px] text-[14px] font-semibold leading-none tracking-[0.015em] transition-colors',
+              sendButtonClassName,
             ].join(' ')}
           >
-            {verificationSent ? '다시전송' : '본인인증'}
+            <span className="whitespace-nowrap">{sendButtonLabel}</span>
           </button>
         </div>
+        {emailHelperMessage ? <p className="mt-3 text-[12px] font-medium leading-[140%] text-[#5C5C5C]">{emailHelperMessage}</p> : null}
       </div>
     </div>
-  );
+  ); 
 }

@@ -7,6 +7,20 @@ export interface LoginPayload extends ApiObjectData {
   username: string;
 }
 
+export interface SendSignupEmailVerificationPayload extends ApiObjectData {
+  campusId: number;
+  email: string;
+}
+
+export interface VerifySignupEmailCodePayload extends ApiObjectData {
+  code: string;
+  email: string;
+}
+
+export interface VerifySignupEmailCodeResponseData extends ApiObjectData {
+  verifiedToken: string;
+}
+
 export const authApi = {
   getMe<TData extends ApiObjectData = ApiObjectData>() {
     return request<TData>({
@@ -26,6 +40,22 @@ export const authApi = {
     return request<TData>({
       method: 'post',
       url: '/auth/logout',
+    });
+  },
+  sendSignupEmailVerification(payload: SendSignupEmailVerificationPayload) {
+    return request<null>({
+      data: payload,
+      method: 'post',
+      requiresAuth: false,
+      url: '/auth/email/send',
+    });
+  },
+  verifySignupEmailCode(payload: VerifySignupEmailCodePayload) {
+    return request<VerifySignupEmailCodeResponseData>({
+      data: payload,
+      method: 'post',
+      requiresAuth: false,
+      url: '/auth/email/verify',
     });
   },
   reissueAccessToken<TData extends ApiObjectData = ApiObjectData>(refreshToken: string) {
