@@ -1,19 +1,31 @@
 import { create } from 'zustand';
 
-import type { SelectedUniversity, SignupForm, SignupState, SignupStep, VerificationState } from '@/features/signup/types';
+import type {
+  EmailVerificationState,
+  EmailVerificationSendErrorReason,
+  EmailVerificationVerifyErrorReason,
+  SelectedUniversity,
+  SignupForm,
+  SignupState,
+  SignupStep,
+} from '@/features/signup/types';
 
 type SignupFlowStore = SignupState & {
   actions: {
+    clearEmailVerificationSendError: () => void;
+    clearEmailVerificationVerifyError: () => void;
     clearDepartmentQuery: () => void;
     clearUniversityQuery: () => void;
     nextStep: () => void;
     previousStep: () => void;
+    returnToEmailVerificationStep: () => void;
     resetFlow: () => void;
     selectAdmissionYear: (value: number) => void;
     selectDepartment: (value: string) => void;
     selectUniversity: (value: SelectedUniversity) => void;
-    sendVerification: () => void;
     setStep: (step: SignupStep) => void;
+    startEmailVerificationSend: () => void;
+    startEmailVerificationVerify: () => void;
     updateDepartmentQuery: (value: string) => void;
     updateEmailLocalPart: (value: string) => void;
     updateNickname: (value: string) => void;
@@ -22,22 +34,61 @@ type SignupFlowStore = SignupState & {
     updateUniversityQuery: (value: string) => void;
     updateUsername: (value: string) => void;
     updateVerificationCode: (value: string) => void;
-    verificationFailure: (message: string) => void;
-    verificationSuccess: () => void;
+    emailVerificationSendFailure: (payload: {
+      blockedEndsAt?: number | null;
+      cooldownEndsAt?: number | null;
+      message: string;
+      reason: EmailVerificationSendErrorReason;
+    }) => void;
+    emailVerificationSendSuccess: (payload: {
+      blockedEndsAt?: number | null;
+      cooldownEndsAt: number;
+      email: string;
+      expiresAt: number;
+    }) => void;
+    emailVerificationVerifyFailure: (payload: {
+      blockedEndsAt?: number | null;
+      message: string;
+      reason: EmailVerificationVerifyErrorReason;
+    }) => void;
+    emailVerificationVerifySuccess: (payload: {
+      email: string;
+      expiresAt: number;
+      verifiedToken: string;
+    }) => void;
   };
 };
 
-const initialVerificationState: VerificationState = {
-  sent: false,
-  code: '',
-  error: '',
+const initialEmailVerificationState: EmailVerificationState = {
+  send: {
+    blockedEndsAt: null,
+    cooldownEndsAt: null,
+    emailChangedAfterSend: false,
+    errorMessage: null,
+    errorReason: null,
+    expiresAt: null,
+    lastSentEmail: null,
+    status: 'idle',
+  },
+  verify: {
+    blockedEndsAt: null,
+    code: '',
+    errorMessage: null,
+    errorReason: null,
+    status: 'idle',
+  },
+  verifiedToken: {
+    email: null,
+    expiresAt: null,
+    isVerified: false,
+    value: null,
+  },
 };
 
 const initialFormState: SignupForm = {
   admissionYear: 2026,
   department: '',
   emailLocalPart: '',
-  emailVerified: false,
   nickname: '',
   password: '',
   passwordConfirm: '',
@@ -48,19 +99,48 @@ const initialFormState: SignupForm = {
 const resetUniversityDependentFields = (form: SignupForm): SignupForm => ({
   ...form,
   emailLocalPart: '',
-  emailVerified: false,
 });
 
-const initialSignupState: SignupState = {
+const resetEmailVerificationState = (): EmailVerificationState => ({
+  send: { ...initialEmailVerificationState.send },
+  verify: { ...initialEmailVerificationState.verify },
+  verifiedToken: { ...initialEmailVerificationState.verifiedToken },
+});
+
+const createInitialSignupState = (): SignupState => ({
   departmentQuery: '',
+  emailVerification: resetEmailVerificationState(),
   form: initialFormState,
   step: 0,
   universityQuery: '',
-  verification: initialVerificationState,
-};
+});
 
 export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
   actions: {
+    clearEmailVerificationSendError: () =>
+      set((state) => ({
+        emailVerification: {
+          ...state.emailVerification,
+          send: {
+            ...state.emailVerification.send,
+            errorMessage: null,
+            errorReason: null,
+            status: state.emailVerification.send.status === 'error' ? 'idle' : state.emailVerification.send.status,
+          },
+        },
+      })),
+    clearEmailVerificationVerifyError: () =>
+      set((state) => ({
+        emailVerification: {
+          ...state.emailVerification,
+          verify: {
+            ...state.emailVerification.verify,
+            errorMessage: null,
+            errorReason: null,
+            status: state.emailVerification.verify.status === 'error' ? 'idle' : state.emailVerification.verify.status,
+          },
+        },
+      })),
     clearDepartmentQuery: () =>
       set((state) => ({
         departmentQuery: '',
@@ -68,9 +148,9 @@ export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
       })),
     clearUniversityQuery: () =>
       set((state) => ({
+        emailVerification: resetEmailVerificationState(),
         form: resetUniversityDependentFields({ ...state.form, selectedUniversity: null }),
         universityQuery: '',
-        verification: initialVerificationState,
       })),
     nextStep: () =>
       set((state) => ({
@@ -80,7 +160,16 @@ export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
       set((state) => ({
         step: Math.max(0, state.step - 1) as SignupStep,
       })),
-    resetFlow: () => set(initialSignupState),
+    returnToEmailVerificationStep: () =>
+      set((state) => ({
+        emailVerification: resetEmailVerificationState(),
+        form: {
+          ...state.form,
+          emailLocalPart: '',
+        },
+        step: 1,
+      })),
+    resetFlow: () => set(createInitialSignupState()),
     selectAdmissionYear: (value) =>
       set((state) => ({
         form: { ...state.form, admissionYear: value },
@@ -92,19 +181,44 @@ export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
       })),
     selectUniversity: (value) =>
       set((state) => ({
+        emailVerification: resetEmailVerificationState(),
         form: {
           ...resetUniversityDependentFields(state.form),
           selectedUniversity: value,
         },
         universityQuery: value.universityName,
-        verification: initialVerificationState,
-      })),
-    sendVerification: () =>
-      set((state) => ({
-        form: { ...state.form, emailVerified: false },
-        verification: { sent: true, code: '', error: '' },
       })),
     setStep: (step) => set({ step }),
+    startEmailVerificationSend: () =>
+      set((state) => ({
+        emailVerification: {
+          send: {
+            ...state.emailVerification.send,
+            emailChangedAfterSend: false,
+            errorMessage: null,
+            errorReason: null,
+            status: 'loading',
+          },
+          verify: {
+            ...initialEmailVerificationState.verify,
+          },
+          verifiedToken: {
+            ...initialEmailVerificationState.verifiedToken,
+          },
+        },
+      })),
+    startEmailVerificationVerify: () =>
+      set((state) => ({
+        emailVerification: {
+          ...state.emailVerification,
+          verify: {
+            ...state.emailVerification.verify,
+            errorMessage: null,
+            errorReason: null,
+            status: 'loading',
+          },
+        },
+      })),
     updateDepartmentQuery: (value) =>
       set((state) => ({
         departmentQuery: value,
@@ -115,15 +229,30 @@ export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
       })),
     updateEmailLocalPart: (value) =>
       set((state) => ({
+        emailVerification:
+          state.emailVerification.send.lastSentEmail !== null || state.emailVerification.verifiedToken.isVerified
+            ? {
+                send: {
+                  ...state.emailVerification.send,
+                  blockedEndsAt: null,
+                  cooldownEndsAt: null,
+                  emailChangedAfterSend: true,
+                  errorMessage: null,
+                  errorReason: null,
+                  expiresAt: null,
+                  status: 'idle',
+                },
+                verify: {
+                  ...initialEmailVerificationState.verify,
+                },
+                verifiedToken: {
+                  ...initialEmailVerificationState.verifiedToken,
+                },
+              }
+            : resetEmailVerificationState(),
         form: {
           ...state.form,
           emailLocalPart: value.replace(/[^a-zA-Z0-9._-]/g, ''),
-          emailVerified: false,
-        },
-        verification: {
-          ...state.verification,
-          code: '',
-          error: '',
         },
       })),
     updateNickname: (value) =>
@@ -140,12 +269,12 @@ export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
       })),
     updateUniversityQuery: (value) =>
       set((state) => ({
+        emailVerification: resetEmailVerificationState(),
         form:
           state.form.selectedUniversity && state.form.selectedUniversity.universityName !== value
             ? resetUniversityDependentFields({ ...state.form, selectedUniversity: null })
             : state.form,
         universityQuery: value,
-        verification: initialVerificationState,
       })),
     updateUsername: (value) =>
       set((state) => ({
@@ -156,22 +285,104 @@ export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
       })),
     updateVerificationCode: (value) =>
       set((state) => ({
-        verification: {
-          ...state.verification,
-          code: value.replace(/\D/g, '').slice(0, 6),
-          error: '',
+        emailVerification: {
+          ...state.emailVerification,
+          verify: {
+            ...state.emailVerification.verify,
+            errorMessage: null,
+            errorReason: null,
+            status: state.emailVerification.verify.status === 'error' ? 'idle' : state.emailVerification.verify.status,
+            code: value.replace(/\D/g, '').slice(0, 6),
+          },
         },
       })),
-    verificationFailure: (message) =>
+    emailVerificationSendFailure: ({ blockedEndsAt = null, cooldownEndsAt = null, message, reason }) =>
       set((state) => ({
-        form: { ...state.form, emailVerified: false },
-        verification: { ...state.verification, error: message },
+        emailVerification: {
+          ...state.emailVerification,
+          send: {
+            ...state.emailVerification.send,
+            blockedEndsAt,
+            cooldownEndsAt: cooldownEndsAt ?? state.emailVerification.send.cooldownEndsAt,
+            emailChangedAfterSend: false,
+            expiresAt: reason === 'verify_blocked' ? null : state.emailVerification.send.expiresAt,
+            errorMessage: message,
+            errorReason: reason,
+            status: 'error',
+          },
+          verify:
+            reason === 'verify_blocked'
+              ? {
+                  ...state.emailVerification.verify,
+                  blockedEndsAt,
+                  code: '',
+                }
+              : state.emailVerification.verify,
+        },
       })),
-    verificationSuccess: () =>
+    emailVerificationSendSuccess: ({ blockedEndsAt = null, cooldownEndsAt, email, expiresAt }) =>
+      set(() => ({
+        emailVerification: {
+          send: {
+            blockedEndsAt,
+            cooldownEndsAt,
+            emailChangedAfterSend: false,
+            errorMessage: null,
+            errorReason: null,
+            expiresAt,
+            lastSentEmail: email,
+            status: 'success',
+          },
+          verify: {
+            ...initialEmailVerificationState.verify,
+          },
+          verifiedToken: {
+            ...initialEmailVerificationState.verifiedToken,
+          },
+        },
+      })),
+    emailVerificationVerifyFailure: ({ blockedEndsAt = null, message, reason }) =>
       set((state) => ({
-        form: { ...state.form, emailVerified: true },
-        verification: { ...state.verification, error: '' },
+        emailVerification: {
+          ...state.emailVerification,
+          verifiedToken: {
+            ...initialEmailVerificationState.verifiedToken,
+          },
+          verify: {
+            ...state.emailVerification.verify,
+            blockedEndsAt,
+            code: reason === 'verify_blocked' ? '' : state.emailVerification.verify.code,
+            errorMessage: message,
+            errorReason: reason,
+            status: 'error',
+          },
+          send:
+            reason === 'verify_blocked'
+              ? {
+                  ...state.emailVerification.send,
+                  expiresAt: null,
+                }
+              : state.emailVerification.send,
+        },
+      })),
+    emailVerificationVerifySuccess: ({ email, expiresAt, verifiedToken }) =>
+      set((state) => ({
+        emailVerification: {
+          ...state.emailVerification,
+          verify: {
+            ...state.emailVerification.verify,
+            errorMessage: null,
+            errorReason: null,
+            status: 'success',
+          },
+          verifiedToken: {
+            email,
+            expiresAt,
+            isVerified: true,
+            value: verifiedToken,
+          },
+        },
       })),
   },
-  ...initialSignupState,
+  ...createInitialSignupState(),
 }));
