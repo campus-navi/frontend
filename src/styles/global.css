@@ -32,3 +32,33 @@
 body {
   margin: 0;
 }
+
+@layer utilities {
+  @keyframes signup-slide-down {
+    0% {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes signup-sheet-up {
+    0% {
+      opacity: 0;
+      transform: translateY(56px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .signup-slide-down {
+    animation: signup-slide-down 220ms ease-out;
+  }
+}
