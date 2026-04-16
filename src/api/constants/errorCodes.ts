@@ -12,21 +12,3 @@ export const AUTH_ERROR_CODES = {
   REFRESH_FAILED: 'AUTH_REFRESH_FAILED',
   SESSION_EXPIRED: 'AUTH_SESSION_EXPIRED',
 } as const;
-
-export const UNIVERSITY_ERROR_CODES = {} as const;
-export const DEPARTMENT_ERROR_CODES = {} as const;
-export const POST_ERROR_CODES = {} as const;
-export const COMMENT_ERROR_CODES = {} as const;
-export const USER_ERROR_CODES = {} as const;
-export const MYPAGE_ERROR_CODES = {} as const;
-
-export const DOMAIN_ERROR_CODES = {
-  auth: AUTH_ERROR_CODES,
-  comment: COMMENT_ERROR_CODES,
-  common: COMMON_ERROR_CODES,
-  department: DEPARTMENT_ERROR_CODES,
-  mypage: MYPAGE_ERROR_CODES,
-  post: POST_ERROR_CODES,
-  university: UNIVERSITY_ERROR_CODES,
-  user: USER_ERROR_CODES,
-} as const;

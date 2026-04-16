@@ -40,16 +40,16 @@ function normalizeFailureResponse(data: unknown): ApiFailureResponse | null {
     return null;
   }
 
-  const failure = data as Partial<ApiFailureResponse>;
+  const failure = data as Partial<ApiFailureResponse> & { message?: unknown };
 
-  if (failure.success !== false || typeof failure.code !== 'string' || typeof failure.message !== 'string') {
+  if (failure.success !== false || typeof failure.code !== 'string') {
     return null;
   }
 
   return {
     code: failure.code,
     data: (failure.data as ApiObjectData | null | undefined) ?? null,
-    message: failure.message,
+    message: typeof failure.message === 'string' ? failure.message : '',
     success: false,
   };
 }
