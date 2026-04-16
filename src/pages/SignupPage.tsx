@@ -1,8 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { isApiError } from '@/api';
+import { AlertModal } from '@/components/ui/AlertModal';
 import { CtaButton } from '@/components/ui/CtaButton';
 import { SignupHeader } from '@/features/signup/components/SignupHeader';
+import { getEmailVerificationErrorModal } from '@/features/signup/emailVerification';
 import { useSignupFlow } from '@/features/signup/hooks/useSignupFlow';
 import { useSignupFlowStore } from '@/features/signup/store/signupFlowStore';
 import { AdmissionYearStep } from '@/features/signup/steps/AdmissionYearStep';
@@ -16,19 +19,58 @@ import { UsernameStep } from '@/features/signup/steps/UsernameStep';
 
 export default function SignupPage() {
   const navigate = useNavigate();
+  const [isEmailVerificationSuccessModalOpen, setIsEmailVerificationSuccessModalOpen] = useState(false);
   const {
     state,
     emailDomain,
+    emailVerification,
     filteredUniversities,
     filteredDepartments,
     isCurrentStepValid,
     progressValue,
     admissionYears,
-    timeLeft,
     universitySearch,
     isUniversitySearchVisible,
     actions,
   } = useSignupFlow();
+  const universitySearchError = universitySearch.isError ? universitySearch.error : null;
+  const isUniversityServerError = isApiError(universitySearchError) && universitySearchError.status === 500;
+  const emailVerificationErrorModal = getEmailVerificationErrorModal(state.emailVerification);
+  const wasEmailVerifiedRef = useRef(state.emailVerification.verifiedToken.isVerified);
+
+  useEffect(() => {
+    const isVerified = state.emailVerification.verifiedToken.isVerified;
+
+    if (state.step === 1 && !wasEmailVerifiedRef.current && isVerified) {
+      setIsEmailVerificationSuccessModalOpen(true);
+    }
+
+    wasEmailVerifiedRef.current = isVerified;
+  }, [state.emailVerification.verifiedToken.isVerified, state.step]);
+
+  const handleEmailVerificationErrorConfirm = () => {
+    if (!emailVerificationErrorModal) {
+      return;
+    }
+
+    if (emailVerificationErrorModal.scope === 'send' && state.emailVerification.send.errorReason === 'ip_blocked') {
+      actions.clearEmailVerificationSendError();
+      navigate('/');
+      return;
+    }
+
+    if (emailVerificationErrorModal.scope === 'send') {
+      actions.clearEmailVerificationSendError();
+      return;
+    }
+
+    actions.clearEmailVerificationVerifyError();
+  };
+
+  const handleEmailVerificationSuccessConfirm = () => {
+    setIsEmailVerificationSuccessModalOpen(false);
+    actions.nextStep();
+  };
 
   useEffect(() => {
     return () => {
@@ -42,11 +84,37 @@ export default function SignupPage() {
       return;
     }
 
+    if (state.step === 2) {
+      actions.returnToEmailVerificationStep();
+      return;
+    }
+
     actions.previousStep();
   };
 
   return (
     <main className="h-[100svh] overflow-hidden bg-white">
+      <AlertModal
+        isOpen={isUniversityServerError}
+        title="에러"
+        description="서버 오류가 발생했습니다. 처음 화면으로 이동해주세요."
+        onConfirm={() => navigate('/')}
+      />
+      <AlertModal
+        isOpen={Boolean(emailVerificationErrorModal)}
+        placement="bottom-sheet"
+        title={emailVerificationErrorModal?.title ?? '에러'}
+        description={emailVerificationErrorModal?.description ?? ''}
+        confirmLabel={emailVerificationErrorModal?.confirmLabel}
+        onConfirm={handleEmailVerificationErrorConfirm}
+      />
+      <AlertModal
+        isOpen={isEmailVerificationSuccessModalOpen}
+        title="인증 성공"
+        description="인증이 완료되었습니다."
+        onConfirm={handleEmailVerificationSuccessConfirm}
+      />
+
       <div className="mx-auto flex h-[100svh] w-full max-w-[393px] flex-col overflow-hidden bg-white">
         {state.step < 7 ? <SignupHeader progressValue={progressValue} onBack={handleBack} /> : <SignupHeader onBack={handleBack} />}
 
@@ -64,7 +132,7 @@ export default function SignupPage() {
                 query={state.universityQuery}
                 selectedUniversity={state.form.selectedUniversity}
                 suggestions={filteredUniversities}
-                errorMessage={universitySearch.isError ? universitySearch.error.message : undefined}
+                errorMessage={universitySearch.isError && !isUniversityServerError ? universitySearch.error.message : undefined}
                 onChange={actions.updateUniversityQuery}
                 onClear={actions.clearUniversityQuery}
                 onRetry={() => void universitySearch.refetch()}
@@ -74,13 +142,14 @@ export default function SignupPage() {
 
             {state.step === 1 ? (
               <EmailVerificationStep
+                email={emailVerification.email}
                 emailLocalPart={state.form.emailLocalPart}
                 emailDomain={emailDomain}
-                emailVerified={state.form.emailVerified}
-                verificationCode={state.verification.code}
-                verificationSent={state.verification.sent}
-                verificationError={state.verification.error}
-                timeLeft={timeLeft}
+                sendBlockedSecondsLeft={emailVerification.sendBlockedSecondsLeft}
+                verifyBlockedSecondsLeft={emailVerification.verifyBlockedSecondsLeft}
+                verification={state.emailVerification}
+                resendCooldownSecondsLeft={emailVerification.resendCooldownSecondsLeft}
+                verificationSecondsLeft={emailVerification.verificationSecondsLeft}
                 onEmailChange={actions.updateEmailLocalPart}
                 onVerificationCodeChange={actions.updateVerificationCode}
                 onSendVerification={actions.sendVerification}
@@ -124,7 +193,7 @@ export default function SignupPage() {
             ) : null}
           </div>
 
-          {state.step < 7 ? (
+          {state.step < 7 && state.step !== 1 ? (
             <div className="mt-auto pt-8">
               <CtaButton
                 active={isCurrentStepValid}
@@ -135,13 +204,13 @@ export default function SignupPage() {
                 다음
               </CtaButton>
             </div>
-          ) : (
+          ) : state.step === 7 ? (
             <div className="mt-auto pt-8">
               <CtaButton active className="py-[18px] text-[18px]" onClick={() => navigate('/')}>
                 메인으로 이동
               </CtaButton>
             </div>
-          )}
+          ) : null}
         </section>
       </div>
     </main>
