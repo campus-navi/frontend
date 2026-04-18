@@ -11,6 +11,7 @@ import type {
 } from '@/features/signup/types';
 
 type SignupFlowStore = SignupState & {
+  flowId: number;
   actions: {
     clearEmailVerificationSendError: () => void;
     clearEmailVerificationVerifyError: () => void;
@@ -115,6 +116,8 @@ const createInitialSignupState = (): SignupState => ({
   universityQuery: '',
 });
 
+const createNextFlowId = (currentFlowId: number) => currentFlowId + 1;
+
 export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
   actions: {
     clearEmailVerificationSendError: () =>
@@ -178,7 +181,11 @@ export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
         },
         step: 0,
       })),
-    resetFlow: () => set(createInitialSignupState()),
+    resetFlow: () =>
+      set((state) => ({
+        ...createInitialSignupState(),
+        flowId: createNextFlowId(state.flowId),
+      })),
     selectAdmissionYear: (value) =>
       set((state) => ({
         form: { ...state.form, admissionYear: value },
@@ -386,5 +393,6 @@ export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
         },
       })),
   },
+  flowId: 0,
   ...createInitialSignupState(),
 }));
