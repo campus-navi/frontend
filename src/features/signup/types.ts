@@ -81,6 +81,7 @@ export type SignupState = {
 };
 
 export type SearchSelectStepProps = {
+  emptyDescription?: string;
   label: string;
   title: ReactNode;
   placeholder: string;
@@ -89,6 +90,14 @@ export type SearchSelectStepProps = {
     id: number | string;
     label: string;
   }>;
+  emptyMessage?: string;
+  errorMessage?: string;
+  hideEmptyState?: boolean;
+  isLoading?: boolean;
+  isResultsVisible?: boolean;
+  loadingMessage?: string;
+  onRetry?: () => void;
+  resultsLabel?: string;
   selectedSuggestionId?: number | string | null;
   onChange: (value: string) => void;
   onClear: () => void;
