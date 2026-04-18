@@ -10,7 +10,18 @@ import type {
   SignupStep,
 } from '@/features/signup/types';
 
+type EmailVerificationRequestContext = {
+  flowId: number;
+  requestId: number;
+};
+
+type OptionalEmailVerificationRequestContext = Partial<EmailVerificationRequestContext>;
+
 type SignupFlowStore = SignupState & {
+  emailVerificationRequest: {
+    sendRequestId: number;
+    verifyRequestId: number;
+  };
   flowId: number;
   actions: {
     clearEmailVerificationSendError: () => void;
@@ -26,8 +37,8 @@ type SignupFlowStore = SignupState & {
     selectDepartment: (value: string) => void;
     selectUniversity: (value: SelectedUniversity) => void;
     setStep: (step: SignupStep) => void;
-    startEmailVerificationSend: () => void;
-    startEmailVerificationVerify: () => void;
+    startEmailVerificationSend: () => EmailVerificationRequestContext;
+    startEmailVerificationVerify: () => EmailVerificationRequestContext;
     updateDepartmentQuery: (value: string) => void;
     updateEmailLocalPart: (value: string) => void;
     updateNickname: (value: string) => void;
@@ -36,24 +47,24 @@ type SignupFlowStore = SignupState & {
     updateUniversityQuery: (value: string) => void;
     updateUsername: (value: string) => void;
     updateVerificationCode: (value: string) => void;
-    emailVerificationSendFailure: (payload: {
+    emailVerificationSendFailure: (payload: OptionalEmailVerificationRequestContext & {
       blockedEndsAt?: number | null;
       cooldownEndsAt?: number | null;
       message: string;
       reason: EmailVerificationSendErrorReason;
     }) => void;
-    emailVerificationSendSuccess: (payload: {
+    emailVerificationSendSuccess: (payload: OptionalEmailVerificationRequestContext & {
       blockedEndsAt?: number | null;
       cooldownEndsAt: number;
       email: string;
       expiresAt: number;
     }) => void;
-    emailVerificationVerifyFailure: (payload: {
+    emailVerificationVerifyFailure: (payload: OptionalEmailVerificationRequestContext & {
       blockedEndsAt?: number | null;
       message: string;
       reason: EmailVerificationVerifyErrorReason;
     }) => void;
-    emailVerificationVerifySuccess: (payload: {
+    emailVerificationVerifySuccess: (payload: OptionalEmailVerificationRequestContext & {
       email: string;
       expiresAt: number;
       verifiedToken: string;
@@ -118,7 +129,16 @@ const createInitialSignupState = (): SignupState => ({
 
 const createNextFlowId = (currentFlowId: number) => currentFlowId + 1;
 
-export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
+const hasActiveSendRequest = (state: SignupFlowStore, context: EmailVerificationRequestContext) =>
+  state.flowId === context.flowId && state.emailVerificationRequest.sendRequestId === context.requestId;
+
+const hasActiveVerifyRequest = (state: SignupFlowStore, context: EmailVerificationRequestContext) =>
+  state.flowId === context.flowId && state.emailVerificationRequest.verifyRequestId === context.requestId;
+
+const hasRequestContext = (context: OptionalEmailVerificationRequestContext): context is EmailVerificationRequestContext =>
+  typeof context.flowId === 'number' && typeof context.requestId === 'number';
+
+export const useSignupFlowStore = create<SignupFlowStore>((set, get) => ({
   actions: {
     clearEmailVerificationSendError: () =>
       set((state) => ({
@@ -151,6 +171,10 @@ export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
       })),
     clearUniversityQuery: () =>
       set((state) => ({
+        emailVerificationRequest: {
+          sendRequestId: state.emailVerificationRequest.sendRequestId + 1,
+          verifyRequestId: state.emailVerificationRequest.verifyRequestId + 1,
+        },
         emailVerification: resetEmailVerificationState(),
         form: resetUniversityDependentFields({ ...state.form, selectedUniversity: null }),
         universityQuery: '',
@@ -165,6 +189,10 @@ export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
       })),
     returnToEmailVerificationStep: () =>
       set((state) => ({
+        emailVerificationRequest: {
+          sendRequestId: state.emailVerificationRequest.sendRequestId + 1,
+          verifyRequestId: state.emailVerificationRequest.verifyRequestId + 1,
+        },
         emailVerification: resetEmailVerificationState(),
         form: {
           ...state.form,
@@ -174,6 +202,10 @@ export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
       })),
     returnToUniversityStep: () =>
       set((state) => ({
+        emailVerificationRequest: {
+          sendRequestId: state.emailVerificationRequest.sendRequestId + 1,
+          verifyRequestId: state.emailVerificationRequest.verifyRequestId + 1,
+        },
         emailVerification: resetEmailVerificationState(),
         form: {
           ...state.form,
@@ -184,6 +216,10 @@ export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
     resetFlow: () =>
       set((state) => ({
         ...createInitialSignupState(),
+        emailVerificationRequest: {
+          sendRequestId: 0,
+          verifyRequestId: 0,
+        },
         flowId: createNextFlowId(state.flowId),
       })),
     selectAdmissionYear: (value) =>
@@ -197,6 +233,10 @@ export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
       })),
     selectUniversity: (value) =>
       set((state) => ({
+        emailVerificationRequest: {
+          sendRequestId: state.emailVerificationRequest.sendRequestId + 1,
+          verifyRequestId: state.emailVerificationRequest.verifyRequestId + 1,
+        },
         emailVerification: resetEmailVerificationState(),
         form: {
           ...resetUniversityDependentFields(state.form),
@@ -205,8 +245,15 @@ export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
         universityQuery: value.universityName,
       })),
     setStep: (step) => set({ step }),
-    startEmailVerificationSend: () =>
+    startEmailVerificationSend: () => {
+      const { emailVerificationRequest, flowId } = get();
+      const requestId = emailVerificationRequest.sendRequestId + 1;
+
       set((state) => ({
+        emailVerificationRequest: {
+          ...state.emailVerificationRequest,
+          sendRequestId: requestId,
+        },
         emailVerification: {
           send: {
             ...state.emailVerification.send,
@@ -221,9 +268,19 @@ export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
             ...initialEmailVerificationState.verifiedToken,
           },
         },
-      })),
-    startEmailVerificationVerify: () =>
+      }));
+
+      return { flowId, requestId };
+    },
+    startEmailVerificationVerify: () => {
+      const { emailVerificationRequest, flowId } = get();
+      const requestId = emailVerificationRequest.verifyRequestId + 1;
+
       set((state) => ({
+        emailVerificationRequest: {
+          ...state.emailVerificationRequest,
+          verifyRequestId: requestId,
+        },
         emailVerification: {
           ...state.emailVerification,
           verify: {
@@ -233,7 +290,10 @@ export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
             status: 'loading',
           },
         },
-      })),
+      }));
+
+      return { flowId, requestId };
+    },
     updateDepartmentQuery: (value) =>
       set((state) => ({
         departmentQuery: value,
@@ -244,6 +304,10 @@ export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
       })),
     updateEmailLocalPart: (value) =>
       set((state) => ({
+        emailVerificationRequest: {
+          sendRequestId: state.emailVerificationRequest.sendRequestId + 1,
+          verifyRequestId: state.emailVerificationRequest.verifyRequestId + 1,
+        },
         emailVerification: {
           send:
             state.emailVerification.send.lastSentEmail !== null
@@ -280,6 +344,10 @@ export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
       })),
     updateUniversityQuery: (value) =>
       set((state) => ({
+        emailVerificationRequest: {
+          sendRequestId: state.emailVerificationRequest.sendRequestId + 1,
+          verifyRequestId: state.emailVerificationRequest.verifyRequestId + 1,
+        },
         emailVerification: resetEmailVerificationState(),
         form:
           state.form.selectedUniversity && state.form.selectedUniversity.universityName !== value
@@ -307,8 +375,15 @@ export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
           },
         },
       })),
-    emailVerificationSendFailure: ({ blockedEndsAt = null, cooldownEndsAt = null, message, reason }) =>
-      set((state) => ({
+    emailVerificationSendFailure: ({ blockedEndsAt = null, cooldownEndsAt = null, flowId, message, reason, requestId }) =>
+      set((state) => {
+        const requestContext = { flowId, requestId };
+
+        if (hasRequestContext(requestContext) && !hasActiveSendRequest(state, requestContext)) {
+          return state;
+        }
+
+        return {
         emailVerification: {
           ...state.emailVerification,
           send: {
@@ -329,9 +404,17 @@ export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
                 }
               : state.emailVerification.verify,
         },
-      })),
-    emailVerificationSendSuccess: ({ blockedEndsAt = null, cooldownEndsAt, email, expiresAt }) =>
-      set(() => ({
+      };
+      }),
+    emailVerificationSendSuccess: ({ blockedEndsAt = null, cooldownEndsAt, email, expiresAt, flowId, requestId }) =>
+      set((state) => {
+        const requestContext = { flowId, requestId };
+
+        if (hasRequestContext(requestContext) && !hasActiveSendRequest(state, requestContext)) {
+          return state;
+        }
+
+        return {
         emailVerification: {
           send: {
             blockedEndsAt,
@@ -349,9 +432,17 @@ export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
             ...initialEmailVerificationState.verifiedToken,
           },
         },
-      })),
-    emailVerificationVerifyFailure: ({ blockedEndsAt = null, message, reason }) =>
-      set((state) => ({
+      };
+      }),
+    emailVerificationVerifyFailure: ({ blockedEndsAt = null, flowId, message, reason, requestId }) =>
+      set((state) => {
+        const requestContext = { flowId, requestId };
+
+        if (hasRequestContext(requestContext) && !hasActiveVerifyRequest(state, requestContext)) {
+          return state;
+        }
+
+        return {
         emailVerification: {
           ...state.emailVerification,
           verifiedToken: {
@@ -373,9 +464,17 @@ export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
                 }
               : state.emailVerification.send,
         },
-      })),
-    emailVerificationVerifySuccess: ({ email, expiresAt, verifiedToken }) =>
-      set((state) => ({
+      };
+      }),
+    emailVerificationVerifySuccess: ({ email, expiresAt, flowId, requestId, verifiedToken }) =>
+      set((state) => {
+        const requestContext = { flowId, requestId };
+
+        if (hasRequestContext(requestContext) && !hasActiveVerifyRequest(state, requestContext)) {
+          return state;
+        }
+
+        return {
         emailVerification: {
           ...state.emailVerification,
           verify: {
@@ -391,7 +490,12 @@ export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
             value: verifiedToken,
           },
         },
-      })),
+      };
+      }),
+  },
+  emailVerificationRequest: {
+    sendRequestId: 0,
+    verifyRequestId: 0,
   },
   flowId: 0,
   ...createInitialSignupState(),
