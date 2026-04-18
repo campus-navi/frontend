@@ -1,15 +1,5 @@
 import type { EmailVerificationState, SignupForm, SignupStep } from '@/features/signup/types';
 
-export function getSuggestions(items: readonly string[], query: string) {
-  const keyword = query.trim().toLowerCase();
-
-  if (!keyword) {
-    return [];
-  }
-
-  return items.filter((item) => item.toLowerCase().includes(keyword)).slice(0, 12);
-}
-
 export function formatRemainingTime(timeLeft: number) {
   const minutes = Math.floor(timeLeft / 60)
     .toString()
@@ -38,11 +28,15 @@ function extractInitials(value: string) {
 }
 
 export function normalizeUniversityKeyword(value: string) {
+  return normalizeSearchKeyword(value)
+    .replace(/campus/g, '캠퍼스');
+}
+
+export function normalizeSearchKeyword(value: string) {
   return value
     .toLowerCase()
     .replace(/\s+/g, '')
-    .replace(/[()]/g, '')
-    .replace(/campus/g, '캠퍼스');
+    .replace(/[()]/g, '');
 }
 
 function hasComposedHangul(value: string) {
@@ -57,14 +51,18 @@ function hasLatinOrDigit(value: string) {
   return /[a-z0-9]/i.test(value);
 }
 
-export function shouldShowUniversitySearchResults(query: string) {
-  const normalizedQuery = normalizeUniversityKeyword(query);
+export function shouldShowSearchResults(query: string, normalize: (value: string) => string = normalizeSearchKeyword) {
+  const normalizedQuery = normalize(query);
 
   if (!normalizedQuery) {
     return false;
   }
 
   return hasComposedHangul(normalizedQuery) || hasKoreanJamo(normalizedQuery) || hasLatinOrDigit(normalizedQuery);
+}
+
+export function shouldShowUniversitySearchResults(query: string) {
+  return shouldShowSearchResults(query, normalizeUniversityKeyword);
 }
 
 export function shouldHideUniversityEmptyState(query: string) {
@@ -77,14 +75,24 @@ export function shouldHideUniversityEmptyState(query: string) {
   return hasComposedHangul(normalizedQuery) && hasKoreanJamo(normalizedQuery);
 }
 
-export function matchesUniversityName(universityName: string, query: string) {
-  const normalizedQuery = normalizeUniversityKeyword(query);
+export function shouldHideSearchEmptyState(query: string) {
+  const normalizedQuery = normalizeSearchKeyword(query);
 
   if (!normalizedQuery) {
     return false;
   }
 
-  const normalizedName = normalizeUniversityKeyword(universityName);
+  return hasComposedHangul(normalizedQuery) && hasKoreanJamo(normalizedQuery);
+}
+
+export function matchesSearchName(name: string, query: string, normalize: (value: string) => string = normalizeSearchKeyword) {
+  const normalizedQuery = normalize(query);
+
+  if (!normalizedQuery) {
+    return false;
+  }
+
+  const normalizedName = normalize(name);
 
   if (normalizedName.includes(normalizedQuery)) {
     return true;
@@ -98,10 +106,18 @@ export function matchesUniversityName(universityName: string, query: string) {
   return initialsQuery.length > 0 && extractInitials(normalizedName).includes(initialsQuery);
 }
 
+export function matchesUniversityName(universityName: string, query: string) {
+  return matchesSearchName(universityName, query, normalizeUniversityKeyword);
+}
+
+export function getSuggestions<TItem>(items: readonly TItem[], query: string, getLabel: (item: TItem) => string) {
+  return items.filter((item) => matchesSearchName(getLabel(item), query)).slice(0, 12);
+}
+
 export function isSignupStepValid(step: SignupStep, form: SignupForm, emailVerification?: EmailVerificationState) {
   if (step === 0) return Boolean(form.selectedUniversity);
   if (step === 1) return Boolean(emailVerification?.verifiedToken.isVerified);
-  if (step === 2) return Boolean(form.department);
+  if (step === 2) return form.departmentId !== null;
   if (step === 3) return Boolean(form.admissionYear);
   if (step === 4) return /^[a-z0-9_]{4,20}$/.test(form.username);
   if (step === 5) return form.password.length >= 8 && form.password === form.passwordConfirm;

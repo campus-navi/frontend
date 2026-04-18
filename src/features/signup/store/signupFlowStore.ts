@@ -34,7 +34,7 @@ type SignupFlowStore = SignupState & {
     returnToUniversityStep: () => void;
     resetFlow: () => void;
     selectAdmissionYear: (value: number) => void;
-    selectDepartment: (value: string) => void;
+    selectDepartment: (value: { id: number | string; name: string }) => void;
     selectUniversity: (value: SelectedUniversity) => void;
     setStep: (step: SignupStep) => void;
     startEmailVerificationSend: () => EmailVerificationRequestContext;
@@ -100,6 +100,7 @@ const initialEmailVerificationState: EmailVerificationState = {
 const initialFormState: SignupForm = {
   admissionYear: 2026,
   department: '',
+  departmentId: null,
   emailLocalPart: '',
   nickname: '',
   password: '',
@@ -110,6 +111,8 @@ const initialFormState: SignupForm = {
 
 const resetUniversityDependentFields = (form: SignupForm): SignupForm => ({
   ...form,
+  department: '',
+  departmentId: null,
   emailLocalPart: '',
 });
 
@@ -167,7 +170,7 @@ export const useSignupFlowStore = create<SignupFlowStore>((set, get) => ({
     clearDepartmentQuery: () =>
       set((state) => ({
         departmentQuery: '',
-        form: state.form.department ? { ...state.form, department: '' } : state.form,
+        form: state.form.department || state.form.departmentId !== null ? { ...state.form, department: '', departmentId: null } : state.form,
       })),
     clearUniversityQuery: () =>
       set((state) => ({
@@ -177,6 +180,7 @@ export const useSignupFlowStore = create<SignupFlowStore>((set, get) => ({
         },
         emailVerification: resetEmailVerificationState(),
         form: resetUniversityDependentFields({ ...state.form, selectedUniversity: null }),
+        departmentQuery: '',
         universityQuery: '',
       })),
     nextStep: () =>
@@ -228,8 +232,8 @@ export const useSignupFlowStore = create<SignupFlowStore>((set, get) => ({
       })),
     selectDepartment: (value) =>
       set((state) => ({
-        departmentQuery: value,
-        form: { ...state.form, department: value },
+        departmentQuery: value.name,
+        form: { ...state.form, department: value.name, departmentId: Number(value.id) },
       })),
     selectUniversity: (value) =>
       set((state) => ({
@@ -242,6 +246,7 @@ export const useSignupFlowStore = create<SignupFlowStore>((set, get) => ({
           ...resetUniversityDependentFields(state.form),
           selectedUniversity: value,
         },
+        departmentQuery: '',
         universityQuery: value.universityName,
       })),
     setStep: (step) => set({ step }),
@@ -299,7 +304,7 @@ export const useSignupFlowStore = create<SignupFlowStore>((set, get) => ({
         departmentQuery: value,
         form:
           state.form.department && state.form.department !== value
-            ? { ...state.form, department: '' }
+            ? { ...state.form, department: '', departmentId: null }
             : state.form,
       })),
     updateEmailLocalPart: (value) =>
@@ -353,6 +358,8 @@ export const useSignupFlowStore = create<SignupFlowStore>((set, get) => ({
           state.form.selectedUniversity && state.form.selectedUniversity.universityName !== value
             ? resetUniversityDependentFields({ ...state.form, selectedUniversity: null })
             : state.form,
+        departmentQuery:
+          state.form.selectedUniversity && state.form.selectedUniversity.universityName !== value ? '' : state.departmentQuery,
         universityQuery: value,
       })),
     updateUsername: (value) =>

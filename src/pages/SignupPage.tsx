@@ -30,6 +30,8 @@ export default function SignupPage() {
     progressValue,
     admissionYears,
     universitySearch,
+    departmentSearch,
+    isDepartmentSearchVisible,
     isUniversitySearchVisible,
     actions,
   } = useSignupFlow();
@@ -168,11 +170,16 @@ export default function SignupPage() {
 
             {state.step === 2 ? (
               <DepartmentStep
+                errorMessage={departmentSearch.isError ? departmentSearch.error.message : undefined}
+                isLoading={departmentSearch.isLoading}
+                isResultsVisible={isDepartmentSearchVisible}
                 query={state.departmentQuery}
+                selectedDepartmentId={state.form.departmentId}
                 suggestions={filteredDepartments}
                 onChange={actions.updateDepartmentQuery}
                 onClear={actions.clearDepartmentQuery}
-                onSelect={actions.selectDepartment}
+                onRetry={() => void departmentSearch.refetch()}
+                onSelect={(department) => actions.selectDepartment({ id: department.id, name: department.label })}
               />
             ) : null}
 

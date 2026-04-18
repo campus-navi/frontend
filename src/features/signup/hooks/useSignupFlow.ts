@@ -1,35 +1,62 @@
 import { useDeferredValue, useMemo } from 'react';
 
-import { admissionYears, departments } from '@/features/signup/constants';
+import { admissionYears } from '@/features/signup/constants';
+import { useDepartmentSearch } from '@/features/signup/hooks/useDepartmentSearch';
 import { useEmailVerification } from '@/features/signup/hooks/useEmailVerification';
 import { useDebouncedValue } from '@/features/signup/hooks/useDebouncedValue';
 import { useUniversitySearch } from '@/features/signup/hooks/useUniversitySearch';
 import { useSignupFlowStore } from '@/features/signup/store/signupFlowStore';
-import { getSuggestions, isSignupStepValid, matchesUniversityName, shouldShowUniversitySearchResults } from '@/features/signup/utils';
+import {
+  getSuggestions,
+  isSignupStepValid,
+  matchesUniversityName,
+  shouldShowSearchResults,
+  shouldShowUniversitySearchResults,
+} from '@/features/signup/utils';
 
 export function useSignupFlow() {
   const { actions: storeActions, ...state } = useSignupFlowStore();
   const deferredUniversityQuery = useDeferredValue(state.universityQuery);
   const debouncedUniversityQuery = useDebouncedValue(deferredUniversityQuery, 180);
   const deferredDepartmentQuery = useDeferredValue(state.departmentQuery);
+  const debouncedDepartmentQuery = useDebouncedValue(deferredDepartmentQuery, 180);
   const universitySearch = useUniversitySearch();
+  const departmentSearch = useDepartmentSearch(state.form.selectedUniversity?.campusId);
   const emailDomain = state.form.selectedUniversity?.emailDomain ?? 'school.ac.kr';
   const emailVerification = useEmailVerification(emailDomain);
+  const isUniversitySelected =
+    state.form.selectedUniversity !== null && state.form.selectedUniversity.universityName === state.universityQuery;
+  const isDepartmentSelected = state.form.departmentId !== null && state.form.department === state.departmentQuery;
+  const isDepartmentSearchVisible = shouldShowSearchResults(debouncedDepartmentQuery) && !isDepartmentSelected;
+  const isUniversitySearchVisible = shouldShowUniversitySearchResults(debouncedUniversityQuery) && !isUniversitySelected;
   const filteredUniversities = useMemo(() => {
-    if (!shouldShowUniversitySearchResults(debouncedUniversityQuery)) {
+    if (!isUniversitySearchVisible) {
       return [];
     }
 
     return (universitySearch.data ?? [])
       .filter((university) => matchesUniversityName(university.universityName, debouncedUniversityQuery))
       .slice(0, 20);
-  }, [debouncedUniversityQuery, universitySearch.data]);
+  }, [debouncedUniversityQuery, isUniversitySearchVisible, universitySearch.data]);
   const filteredDepartments = useMemo(
-    () =>
-      state.form.department && state.form.department === state.departmentQuery
-        ? []
-        : getSuggestions(departments, deferredDepartmentQuery),
-    [deferredDepartmentQuery, state.form.department, state.departmentQuery],
+    () => {
+      if (isDepartmentSelected) {
+        return [];
+      }
+
+      if (!isDepartmentSearchVisible) {
+        return [];
+      }
+
+      const departments = departmentSearch.data ?? [];
+      const matchedDepartments = getSuggestions(departments, debouncedDepartmentQuery, (department) => department.name);
+
+      return matchedDepartments.map((department) => ({
+        id: department.id,
+        label: department.name,
+      }));
+    },
+    [debouncedDepartmentQuery, departmentSearch.data, isDepartmentSearchVisible, isDepartmentSelected],
   );
   const isCurrentStepValid = isSignupStepValid(state.step, state.form, state.emailVerification);
   const progressValue = (Math.min(state.step, 6) + 1) / 7;
@@ -44,7 +71,9 @@ export function useSignupFlow() {
     progressValue,
     admissionYears,
     universitySearch,
-    isUniversitySearchVisible: shouldShowUniversitySearchResults(debouncedUniversityQuery),
+    departmentSearch,
+    isDepartmentSearchVisible,
+    isUniversitySearchVisible,
     actions: {
       previousStep: storeActions.previousStep,
       returnToEmailVerificationStep: storeActions.returnToEmailVerificationStep,
