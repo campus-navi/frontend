@@ -15,6 +15,7 @@ export type SignupForm = {
   selectedUniversity: SelectedUniversity | null;
   emailLocalPart: string;
   department: string;
+  departmentId: number | null;
   admissionYear: number;
   username: string;
   password: string;
@@ -84,8 +85,12 @@ export type SearchSelectStepProps = {
   title: ReactNode;
   placeholder: string;
   value: string;
-  suggestions: string[];
+  suggestions: Array<{
+    id: number | string;
+    label: string;
+  }>;
+  selectedSuggestionId?: number | string | null;
   onChange: (value: string) => void;
   onClear: () => void;
-  onSelect: (value: string) => void;
+  onSelect: (value: { id: number | string; label: string }) => void;
 };

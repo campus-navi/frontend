@@ -1,6 +1,7 @@
 import { useDeferredValue, useMemo } from 'react';
 
-import { admissionYears, departments } from '@/features/signup/constants';
+import { admissionYears } from '@/features/signup/constants';
+import { useDepartmentSearch } from '@/features/signup/hooks/useDepartmentSearch';
 import { useEmailVerification } from '@/features/signup/hooks/useEmailVerification';
 import { useDebouncedValue } from '@/features/signup/hooks/useDebouncedValue';
 import { useUniversitySearch } from '@/features/signup/hooks/useUniversitySearch';
@@ -13,6 +14,7 @@ export function useSignupFlow() {
   const debouncedUniversityQuery = useDebouncedValue(deferredUniversityQuery, 180);
   const deferredDepartmentQuery = useDeferredValue(state.departmentQuery);
   const universitySearch = useUniversitySearch();
+  const departmentSearch = useDepartmentSearch(state.form.selectedUniversity?.campusId);
   const emailDomain = state.form.selectedUniversity?.emailDomain ?? 'school.ac.kr';
   const emailVerification = useEmailVerification(emailDomain);
   const filteredUniversities = useMemo(() => {
@@ -25,11 +27,20 @@ export function useSignupFlow() {
       .slice(0, 20);
   }, [debouncedUniversityQuery, universitySearch.data]);
   const filteredDepartments = useMemo(
-    () =>
-      state.form.department && state.form.department === state.departmentQuery
-        ? []
-        : getSuggestions(departments, deferredDepartmentQuery),
-    [deferredDepartmentQuery, state.form.department, state.departmentQuery],
+    () => {
+      if (state.form.department && state.form.department === state.departmentQuery) {
+        return [];
+      }
+
+      const departments = departmentSearch.data ?? [];
+      const matchedDepartments = getSuggestions(departments, deferredDepartmentQuery, (department) => department.name);
+
+      return matchedDepartments.map((department) => ({
+        id: department.id,
+        label: department.name,
+      }));
+    },
+    [deferredDepartmentQuery, departmentSearch.data, state.form.department, state.departmentQuery],
   );
   const isCurrentStepValid = isSignupStepValid(state.step, state.form, state.emailVerification);
   const progressValue = (Math.min(state.step, 6) + 1) / 7;
@@ -44,6 +55,7 @@ export function useSignupFlow() {
     progressValue,
     admissionYears,
     universitySearch,
+    departmentSearch,
     isUniversitySearchVisible: shouldShowUniversitySearchResults(debouncedUniversityQuery),
     actions: {
       previousStep: storeActions.previousStep,

@@ -169,10 +169,11 @@ export default function SignupPage() {
             {state.step === 2 ? (
               <DepartmentStep
                 query={state.departmentQuery}
+                selectedDepartmentId={state.form.departmentId}
                 suggestions={filteredDepartments}
                 onChange={actions.updateDepartmentQuery}
                 onClear={actions.clearDepartmentQuery}
-                onSelect={actions.selectDepartment}
+                onSelect={(department) => actions.selectDepartment({ id: department.id, name: department.label })}
               />
             ) : null}
 

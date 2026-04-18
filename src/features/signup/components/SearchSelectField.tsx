@@ -7,6 +7,7 @@ export function SearchSelectField({
   label,
   title,
   placeholder,
+  selectedSuggestionId,
   value,
   suggestions,
   onChange,
@@ -73,14 +74,19 @@ export function SearchSelectField({
             style={{ WebkitOverflowScrolling: 'touch' }}
           >
             {suggestions.map((item) => (
-              <li key={item} className="w-full flex-none">
+              <li key={item.id} className="w-full flex-none">
                 <button
                   type="button"
                   onClick={() => onSelect(item)}
                   className="flex min-h-[42px] w-full items-center gap-3 text-left"
                 >
-                  <span className="h-4 w-4 flex-none rounded-[2px] bg-[#EFEFEF]" />
-                  <span className="text-[15px] font-semibold leading-[1.35] text-[#404040]">{item}</span>
+                  <span
+                    className={[
+                      'h-4 w-4 flex-none rounded-[2px]',
+                      selectedSuggestionId === item.id ? 'bg-[#6C6C6C]' : 'bg-[#EFEFEF]',
+                    ].join(' ')}
+                  />
+                  <span className="text-[15px] font-semibold leading-[1.35] text-[#404040]">{item.label}</span>
                 </button>
               </li>
             ))}
