@@ -5,12 +5,14 @@ import { signupEmailVerificationPolicy } from '@/features/signup/constants';
 import {
   createSchoolEmail,
   EMAIL_VERIFICATION_MESSAGES,
+  isSameEmailForComparison,
   isValidSchoolEmail,
   mapSendEmailVerificationError,
   mapVerifyEmailVerificationError,
 } from '@/features/signup/emailVerification';
 import { useSignupFlowStore } from '@/features/signup/store/signupFlowStore';
 import { useVerificationTimer } from '@/features/signup/hooks/useVerificationTimer';
+import { formatRemainingTime } from '@/features/signup/utils';
 
 function dismissMobileKeyboard() {
   const activeElement = document.activeElement;
@@ -52,6 +54,48 @@ export function useEmailVerification(emailDomain: string) {
   const resendCooldownTimer = useVerificationTimer(emailVerification.send.cooldownEndsAt);
   const sendBlockedTimer = useVerificationTimer(emailVerification.send.blockedEndsAt);
   const verifyBlockedTimer = useVerificationTimer(emailVerification.verify.blockedEndsAt);
+  const sendBlockedSecondsLeft = sendBlockedTimer.timeLeft;
+  const verifyBlockedSecondsLeft = verifyBlockedTimer.timeLeft;
+  const resendCooldownSecondsLeft = resendCooldownTimer.timeLeft;
+  const verificationSecondsLeft = verificationTimer.timeLeft;
+  const isVerified = emailVerification.verifiedToken.isVerified;
+  const lastSentEmail = emailVerification.send.lastSentEmail;
+  const hasSentCode = lastSentEmail !== null;
+  const isCodeSent = hasSentCode || isVerified;
+  const isSending = emailVerification.send.status === 'loading';
+  const isVerifying = emailVerification.verify.status === 'loading';
+  const isCodeReady = emailVerification.verify.code.length === 6;
+  const isSendVerifyBlocked = emailVerification.send.errorReason === 'verify_blocked';
+  const isVerifyBlocked = verifyBlockedSecondsLeft > 0;
+  const hasEmailMismatchSinceLastSend = hasSentCode && !isSameEmailForComparison(email, lastSentEmail);
+  const hasActiveVerificationSession = hasSentCode && emailVerification.send.expiresAt !== null && !hasEmailMismatchSinceLastSend;
+  const isVerificationExpired =
+    hasActiveVerificationSession && !isVerified && !isSending && !isVerifyBlocked && !isSendVerifyBlocked && verificationSecondsLeft <= 0;
+  const needsResendBecauseExpired = !hasEmailMismatchSinceLastSend && isVerificationExpired;
+  const needsResendBecauseInvalidated =
+    hasSentCode && !isVerified && !hasActiveVerificationSession && !hasEmailMismatchSinceLastSend && !isSendVerifyBlocked;
+  const canVerify =
+    hasActiveVerificationSession && !isVerified && !isVerifying && !isVerifyBlocked && !needsResendBecauseExpired && isCodeReady;
+  const canSend = Boolean(emailLocalPart.trim()) && !isSending && sendBlockedSecondsLeft <= 0 && resendCooldownSecondsLeft <= 0;
+  const sendButtonLabel = isSending ? '전송중' : isCodeSent ? '재전송' : '인증전송';
+  const verifyButtonLabel = isVerified ? '인증완료' : isVerifying ? '확인중' : '인증하기';
+  const verificationTimerLabel =
+    isVerified || !hasActiveVerificationSession || isSending || isVerifyBlocked || isSendVerifyBlocked
+      ? null
+      : verificationSecondsLeft > 0
+        ? `남은시간 ${formatRemainingTime(verificationSecondsLeft)}`
+        : '유효시간 만료';
+  const codeHelperMessage =
+    emailVerification.verify.errorReason === 'invalid_code'
+      ? emailVerification.verify.errorMessage
+      : hasEmailMismatchSinceLastSend
+        ? '이메일이 변경되었습니다. 인증을 다시 진행해주세요.'
+      : needsResendBecauseInvalidated
+        ? '인증코드를 다시 전송해주세요.'
+      : !isSendVerifyBlocked && (needsResendBecauseExpired || emailVerification.verify.errorReason === 'code_not_found')
+        ? '유효시간이 만료되었습니다. 인증코드를 다시 전송해주세요.'
+        : null;
+  const emailHelperMessage = hasActiveVerificationSession && lastSentEmail ? `${lastSentEmail}로 인증번호를 전송했습니다.` : null;
 
   const sendCode = async () => {
     if (sendInFlightRef.current) {
@@ -157,11 +201,22 @@ export function useEmailVerification(emailDomain: string) {
 
   return {
     email,
-    sendBlockedSecondsLeft: sendBlockedTimer.timeLeft,
+    sendBlockedSecondsLeft,
     sendCode,
-    verifyBlockedSecondsLeft: verifyBlockedTimer.timeLeft,
+    ui: {
+      canSend,
+      canVerify,
+      codeHelperMessage,
+      emailHelperMessage,
+      isCodeSent,
+      isVerificationCodeReadOnly: isVerified || isVerifyBlocked,
+      sendButtonLabel,
+      verificationTimerLabel,
+      verifyButtonLabel,
+    },
+    verifyBlockedSecondsLeft,
     verifyCode,
-    resendCooldownSecondsLeft: resendCooldownTimer.timeLeft,
-    verificationSecondsLeft: verificationTimer.timeLeft,
+    resendCooldownSecondsLeft,
+    verificationSecondsLeft,
   };
 }

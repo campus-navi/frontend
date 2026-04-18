@@ -1,19 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { SignupTextField } from '@/features/signup/components/SignupTextField';
-import { isSameEmailForComparison } from '@/features/signup/emailVerification';
-import { formatRemainingTime } from '@/features/signup/utils';
 import type { EmailVerificationState } from '@/features/signup/types';
 
 type EmailVerificationStepProps = {
-  email: string;
   emailLocalPart: string;
   emailDomain: string;
-  sendBlockedSecondsLeft: number;
-  verifyBlockedSecondsLeft: number;
+  isCodeSent: boolean;
+  isSendEnabled: boolean;
+  isVerifyButtonEnabled: boolean;
+  isVerificationCodeReadOnly: boolean;
+  codeHelperMessage: string | null;
+  emailHelperMessage: string | null;
+  sendButtonLabel: string;
+  verificationTimerLabel: string | null;
   verification: EmailVerificationState;
-  resendCooldownSecondsLeft: number;
-  verificationSecondsLeft: number;
+  verifyButtonLabel: string;
   onEmailChange: (value: string) => void;
   onVerificationCodeChange: (value: string) => void;
   onSendVerification: () => void;
@@ -21,14 +23,18 @@ type EmailVerificationStepProps = {
 };
 
 export function EmailVerificationStep({
-  email,
   emailLocalPart,
   emailDomain,
-  sendBlockedSecondsLeft,
-  verifyBlockedSecondsLeft,
+  isCodeSent,
+  isSendEnabled,
+  isVerifyButtonEnabled,
+  isVerificationCodeReadOnly,
+  codeHelperMessage,
+  emailHelperMessage,
+  sendButtonLabel,
+  verificationTimerLabel,
   verification,
-  resendCooldownSecondsLeft,
-  verificationSecondsLeft,
+  verifyButtonLabel,
   onEmailChange,
   onVerificationCodeChange,
   onSendVerification,
@@ -39,34 +45,6 @@ export function EmailVerificationStep({
   const [isEmailFocused, setIsEmailFocused] = useState(false);
   const [isVerificationCodeFocused, setIsVerificationCodeFocused] = useState(false);
   const isVerified = verification.verifiedToken.isVerified;
-  const lastSentEmail = verification.send.lastSentEmail;
-  const hasSentCode = lastSentEmail !== null;
-  const isCodeSent = hasSentCode || isVerified;
-  const isSending = verification.send.status === 'loading';
-  const isVerifying = verification.verify.status === 'loading';
-  const isCodeReady = verification.verify.code.length === 6;
-  const isSendVerifyBlocked = verification.send.errorReason === 'verify_blocked';
-  const isVerifyBlocked = verifyBlockedSecondsLeft > 0;
-  const hasEmailMismatchSinceLastSend = hasSentCode && !isSameEmailForComparison(email, lastSentEmail);
-  const needsResendBecauseMismatch = hasEmailMismatchSinceLastSend;
-  const hasActiveVerificationSession = hasSentCode && verification.send.expiresAt !== null && !needsResendBecauseMismatch;
-  const isVerificationExpired =
-    hasActiveVerificationSession && !isVerified && !isSending && !isVerifyBlocked && !isSendVerifyBlocked && verificationSecondsLeft <= 0;
-  const needsResendBecauseExpired = !needsResendBecauseMismatch && isVerificationExpired;
-  const needsResendBecauseInvalidated =
-    hasSentCode && !isVerified && !hasActiveVerificationSession && !needsResendBecauseMismatch && !isSendVerifyBlocked;
-  const isSendBlocked = sendBlockedSecondsLeft > 0;
-  const isSendEnabled = Boolean(emailLocalPart.trim()) && !isSending && !isSendBlocked && resendCooldownSecondsLeft <= 0;
-  const isVerifyButtonEnabled =
-    hasActiveVerificationSession && !isVerified && !isVerifying && !isVerifyBlocked && !needsResendBecauseExpired && isCodeReady;
-  const sendButtonLabel = isSending ? '전송중' : isCodeSent ? '재전송' : '인증전송';
-  const verifyButtonLabel = isVerified ? '인증완료' : isVerifying ? '확인중' : '인증하기';
-  const verificationTimerLabel =
-    isVerified || !hasActiveVerificationSession || isSending || isVerifyBlocked || isSendVerifyBlocked
-      ? null
-      : verificationSecondsLeft > 0
-        ? `남은시간 ${formatRemainingTime(verificationSecondsLeft)}`
-        : '유효시간 만료';
   const hasEmailInput = Boolean(emailLocalPart.trim());
   const emailLineBorderClassName = isEmailFocused || hasEmailInput ? 'border-[#707070]' : 'border-[#E8E8E8]';
   const hasVerificationCodeInput = Boolean(verification.verify.code.trim());
@@ -74,18 +52,6 @@ export function EmailVerificationStep({
     isVerificationCodeFocused || hasVerificationCodeInput ? 'border-[#707070]' : 'border-[#E8E8E8]';
   const sendButtonClassName = isSendEnabled ? 'bg-[#333333] text-white' : 'bg-[#E7E7E7] text-[#BBBBBB]';
   const labelClassName = 'text-[14px] font-medium leading-[140%] text-[#5C5C5C]';
-  const codeHelperMessage =
-    verification.verify.errorReason === 'invalid_code'
-      ? verification.verify.errorMessage
-      : needsResendBecauseMismatch
-        ? '이메일이 변경되었습니다. 인증을 다시 진행해주세요.'
-      : needsResendBecauseInvalidated
-        ? '인증코드를 다시 전송해주세요.'
-      : !isSendVerifyBlocked && (needsResendBecauseExpired || verification.verify.errorReason === 'code_not_found')
-        ? '유효시간이 만료되었습니다. 인증코드를 다시 전송해주세요.'
-        : null;
-  const emailHelperMessage =
-    hasActiveVerificationSession && lastSentEmail ? `${lastSentEmail}로 인증번호를 전송했습니다.` : null;
 
   useEffect(() => {
     const focusTimer = window.setTimeout(() => {
@@ -128,7 +94,7 @@ export function EmailVerificationStep({
               onChange={(event) => onVerificationCodeChange(event.target.value)}
               onBlur={() => setIsVerificationCodeFocused(false)}
               onFocus={() => setIsVerificationCodeFocused(true)}
-              readOnly={isVerified || isVerifyBlocked}
+              readOnly={isVerificationCodeReadOnly}
               placeholder="6자리 숫자 입력"
               className={[
                 'min-w-0 flex-1 border-0 bg-transparent px-0 text-[22px] tracking-[0.28em] placeholder:text-[15px] placeholder:tracking-normal focus:outline-none',
