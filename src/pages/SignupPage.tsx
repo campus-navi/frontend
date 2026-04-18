@@ -89,6 +89,11 @@ export default function SignupPage() {
       return;
     }
 
+    if (state.step === 1) {
+      actions.returnToUniversityStep();
+      return;
+    }
+
     actions.previousStep();
   };
 

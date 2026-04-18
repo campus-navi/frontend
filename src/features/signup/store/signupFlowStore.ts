@@ -19,6 +19,7 @@ type SignupFlowStore = SignupState & {
     nextStep: () => void;
     previousStep: () => void;
     returnToEmailVerificationStep: () => void;
+    returnToUniversityStep: () => void;
     resetFlow: () => void;
     selectAdmissionYear: (value: number) => void;
     selectDepartment: (value: string) => void;
@@ -167,6 +168,15 @@ export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
           emailLocalPart: '',
         },
         step: 1,
+      })),
+    returnToUniversityStep: () =>
+      set((state) => ({
+        emailVerification: resetEmailVerificationState(),
+        form: {
+          ...state.form,
+          emailLocalPart: '',
+        },
+        step: 0,
       })),
     resetFlow: () => set(createInitialSignupState()),
     selectAdmissionYear: (value) =>
