@@ -63,7 +63,6 @@ const initialEmailVerificationState: EmailVerificationState = {
   send: {
     blockedEndsAt: null,
     cooldownEndsAt: null,
-    emailChangedAfterSend: false,
     errorMessage: null,
     errorReason: null,
     expiresAt: null,
@@ -194,7 +193,6 @@ export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
         emailVerification: {
           send: {
             ...state.emailVerification.send,
-            emailChangedAfterSend: false,
             errorMessage: null,
             errorReason: null,
             status: 'loading',
@@ -229,27 +227,23 @@ export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
       })),
     updateEmailLocalPart: (value) =>
       set((state) => ({
-        emailVerification:
-          state.emailVerification.send.lastSentEmail !== null || state.emailVerification.verifiedToken.isVerified
-            ? {
-                send: {
-                  ...state.emailVerification.send,
-                  blockedEndsAt: null,
-                  cooldownEndsAt: null,
-                  emailChangedAfterSend: true,
-                  errorMessage: null,
-                  errorReason: null,
-                  expiresAt: null,
-                  status: 'idle',
+        emailVerification: {
+          send:
+            state.emailVerification.send.lastSentEmail !== null
+              ? {
+                  ...initialEmailVerificationState.send,
+                  lastSentEmail: state.emailVerification.send.lastSentEmail,
+                }
+              : {
+                  ...initialEmailVerificationState.send,
                 },
-                verify: {
-                  ...initialEmailVerificationState.verify,
-                },
-                verifiedToken: {
-                  ...initialEmailVerificationState.verifiedToken,
-                },
-              }
-            : resetEmailVerificationState(),
+          verify: {
+            ...initialEmailVerificationState.verify,
+          },
+          verifiedToken: {
+            ...initialEmailVerificationState.verifiedToken,
+          },
+        },
         form: {
           ...state.form,
           emailLocalPart: value.replace(/[^a-zA-Z0-9._-]/g, ''),
@@ -304,7 +298,6 @@ export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
             ...state.emailVerification.send,
             blockedEndsAt,
             cooldownEndsAt: cooldownEndsAt ?? state.emailVerification.send.cooldownEndsAt,
-            emailChangedAfterSend: false,
             expiresAt: reason === 'verify_blocked' ? null : state.emailVerification.send.expiresAt,
             errorMessage: message,
             errorReason: reason,
@@ -326,7 +319,6 @@ export const useSignupFlowStore = create<SignupFlowStore>((set) => ({
           send: {
             blockedEndsAt,
             cooldownEndsAt,
-            emailChangedAfterSend: false,
             errorMessage: null,
             errorReason: null,
             expiresAt,
