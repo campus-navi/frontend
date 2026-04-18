@@ -48,6 +48,7 @@ export function useSignupFlow() {
     actions: {
       previousStep: storeActions.previousStep,
       returnToEmailVerificationStep: storeActions.returnToEmailVerificationStep,
+      returnToUniversityStep: storeActions.returnToUniversityStep,
       nextStep: () => {
         if (!isCurrentStepValid) return;
         storeActions.nextStep();

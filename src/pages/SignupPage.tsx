@@ -89,6 +89,11 @@ export default function SignupPage() {
       return;
     }
 
+    if (state.step === 1) {
+      actions.returnToUniversityStep();
+      return;
+    }
+
     actions.previousStep();
   };
 
@@ -142,14 +147,18 @@ export default function SignupPage() {
 
             {state.step === 1 ? (
               <EmailVerificationStep
-                email={emailVerification.email}
                 emailLocalPart={state.form.emailLocalPart}
                 emailDomain={emailDomain}
-                sendBlockedSecondsLeft={emailVerification.sendBlockedSecondsLeft}
-                verifyBlockedSecondsLeft={emailVerification.verifyBlockedSecondsLeft}
+                isCodeSent={emailVerification.ui.isCodeSent}
+                isSendEnabled={emailVerification.ui.canSend}
+                isVerifyButtonEnabled={emailVerification.ui.canVerify}
+                isVerificationCodeReadOnly={emailVerification.ui.isVerificationCodeReadOnly}
+                codeHelperMessage={emailVerification.ui.codeHelperMessage}
+                emailHelperMessage={emailVerification.ui.emailHelperMessage}
+                sendButtonLabel={emailVerification.ui.sendButtonLabel}
+                verificationTimerLabel={emailVerification.ui.verificationTimerLabel}
                 verification={state.emailVerification}
-                resendCooldownSecondsLeft={emailVerification.resendCooldownSecondsLeft}
-                verificationSecondsLeft={emailVerification.verificationSecondsLeft}
+                verifyButtonLabel={emailVerification.ui.verifyButtonLabel}
                 onEmailChange={actions.updateEmailLocalPart}
                 onVerificationCodeChange={actions.updateVerificationCode}
                 onSendVerification={actions.sendVerification}

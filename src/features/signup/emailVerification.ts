@@ -33,6 +33,14 @@ export function createSchoolEmail(emailLocalPart: string, emailDomain: string) {
   return `${emailLocalPart.trim()}@${emailDomain.trim()}`;
 }
 
+export function normalizeEmailForComparison(email: string) {
+  return email.trim().toLowerCase();
+}
+
+export function isSameEmailForComparison(currentEmail: string, targetEmail: string) {
+  return normalizeEmailForComparison(currentEmail) === normalizeEmailForComparison(targetEmail);
+}
+
 export function isValidSchoolEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }

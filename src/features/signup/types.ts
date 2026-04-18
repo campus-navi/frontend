@@ -43,7 +43,6 @@ export type EmailVerificationVerifyErrorReason =
 export type EmailVerificationSendState = {
   blockedEndsAt: number | null;
   cooldownEndsAt: number | null;
-  emailChangedAfterSend: boolean;
   errorMessage: string | null;
   errorReason: EmailVerificationSendErrorReason | null;
   expiresAt: number | null;
