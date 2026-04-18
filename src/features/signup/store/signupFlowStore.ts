@@ -258,6 +258,7 @@ export const useSignupFlowStore = create<SignupFlowStore>((set, get) => ({
         emailVerificationRequest: {
           ...state.emailVerificationRequest,
           sendRequestId: requestId,
+          verifyRequestId: state.emailVerificationRequest.verifyRequestId + 1,
         },
         emailVerification: {
           send: {
