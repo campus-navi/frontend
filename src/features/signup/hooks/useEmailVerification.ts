@@ -116,7 +116,7 @@ export function useEmailVerification(emailDomain: string) {
       return;
     }
 
-    actions.startEmailVerificationSend();
+    const requestContext = actions.startEmailVerificationSend();
     sendInFlightRef.current = true;
 
     try {
@@ -131,6 +131,7 @@ export function useEmailVerification(emailDomain: string) {
         cooldownEndsAt: now + signupEmailVerificationPolicy.resendCooldownMs,
         email,
         expiresAt: now + signupEmailVerificationPolicy.codeExpiresInMs,
+        ...requestContext,
       });
     } catch (error) {
       const normalizedError = normalizeApiError(error);
@@ -146,6 +147,7 @@ export function useEmailVerification(emailDomain: string) {
               ? now + signupEmailVerificationPolicy.verifyBlockedMs
               : null,
         cooldownEndsAt: mappedError.reason === 'resend_cooldown' ? now + signupEmailVerificationPolicy.resendCooldownMs : null,
+        ...requestContext,
       });
     } finally {
       sendInFlightRef.current = false;
@@ -165,7 +167,7 @@ export function useEmailVerification(emailDomain: string) {
       return;
     }
 
-    actions.startEmailVerificationVerify();
+    const requestContext = actions.startEmailVerificationVerify();
     verifyInFlightRef.current = true;
 
     try {
@@ -183,6 +185,7 @@ export function useEmailVerification(emailDomain: string) {
         email,
         expiresAt: Date.now() + signupEmailVerificationPolicy.verifiedTokenExpiresInMs,
         verifiedToken,
+        ...requestContext,
       });
       dismissMobileKeyboard();
     } catch (error) {
@@ -193,6 +196,7 @@ export function useEmailVerification(emailDomain: string) {
       actions.emailVerificationVerifyFailure({
         ...mappedError,
         blockedEndsAt: mappedError.reason === 'verify_blocked' ? now + signupEmailVerificationPolicy.verifyBlockedMs : null,
+        ...requestContext,
       });
     } finally {
       verifyInFlightRef.current = false;
