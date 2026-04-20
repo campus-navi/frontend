@@ -1,6 +1,7 @@
 import { apiConfig } from '@/api/config';
 import { request } from '@/api/client';
 import type { ApiObjectData } from '@/api/types';
+import { tokenStorage } from '@/shared/auth';
 
 export interface LoginPayload extends ApiObjectData {
   password: string;
@@ -29,6 +30,15 @@ export interface VerifySignupEmailCodeResponseData extends ApiObjectData {
   verifiedToken: string;
 }
 
+export interface SignupPayload extends ApiObjectData {
+  admissionYear: number;
+  departmentId: number;
+  nickname: string;
+  password: string;
+  username: string;
+  verifiedToken: string;
+}
+
 export const authApi = {
   getMe<TData extends ApiObjectData = ApiObjectData>() {
     return request<TData>({
@@ -44,11 +54,15 @@ export const authApi = {
       url: '/auth/login',
     });
   },
-  logout<TData extends ApiObjectData = ApiObjectData>() {
-    return request<TData>({
+  async logout<TData extends ApiObjectData = ApiObjectData>() {
+    const response = await request<TData>({
       method: 'post',
+      withCredentials: true,
       url: '/auth/logout',
     });
+
+    tokenStorage.clearAccessToken();
+    return response;
   },
   sendSignupEmailVerification(payload: SendSignupEmailVerificationPayload) {
     return request<null>({
@@ -82,15 +96,20 @@ export const authApi = {
       url: '/auth/email/verify',
     });
   },
-  reissueAccessToken<TData extends ApiObjectData = ApiObjectData>(refreshToken: string) {
+  signup<TData extends ApiObjectData = ApiObjectData>(payload: SignupPayload) {
     return request<TData>({
-      headers: {
-        Authorization: `Bearer ${refreshToken}`,
-        'X-Refresh-Token': refreshToken,
-      },
+      data: payload,
+      method: 'post',
+      requiresAuth: false,
+      url: '/auth/signup',
+    });
+  },
+  reissueAccessToken<TData extends ApiObjectData = ApiObjectData>() {
+    return request<TData>({
       method: 'post',
       requiresAuth: false,
       skipAuthRefresh: true,
+      withCredentials: true,
       url: apiConfig.refreshPath,
     });
   },

@@ -4,7 +4,6 @@ import type {
   NicknameValidationResult,
   PasswordValidationResult,
   SignupForm,
-  SignupPayload,
   SignupStep,
   UsernameValidationResult,
 } from '@/features/signup/types';
@@ -244,22 +243,5 @@ export function validateSignupNickname(nickname: string): NicknameValidationResu
   return {
     isValid: true,
     message: null,
-  };
-}
-
-export function buildSignupPayload(form: SignupForm, emailVerification: EmailVerificationState): SignupPayload | null {
-  const verifiedToken = emailVerification.verifiedToken.value;
-
-  if (form.departmentId === null || !verifiedToken) {
-    return null;
-  }
-
-  return {
-    departmentId: form.departmentId,
-    admissionYear: form.admissionYear,
-    username: form.username,
-    password: form.password,
-    nickname: form.nickname,
-    verifiedToken,
   };
 }
