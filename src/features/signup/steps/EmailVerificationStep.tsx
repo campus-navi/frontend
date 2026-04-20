@@ -52,6 +52,10 @@ export function EmailVerificationStep({
     isVerificationCodeFocused || hasVerificationCodeInput ? 'border-[#707070]' : 'border-[#E8E8E8]';
   const sendButtonClassName = isSendEnabled ? 'bg-[#333333] text-white' : 'bg-[#E7E7E7] text-[#BBBBBB]';
   const labelClassName = 'text-[14px] font-medium leading-[140%] text-[#5C5C5C]';
+  const verificationFieldClassName = [
+    'overflow-hidden transition-[max-height,opacity,transform,margin] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[max-height,opacity,transform]',
+    isCodeSent ? 'mt-10 mb-8 max-h-[140px] translate-y-0 opacity-100' : 'mt-0 mb-0 max-h-0 -translate-y-3 opacity-0 pointer-events-none',
+  ].join(' ');
 
   useEffect(() => {
     const focusTimer = window.setTimeout(() => {
@@ -81,8 +85,7 @@ export function EmailVerificationStep({
         이메일을 입력해주세요
       </h1>
 
-      {isCodeSent ? (
-        <div className="signup-slide-down mt-10">
+      <div className={verificationFieldClassName} aria-hidden={!isCodeSent}>
           <p className={labelClassName}>인증코드</p>
           <div className={['mt-5 flex items-center gap-3 border-b-2 pb-3 transition-colors', verificationCodeLineBorderClassName].join(' ')}>
             <input
@@ -121,10 +124,9 @@ export function EmailVerificationStep({
           {codeHelperMessage ? (
             <p className="mt-3 text-[12px] font-medium leading-[140%] text-[#5C5C5C]">{codeHelperMessage}</p>
           ) : null}
-        </div>
-      ) : null}
+      </div>
 
-      <div className={isCodeSent ? 'mt-8' : 'mt-10'}>
+      <div className={isCodeSent ? 'mt-0' : 'mt-10'}>
         <p className={labelClassName}>학교 이메일</p>
         <div className="mt-2 flex items-end gap-2">
           <div className={['min-w-0 flex-1 border-b-2 transition-colors', emailLineBorderClassName].join(' ')}>

@@ -186,7 +186,7 @@ export const useSignupFlowStore = create<SignupFlowStore>((set, get) => ({
       })),
     nextStep: () =>
       set((state) => ({
-        step: Math.min(7, state.step + 1) as SignupStep,
+        step: Math.min(6, state.step + 1) as SignupStep,
       })),
     previousStep: () =>
       set((state) => ({
@@ -350,7 +350,14 @@ export const useSignupFlowStore = create<SignupFlowStore>((set, get) => ({
       })),
     updatePassword: (value) =>
       set((state) => ({
-        form: { ...state.form, password: value },
+        form:
+          state.form.password === value
+            ? state.form
+            : {
+                ...state.form,
+                password: value,
+                passwordConfirm: '',
+              },
       })),
     updatePasswordConfirm: (value) =>
       set((state) => ({
@@ -375,6 +382,8 @@ export const useSignupFlowStore = create<SignupFlowStore>((set, get) => ({
       set((state) => ({
         form: {
           ...state.form,
+          password: state.form.username === value ? state.form.password : '',
+          passwordConfirm: state.form.username === value ? state.form.passwordConfirm : '',
           username: value,
         },
       })),
