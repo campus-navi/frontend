@@ -4,7 +4,7 @@ import { ClearIcon } from '@/features/signup/components/SignupIcons';
 import { SignupTextField } from '@/features/signup/components/SignupTextField';
 
 type NicknameStepProps = {
-  helperText: string;
+  helperText?: string;
   helperTone?: 'default' | 'success' | 'error';
   nickname: string;
   onChange: (value: string) => void;
