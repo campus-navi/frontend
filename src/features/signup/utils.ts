@@ -1,4 +1,4 @@
-import type { EmailVerificationState, SignupForm, SignupStep } from '@/features/signup/types';
+import type { EmailVerificationState, SignupForm, SignupPayload, SignupStep } from '@/features/signup/types';
 
 export function formatRemainingTime(timeLeft: number) {
   const minutes = Math.floor(timeLeft / 60)
@@ -124,4 +124,21 @@ export function isSignupStepValid(step: SignupStep, form: SignupForm, emailVerif
   if (step === 6) return form.nickname.trim().length >= 2;
 
   return true;
+}
+
+export function buildSignupPayload(form: SignupForm, emailVerification: EmailVerificationState): SignupPayload | null {
+  const verifiedToken = emailVerification.verifiedToken.value;
+
+  if (form.departmentId === null || !verifiedToken) {
+    return null;
+  }
+
+  return {
+    departmentId: form.departmentId,
+    admissionYear: form.admissionYear,
+    username: form.username,
+    password: form.password,
+    nickname: form.nickname,
+    verifiedToken,
+  };
 }
