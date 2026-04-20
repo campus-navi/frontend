@@ -23,6 +23,15 @@ export type SignupForm = {
   nickname: string;
 };
 
+export type SignupPayload = {
+  departmentId: number;
+  admissionYear: number;
+  username: string;
+  password: string;
+  nickname: string;
+  verifiedToken: string;
+};
+
 export type EmailVerificationSendErrorReason =
   | 'invalid_email'
   | 'already_registered'

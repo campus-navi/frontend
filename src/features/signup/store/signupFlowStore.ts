@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 
+import { defaultAdmissionYear } from '@/features/signup/constants';
 import type {
   EmailVerificationState,
   EmailVerificationSendErrorReason,
@@ -98,7 +99,7 @@ const initialEmailVerificationState: EmailVerificationState = {
 };
 
 const initialFormState: SignupForm = {
-  admissionYear: 2026,
+  admissionYear: defaultAdmissionYear,
   department: '',
   departmentId: null,
   emailLocalPart: '',
@@ -190,6 +191,13 @@ export const useSignupFlowStore = create<SignupFlowStore>((set, get) => ({
     previousStep: () =>
       set((state) => ({
         step: Math.max(0, state.step - 1) as SignupStep,
+        form:
+          state.step === 4
+            ? {
+                ...state.form,
+                admissionYear: defaultAdmissionYear,
+              }
+            : state.form,
       })),
     returnToEmailVerificationStep: () =>
       set((state) => ({
