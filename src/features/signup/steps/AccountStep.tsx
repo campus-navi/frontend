@@ -144,17 +144,6 @@ export function AccountStep({
     ),
     [isPasswordConfirmVisible, onPasswordConfirmChange, passwordConfirm],
   );
-  const animatedFieldClassName =
-    'overflow-hidden transition-[max-height,opacity,transform,margin] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[max-height,opacity,transform]';
-  const passwordConfirmFieldClassName = [
-    animatedFieldClassName,
-    debouncedPasswordConfirmFieldVisible ? 'mb-8 max-h-[168px] translate-y-0 opacity-100' : 'mb-0 max-h-0 -translate-y-3 opacity-0 pointer-events-none',
-  ].join(' ');
-  const passwordFieldClassName = [
-    animatedFieldClassName,
-    debouncedPasswordFieldVisible ? 'mb-8 max-h-[164px] translate-y-0 opacity-100' : 'mb-0 max-h-0 -translate-y-3 opacity-0 pointer-events-none',
-  ].join(' ');
-
   return (
     <div>
       <h1 className="text-[22px] font-bold leading-[1.45] tracking-[-0.03em] text-[#303030]">
@@ -163,33 +152,37 @@ export function AccountStep({
         정보를 입력해주세요.
       </h1>
       <div className="mt-10">
-        <div className={passwordConfirmFieldClassName} aria-hidden={!debouncedPasswordConfirmFieldVisible}>
-          <SignupTextField
-            inputRef={passwordConfirmInputRef}
-            label="비밀번호 확인"
-            type={isPasswordConfirmVisible ? 'text' : 'password'}
-            value={passwordConfirm}
-            placeholder="비밀번호를 다시 입력해주세요"
-            helperText={confirmHelperText}
-            helperTone={confirmHelperTone}
-            trailingActions={passwordConfirmActions}
-            onChange={onPasswordConfirmChange}
-          />
-        </div>
+        {debouncedPasswordConfirmFieldVisible ? (
+          <div className="signup-slide-down mb-8">
+            <SignupTextField
+              inputRef={passwordConfirmInputRef}
+              label="비밀번호 확인"
+              type={isPasswordConfirmVisible ? 'text' : 'password'}
+              value={passwordConfirm}
+              placeholder="비밀번호를 다시 입력해주세요"
+              helperText={confirmHelperText}
+              helperTone={confirmHelperTone}
+              trailingActions={passwordConfirmActions}
+              onChange={onPasswordConfirmChange}
+            />
+          </div>
+        ) : null}
 
-        <div className={passwordFieldClassName} aria-hidden={!debouncedPasswordFieldVisible}>
-          <SignupTextField
-            inputRef={passwordInputRef}
-            label="비밀번호"
-            type={isPasswordVisible ? 'text' : 'password'}
-            value={password}
-            placeholder="영문, 숫자, 특수문자를 포함한 8~16자"
-            helperText={passwordHelperText ?? undefined}
-            helperTone={passwordHelperTone}
-            trailingActions={passwordActions}
-            onChange={onPasswordChange}
-          />
-        </div>
+        {debouncedPasswordFieldVisible ? (
+          <div className="signup-slide-down mb-8">
+            <SignupTextField
+              inputRef={passwordInputRef}
+              label="비밀번호"
+              type={isPasswordVisible ? 'text' : 'password'}
+              value={password}
+              placeholder="영문, 숫자, 특수문자를 포함한 8~16자"
+              helperText={passwordHelperText ?? undefined}
+              helperTone={passwordHelperTone}
+              trailingActions={passwordActions}
+              onChange={onPasswordChange}
+            />
+          </div>
+        ) : null}
 
         <SignupTextField
           label="아이디"
