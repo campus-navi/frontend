@@ -1,11 +1,10 @@
-import type { SignupForm } from '@/features/signup/types';
+import type { SignupCompleteSnapshot } from '@/features/signup/types';
 
 type SuccessStepProps = {
-  form: SignupForm;
-  emailDomain: string;
+  snapshot: SignupCompleteSnapshot;
 };
 
-export function SuccessStep({ form, emailDomain }: SuccessStepProps) {
+export function SuccessStep({ snapshot }: SuccessStepProps) {
   return (
     <div className="flex h-full flex-col justify-center">
       <div className="relative overflow-hidden rounded-[32px] bg-[linear-gradient(160deg,#f5f7fb_0%,#eef3ff_55%,#ffffff_100%)] px-7 py-8 shadow-[0_18px_40px_rgba(31,41,55,0.08)]">
@@ -24,26 +23,24 @@ export function SuccessStep({ form, emailDomain }: SuccessStepProps) {
           <div className="mt-8 rounded-[24px] border border-white/70 bg-white/85 p-5 backdrop-blur">
             <div className="flex flex-wrap gap-2">
               <span className="rounded-full bg-[#F1F5FF] px-3 py-1.5 text-sm font-medium text-[#4460A8]">
-                {form.selectedUniversity?.universityName ?? '대학교 미선택'}
+                {snapshot.universityName}
               </span>
-              <span className="rounded-full bg-[#F4F6F8] px-3 py-1.5 text-sm font-medium text-[#556070]">{form.department}</span>
-              <span className="rounded-full bg-[#EDF9EF] px-3 py-1.5 text-sm font-medium text-[#2F7A45]">{form.admissionYear}학번</span>
+              <span className="rounded-full bg-[#F4F6F8] px-3 py-1.5 text-sm font-medium text-[#556070]">{snapshot.department}</span>
+              <span className="rounded-full bg-[#EDF9EF] px-3 py-1.5 text-sm font-medium text-[#2F7A45]">{snapshot.admissionYear}학번</span>
             </div>
 
             <dl className="mt-5 space-y-3 text-left">
               <div className="flex items-center justify-between gap-4">
                 <dt className="text-sm text-[#8B95A7]">학교 메일</dt>
-                <dd className="text-sm font-semibold text-[#2A3342]">
-                  {form.emailLocalPart}@{emailDomain}
-                </dd>
+                <dd className="text-sm font-semibold text-[#2A3342]">{snapshot.email}</dd>
               </div>
               <div className="flex items-center justify-between gap-4">
                 <dt className="text-sm text-[#8B95A7]">아이디</dt>
-                <dd className="text-sm font-semibold text-[#2A3342]">{form.username}</dd>
+                <dd className="text-sm font-semibold text-[#2A3342]">{snapshot.username}</dd>
               </div>
               <div className="flex items-center justify-between gap-4">
                 <dt className="text-sm text-[#8B95A7]">닉네임</dt>
-                <dd className="text-sm font-semibold text-[#2A3342]">{form.nickname}</dd>
+                <dd className="text-sm font-semibold text-[#2A3342]">{snapshot.nickname}</dd>
               </div>
             </dl>
           </div>

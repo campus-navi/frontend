@@ -1,12 +1,12 @@
 import axios, { AxiosError, AxiosHeaders, type AxiosInstance, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
 
 import { markSessionExpired, resetSessionExpired } from '@/api/auth/session';
-import { tokenStorage } from '@/api/auth/tokenStorage';
 import { AUTH_ERROR_CODES } from '@/api/constants/errorCodes';
 import { apiConfig } from '@/api/config';
 import { createApiError, normalizeApiError } from '@/api/errors';
 import { validateApiResponse } from '@/api/response';
 import type { ApiObjectData, ApiRequestConfig, ApiResponse, ApiResponseData, ApiSuccessResponse, QueuedRequest } from '@/api/types';
+import { extractBearerAccessTokenFromHeaders, tokenStorage } from '@/shared/auth';
 
 declare module 'axios' {
   interface InternalAxiosRequestConfig {
@@ -18,7 +18,6 @@ declare module 'axios' {
 
 interface RefreshResponseData extends ApiObjectData {
   accessToken?: string;
-  refreshToken?: string;
 }
 
 const DEFAULT_HEADERS = {
@@ -30,6 +29,7 @@ const refreshClient = axios.create({
   baseURL: apiConfig.baseURL,
   headers: DEFAULT_HEADERS,
   timeout: apiConfig.timeoutMs,
+  withCredentials: true,
 });
 
 let isRefreshing = false;
@@ -77,21 +77,13 @@ async function replayQueuedRequests(accessToken: string) {
   );
 }
 
-function getRefreshTokenOrThrow() {
-  const refreshToken = tokenStorage.getRefreshToken();
+function extractAccessToken(data: RefreshResponseData, responseHeaders?: AxiosResponse['headers']) {
+  const headerAccessToken = extractBearerAccessTokenFromHeaders(responseHeaders);
 
-  if (!refreshToken) {
-    throw createApiError({
-      code: AUTH_ERROR_CODES.REFRESH_TOKEN_MISSING,
-      message: '리프레시 토큰이 없어 재로그인이 필요합니다.',
-      status: 401,
-    });
+  if (headerAccessToken) {
+    return headerAccessToken;
   }
 
-  return refreshToken;
-}
-
-function extractAccessToken(data: RefreshResponseData) {
   const accessToken = typeof data.accessToken === 'string' ? data.accessToken : null;
 
   if (!accessToken) {
@@ -120,25 +112,14 @@ function isRefreshAuthenticationFailure(status: number | null, code: string) {
 }
 
 async function refreshAccessToken() {
-  const refreshToken = getRefreshTokenOrThrow();
   const response = await refreshClient.post<ApiSuccessResponse<RefreshResponseData>>(
     apiConfig.refreshPath,
     {},
-    {
-      headers: {
-        Authorization: `Bearer ${refreshToken}`,
-        'X-Refresh-Token': refreshToken,
-      },
-    },
   );
   const validatedResponse = validateApiResponse(response.status, response.data as ApiResponse<RefreshResponseData>);
-  const accessToken = extractAccessToken(validatedResponse.data);
-  const nextRefreshToken = typeof validatedResponse.data.refreshToken === 'string' ? validatedResponse.data.refreshToken : refreshToken;
+  const accessToken = extractAccessToken(validatedResponse.data, response.headers);
 
-  tokenStorage.setTokens({
-    accessToken,
-    refreshToken: nextRefreshToken,
-  });
+  tokenStorage.setAccessToken(accessToken);
   resetSessionExpired();
 
   return accessToken;
@@ -148,6 +129,7 @@ export const apiClient: AxiosInstance = axios.create({
   baseURL: apiConfig.baseURL,
   headers: DEFAULT_HEADERS,
   timeout: apiConfig.timeoutMs,
+  withCredentials: true,
 });
 
 apiClient.interceptors.request.use((config) => {
@@ -202,7 +184,7 @@ apiClient.interceptors.response.use(
         status: 401,
       });
 
-      tokenStorage.clear();
+      tokenStorage.clearAccessToken();
       clearQueuedRequests(sessionExpiredError);
       markSessionExpired(sessionExpiredError);
       return Promise.reject(sessionExpiredError);

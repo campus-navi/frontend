@@ -7,12 +7,12 @@ import { CtaButton } from '@/components/ui/CtaButton';
 import { SignupHeader } from '@/features/signup/components/SignupHeader';
 import { getEmailVerificationErrorModal } from '@/features/signup/emailVerification';
 import { useSignupFlow } from '@/features/signup/hooks/useSignupFlow';
+import { useSignupSubmit } from '@/features/signup/hooks/useSignupSubmit';
 import { useSignupFlowStore } from '@/features/signup/store/signupFlowStore';
 import { AdmissionYearStep } from '@/features/signup/steps/AdmissionYearStep';
 import { DepartmentStep } from '@/features/signup/steps/DepartmentStep';
 import { EmailVerificationStep } from '@/features/signup/steps/EmailVerificationStep';
 import { NicknameStep } from '@/features/signup/steps/NicknameStep';
-import { SuccessStep } from '@/features/signup/steps/SuccessStep';
 import { UniversityStep } from '@/features/signup/steps/UniversityStep';
 import { AccountStep } from '@/features/signup/steps/AccountStep';
 
@@ -41,6 +41,13 @@ export default function SignupPage() {
   const isUniversityServerError = isApiError(universitySearchError) && universitySearchError.status === 500;
   const emailVerificationErrorModal = getEmailVerificationErrorModal(state.emailVerification);
   const wasEmailVerifiedRef = useRef(state.emailVerification.verifiedToken.isVerified);
+  const signupSubmit = useSignupSubmit({
+    emailDomain,
+    emailVerification: state.emailVerification,
+    form: state.form,
+    onResetFlow: actions.resetFlow,
+    onReturnToEmailVerificationStep: actions.returnToEmailVerificationStep,
+  });
 
   useEffect(() => {
     const isVerified = state.emailVerification.verifiedToken.isVerified;
@@ -83,6 +90,10 @@ export default function SignupPage() {
   }, []);
 
   const handleBack = () => {
+    if (signupSubmit.isPending) {
+      return;
+    }
+
     if (state.step === 0) {
       navigate(-1);
       return;
@@ -123,14 +134,20 @@ export default function SignupPage() {
         description="인증이 완료되었습니다."
         onConfirm={handleEmailVerificationSuccessConfirm}
       />
+      <AlertModal
+        isOpen={Boolean(signupSubmit.modal)}
+        title={signupSubmit.modal?.title ?? '에러'}
+        description={signupSubmit.modal?.description ?? ''}
+        onConfirm={signupSubmit.closeModal}
+      />
 
       <div className="mx-auto flex h-[100svh] w-full max-w-[393px] flex-col overflow-hidden bg-white">
-        {state.step < 6 ? <SignupHeader progressValue={progressValue} onBack={handleBack} /> : <SignupHeader onBack={handleBack} />}
+        <SignupHeader progressValue={progressValue} onBack={handleBack} />
 
         <section
           className={[
             'flex min-h-0 flex-1 flex-col overflow-hidden px-5 pb-[max(24px,env(safe-area-inset-bottom))]',
-            state.step < 6 ? 'pt-12' : 'py-10',
+            'pt-12',
           ].join(' ')}
         >
           <div className="min-h-0 flex-1 overflow-hidden">
@@ -221,26 +238,17 @@ export default function SignupPage() {
               />
             ) : null}
 
-            {state.step === 6 ? (
-              <SuccessStep form={state.form} emailDomain={emailDomain} />
-            ) : null}
           </div>
 
-          {state.step < 6 && state.step !== 1 ? (
+          {state.step !== 1 ? (
             <div className="mt-auto pt-8">
               <CtaButton
-                active={isCurrentStepValid}
-                disabled={!isCurrentStepValid}
+                active={isCurrentStepValid && !signupSubmit.isPending}
+                disabled={!isCurrentStepValid || signupSubmit.isPending}
                 className="py-[18px] text-[18px] disabled:cursor-not-allowed disabled:bg-[#E4E4E4] disabled:text-[#BDBDBD] disabled:hover:bg-[#E4E4E4]"
-                onClick={actions.nextStep}
+                onClick={state.step === 5 ? () => void signupSubmit.submit() : actions.nextStep}
               >
-                다음
-              </CtaButton>
-            </div>
-          ) : state.step === 6 ? (
-            <div className="mt-auto pt-8">
-              <CtaButton active className="py-[18px] text-[18px]" onClick={() => navigate('/')}>
-                메인으로 이동
+                {state.step === 5 ? (signupSubmit.isPending ? '회원가입 중...' : '회원가입 완료') : '다음'}
               </CtaButton>
             </div>
           ) : null}

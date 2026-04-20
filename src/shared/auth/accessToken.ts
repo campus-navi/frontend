@@ -1,0 +1,35 @@
+import { AxiosHeaders, type AxiosResponseHeaders, type RawAxiosResponseHeaders } from 'axios';
+
+type ResponseHeaders = AxiosResponseHeaders | Partial<RawAxiosResponseHeaders> | Record<string, unknown> | undefined;
+
+function getAuthorizationHeaderValue(headers: ResponseHeaders) {
+  if (!headers) {
+    return null;
+  }
+
+  if (headers instanceof AxiosHeaders) {
+    const authorizationHeader = headers.get('Authorization') ?? headers.get('authorization');
+    return typeof authorizationHeader === 'string' ? authorizationHeader.trim() : null;
+  }
+
+  const authorizationHeader =
+    headers.Authorization ??
+    headers.authorization;
+
+  return typeof authorizationHeader === 'string' ? authorizationHeader.trim() : null;
+}
+
+export function extractBearerAccessToken(authorizationHeader: string | null | undefined) {
+  if (!authorizationHeader) {
+    return null;
+  }
+
+  const matchedToken = authorizationHeader.match(/^Bearer\s+(.+)$/i);
+  const accessToken = matchedToken?.[1]?.trim() ?? '';
+
+  return accessToken ? accessToken : null;
+}
+
+export function extractBearerAccessTokenFromHeaders(headers: ResponseHeaders) {
+  return extractBearerAccessToken(getAuthorizationHeaderValue(headers));
+}

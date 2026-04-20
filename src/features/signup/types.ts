@@ -34,6 +34,15 @@ export type SignupPayload = {
   verifiedToken: string;
 };
 
+export type SignupCompleteSnapshot = {
+  admissionYear: number;
+  department: string;
+  email: string;
+  nickname: string;
+  universityName: string;
+  username: string;
+};
+
 export type UsernameValidationResult = {
   isValid: boolean;
   message: string | null;

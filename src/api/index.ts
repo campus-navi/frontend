@@ -1,5 +1,4 @@
 export { getIsSessionExpired, markSessionExpired, resetSessionExpired, subscribeSessionExpired } from '@/api/auth/session';
-export { tokenStorage } from '@/api/auth/tokenStorage';
 export { apiClient, request } from '@/api/client';
 export { ApiError, createApiError, isApiError, normalizeApiError } from '@/api/errors';
 export { authApi } from '@/api/modules/auth';
@@ -19,3 +18,4 @@ export type {
   ApiResponseData,
   ApiSuccessResponse,
 } from '@/api/types';
+export { tokenStorage } from '@/shared/auth';
