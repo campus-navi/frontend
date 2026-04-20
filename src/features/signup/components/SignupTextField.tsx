@@ -1,4 +1,4 @@
-import type { HTMLInputAutoCompleteAttribute, HTMLInputTypeAttribute, ReactNode, Ref } from 'react';
+import type { HTMLInputAutoCompleteAttribute, HTMLInputTypeAttribute, RefObject } from 'react';
 
 type SignupTextFieldProps = {
   autoCapitalize?: string;
@@ -7,10 +7,9 @@ type SignupTextFieldProps = {
   inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
   containerClassName?: string;
   inputClassName?: string;
-  inputRef?: Ref<HTMLInputElement>;
+  inputRef?: RefObject<HTMLInputElement>;
   lang?: string;
   label: string;
-  trailingActions?: ReactNode;
   value: string;
   placeholder: string;
   spellCheck?: boolean;
@@ -32,7 +31,6 @@ export function SignupTextField({
   inputRef,
   lang,
   label,
-  trailingActions,
   value,
   placeholder,
   spellCheck,
@@ -52,7 +50,6 @@ export function SignupTextField({
       <div
         className={[
           label ? 'mt-5 border-b border-[#E1E1E1] focus-within:border-[#1F1F1F]' : 'border-b border-[#E1E1E1] focus-within:border-[#1F1F1F]',
-          'flex items-center gap-2',
           containerClassName,
         ]
           .filter(Boolean)
@@ -72,11 +69,10 @@ export function SignupTextField({
           onChange={(event) => onChange(event.target.value)}
           onFocus={onFocus}
           placeholder={placeholder}
-          className={['h-12 min-w-0 flex-1 border-0 bg-transparent px-0 text-[17px] text-[#202020] placeholder:text-[#B9B9B9] focus:outline-none', inputClassName]
+          className={['h-12 w-full border-0 bg-transparent px-0 text-[17px] text-[#202020] placeholder:text-[#B9B9B9] focus:outline-none', inputClassName]
             .filter(Boolean)
             .join(' ')}
         />
-        {trailingActions ? <div className="flex shrink-0 items-center gap-1 pb-0">{trailingActions}</div> : null}
       </div>
       {helperText ? <p className={['mt-3 text-sm', helperToneClassName].join(' ')}>{helperText}</p> : null}
     </div>

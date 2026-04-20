@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 
-export const totalSignupSteps = 6;
+export const totalSignupSteps = 7;
 
-export type SignupStep = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+export type SignupStep = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
 export type UsernameAvailabilityStatus = 'idle' | 'checking' | 'available' | 'duplicate' | 'error';
 
@@ -36,18 +36,6 @@ export type SignupPayload = {
 export type UsernameValidationResult = {
   isValid: boolean;
   message: string | null;
-};
-
-export type PasswordValidationResult = {
-  isValid: boolean;
-  message: string | null;
-  checks: {
-    hasLetter: boolean;
-    hasNumber: boolean;
-    hasSpecialCharacter: boolean;
-    hasWhitespace: boolean;
-    isLengthValid: boolean;
-  };
 };
 
 export type EmailVerificationSendErrorReason =

@@ -22,8 +22,3 @@ export const signupUsernamePolicy = {
   maxLength: 30,
   minLength: 4,
 } as const;
-
-export const signupPasswordPolicy = {
-  maxLength: 16,
-  minLength: 8,
-} as const;

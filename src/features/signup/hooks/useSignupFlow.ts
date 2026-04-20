@@ -3,7 +3,6 @@ import { useDeferredValue, useMemo } from 'react';
 import { admissionYears } from '@/features/signup/constants';
 import { useDepartmentSearch } from '@/features/signup/hooks/useDepartmentSearch';
 import { useEmailVerification } from '@/features/signup/hooks/useEmailVerification';
-import { usePasswordValidation } from '@/features/signup/hooks/usePasswordValidation';
 import { useDebouncedValue } from '@/features/signup/hooks/useDebouncedValue';
 import { useUsernameAvailability } from '@/features/signup/hooks/useUsernameAvailability';
 import { useUniversitySearch } from '@/features/signup/hooks/useUniversitySearch';
@@ -27,7 +26,6 @@ export function useSignupFlow() {
   const emailDomain = state.form.selectedUniversity?.emailDomain ?? 'school.ac.kr';
   const emailVerification = useEmailVerification(emailDomain);
   const usernameAvailability = useUsernameAvailability(state.form.username);
-  const passwordValidation = usePasswordValidation(state.form.password, state.form.passwordConfirm);
   const isUniversitySelected =
     state.form.selectedUniversity !== null && state.form.selectedUniversity.universityName === state.universityQuery;
   const isDepartmentSelected = state.form.departmentId !== null && state.form.department === state.departmentQuery;
@@ -64,20 +62,15 @@ export function useSignupFlow() {
   );
   const isCurrentStepValid =
     state.step === 4
-      ? usernameAvailability.validation.isValid &&
-        usernameAvailability.isAvailable &&
-        passwordValidation.passwordValidation.isValid &&
-        passwordValidation.isConfirmFilled &&
-        passwordValidation.isPasswordMatched
+      ? usernameAvailability.validation.isValid && usernameAvailability.isAvailable
       : isSignupStepValid(state.step, state.form, state.emailVerification);
-  const progressValue = (Math.min(state.step, 5) + 1) / 6;
+  const progressValue = (Math.min(state.step, 6) + 1) / 7;
 
   return {
     state,
     emailDomain,
     emailVerification,
     usernameAvailability,
-    passwordValidation,
     filteredUniversities,
     filteredDepartments,
     isCurrentStepValid,

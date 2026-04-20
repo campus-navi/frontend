@@ -117,18 +117,6 @@ const resetUniversityDependentFields = (form: SignupForm): SignupForm => ({
   emailLocalPart: '',
 });
 
-const resetEmailVerificationDependentFields = (form: SignupForm): SignupForm => ({
-  ...form,
-  admissionYear: defaultAdmissionYear,
-  department: '',
-  departmentId: null,
-  emailLocalPart: '',
-  nickname: '',
-  password: '',
-  passwordConfirm: '',
-  username: '',
-});
-
 const resetEmailVerificationState = (): EmailVerificationState => ({
   send: { ...initialEmailVerificationState.send },
   verify: { ...initialEmailVerificationState.verify },
@@ -198,12 +186,18 @@ export const useSignupFlowStore = create<SignupFlowStore>((set, get) => ({
       })),
     nextStep: () =>
       set((state) => ({
-        step: Math.min(6, state.step + 1) as SignupStep,
+        step: Math.min(7, state.step + 1) as SignupStep,
       })),
     previousStep: () =>
       set((state) => ({
         step: Math.max(0, state.step - 1) as SignupStep,
-        form: state.form,
+        form:
+          state.step === 4
+            ? {
+                ...state.form,
+                admissionYear: defaultAdmissionYear,
+              }
+            : state.form,
       })),
     returnToEmailVerificationStep: () =>
       set((state) => ({
@@ -211,9 +205,11 @@ export const useSignupFlowStore = create<SignupFlowStore>((set, get) => ({
           sendRequestId: state.emailVerificationRequest.sendRequestId + 1,
           verifyRequestId: state.emailVerificationRequest.verifyRequestId + 1,
         },
-        departmentQuery: '',
         emailVerification: resetEmailVerificationState(),
-        form: resetEmailVerificationDependentFields(state.form),
+        form: {
+          ...state.form,
+          emailLocalPart: '',
+        },
         step: 1,
       })),
     returnToUniversityStep: () =>
@@ -222,9 +218,11 @@ export const useSignupFlowStore = create<SignupFlowStore>((set, get) => ({
           sendRequestId: state.emailVerificationRequest.sendRequestId + 1,
           verifyRequestId: state.emailVerificationRequest.verifyRequestId + 1,
         },
-        departmentQuery: '',
         emailVerification: resetEmailVerificationState(),
-        form: resetEmailVerificationDependentFields(state.form),
+        form: {
+          ...state.form,
+          emailLocalPart: '',
+        },
         step: 0,
       })),
     resetFlow: () =>
@@ -352,14 +350,7 @@ export const useSignupFlowStore = create<SignupFlowStore>((set, get) => ({
       })),
     updatePassword: (value) =>
       set((state) => ({
-        form:
-          state.form.password === value
-            ? state.form
-            : {
-                ...state.form,
-                password: value,
-                passwordConfirm: '',
-              },
+        form: { ...state.form, password: value },
       })),
     updatePasswordConfirm: (value) =>
       set((state) => ({
@@ -384,8 +375,6 @@ export const useSignupFlowStore = create<SignupFlowStore>((set, get) => ({
       set((state) => ({
         form: {
           ...state.form,
-          password: state.form.username === value ? state.form.password : '',
-          passwordConfirm: state.form.username === value ? state.form.passwordConfirm : '',
           username: value,
         },
       })),
