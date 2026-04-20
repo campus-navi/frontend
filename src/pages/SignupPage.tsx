@@ -12,9 +12,10 @@ import { AdmissionYearStep } from '@/features/signup/steps/AdmissionYearStep';
 import { DepartmentStep } from '@/features/signup/steps/DepartmentStep';
 import { EmailVerificationStep } from '@/features/signup/steps/EmailVerificationStep';
 import { NicknameStep } from '@/features/signup/steps/NicknameStep';
+import { PasswordStep } from '@/features/signup/steps/PasswordStep';
 import { SuccessStep } from '@/features/signup/steps/SuccessStep';
 import { UniversityStep } from '@/features/signup/steps/UniversityStep';
-import { AccountStep } from '@/features/signup/steps/AccountStep';
+import { UsernameStep } from '@/features/signup/steps/UsernameStep';
 
 export default function SignupPage() {
   const navigate = useNavigate();
@@ -24,7 +25,6 @@ export default function SignupPage() {
     emailDomain,
     emailVerification,
     usernameAvailability,
-    passwordValidation,
     filteredUniversities,
     filteredDepartments,
     isCurrentStepValid,
@@ -124,12 +124,12 @@ export default function SignupPage() {
       />
 
       <div className="mx-auto flex h-[100svh] w-full max-w-[393px] flex-col overflow-hidden bg-white">
-        {state.step < 6 ? <SignupHeader progressValue={progressValue} onBack={handleBack} /> : <SignupHeader onBack={handleBack} />}
+        {state.step < 7 ? <SignupHeader progressValue={progressValue} onBack={handleBack} /> : <SignupHeader onBack={handleBack} />}
 
         <section
           className={[
             'flex min-h-0 flex-1 flex-col overflow-hidden px-5 pb-[max(24px,env(safe-area-inset-bottom))]',
-            state.step < 6 ? 'pt-12' : 'py-10',
+            state.step < 7 ? 'pt-12' : 'py-10',
           ].join(' ')}
         >
           <div className="min-h-0 flex-1 overflow-hidden">
@@ -193,32 +193,31 @@ export default function SignupPage() {
             ) : null}
 
             {state.step === 4 ? (
-              <AccountStep
+              <UsernameStep
                 helperText={usernameAvailability.helperText}
                 helperTone={usernameAvailability.helperTone}
-                isUsernameAvailable={usernameAvailability.isAvailable}
-                password={state.form.password}
-                passwordConfirm={state.form.passwordConfirm}
-                passwordHelperText={passwordValidation.passwordHelperText}
-                passwordHelperTone={passwordValidation.passwordHelperTone}
-                shouldShowPasswordConfirmField={passwordValidation.shouldShowPasswordConfirmField}
-                confirmHelperText={passwordValidation.confirmHelperText}
-                confirmHelperTone={passwordValidation.confirmHelperTone}
                 username={state.form.username}
                 onChange={actions.updateUsername}
+              />
+            ) : null}
+
+            {state.step === 5 ? (
+              <PasswordStep
+                password={state.form.password}
+                passwordConfirm={state.form.passwordConfirm}
                 onPasswordChange={actions.updatePassword}
                 onPasswordConfirmChange={actions.updatePasswordConfirm}
               />
             ) : null}
 
-            {state.step === 5 ? <NicknameStep nickname={state.form.nickname} onChange={actions.updateNickname} /> : null}
+            {state.step === 6 ? <NicknameStep nickname={state.form.nickname} onChange={actions.updateNickname} /> : null}
 
-            {state.step === 6 ? (
+            {state.step === 7 ? (
               <SuccessStep form={state.form} emailDomain={emailDomain} />
             ) : null}
           </div>
 
-          {state.step < 6 && state.step !== 1 ? (
+          {state.step < 7 && state.step !== 1 ? (
             <div className="mt-auto pt-8">
               <CtaButton
                 active={isCurrentStepValid}
@@ -229,7 +228,7 @@ export default function SignupPage() {
                 다음
               </CtaButton>
             </div>
-          ) : state.step === 6 ? (
+          ) : state.step === 7 ? (
             <div className="mt-auto pt-8">
               <CtaButton active className="py-[18px] text-[18px]" onClick={() => navigate('/')}>
                 메인으로 이동

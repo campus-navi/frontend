@@ -1,5 +1,5 @@
-import { signupPasswordPolicy, signupUsernamePolicy } from '@/features/signup/constants';
-import type { EmailVerificationState, PasswordValidationResult, SignupForm, SignupPayload, SignupStep, UsernameValidationResult } from '@/features/signup/types';
+import { signupUsernamePolicy } from '@/features/signup/constants';
+import type { EmailVerificationState, SignupForm, SignupPayload, SignupStep, UsernameValidationResult } from '@/features/signup/types';
 
 export function formatRemainingTime(timeLeft: number) {
   const minutes = Math.floor(timeLeft / 60)
@@ -120,8 +120,9 @@ export function isSignupStepValid(step: SignupStep, form: SignupForm, emailVerif
   if (step === 1) return Boolean(emailVerification?.verifiedToken.isVerified);
   if (step === 2) return form.departmentId !== null;
   if (step === 3) return Boolean(form.admissionYear);
-  if (step === 4) return validateSignupUsername(form.username).isValid && validateSignupPassword(form.password).isValid;
-  if (step === 5) return form.nickname.trim().length >= 2;
+  if (step === 4) return validateSignupUsername(form.username).isValid;
+  if (step === 5) return form.password.length >= 8 && form.password === form.passwordConfirm;
+  if (step === 6) return form.nickname.trim().length >= 2;
 
   return true;
 }
@@ -151,54 +152,6 @@ export function validateSignupUsername(username: string): UsernameValidationResu
   return {
     isValid: true,
     message: null,
-  };
-}
-
-export function validateSignupPassword(password: string): PasswordValidationResult {
-  const checks = {
-    hasLetter: /[a-z]/i.test(password),
-    hasNumber: /\d/.test(password),
-    hasSpecialCharacter: /[^A-Za-z0-9\s]/.test(password),
-    hasWhitespace: /\s/.test(password),
-    isLengthValid: password.length >= signupPasswordPolicy.minLength && password.length <= signupPasswordPolicy.maxLength,
-  };
-
-  if (!password) {
-    return {
-      isValid: false,
-      message: '영문, 숫자, 특수문자를 포함한 8~16자를 입력해주세요.',
-      checks,
-    };
-  }
-
-  if (checks.hasWhitespace) {
-    return {
-      isValid: false,
-      message: '비밀번호에는 공백을 포함할 수 없습니다.',
-      checks,
-    };
-  }
-
-  if (!checks.isLengthValid) {
-    return {
-      isValid: false,
-      message: `비밀번호는 ${signupPasswordPolicy.minLength}~${signupPasswordPolicy.maxLength}자 이내로 입력해주세요.`,
-      checks,
-    };
-  }
-
-  if (!checks.hasLetter || !checks.hasNumber || !checks.hasSpecialCharacter) {
-    return {
-      isValid: false,
-      message: '영문, 숫자, 특수문자를 모두 포함해야 합니다.',
-      checks,
-    };
-  }
-
-  return {
-    isValid: true,
-    message: '사용 가능한 비밀번호입니다.',
-    checks,
   };
 }
 
