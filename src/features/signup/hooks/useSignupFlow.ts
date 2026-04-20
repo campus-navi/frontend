@@ -3,6 +3,7 @@ import { useDeferredValue, useMemo } from 'react';
 import { admissionYears } from '@/features/signup/constants';
 import { useDepartmentSearch } from '@/features/signup/hooks/useDepartmentSearch';
 import { useEmailVerification } from '@/features/signup/hooks/useEmailVerification';
+import { useNicknameValidation } from '@/features/signup/hooks/useNicknameValidation';
 import { usePasswordValidation } from '@/features/signup/hooks/usePasswordValidation';
 import { useDebouncedValue } from '@/features/signup/hooks/useDebouncedValue';
 import { useUsernameAvailability } from '@/features/signup/hooks/useUsernameAvailability';
@@ -27,6 +28,7 @@ export function useSignupFlow() {
   const emailDomain = state.form.selectedUniversity?.emailDomain ?? 'school.ac.kr';
   const emailVerification = useEmailVerification(emailDomain);
   const usernameAvailability = useUsernameAvailability(state.form.username);
+  const nicknameValidation = useNicknameValidation(state.form.nickname);
   const passwordValidation = usePasswordValidation(state.form.password, state.form.passwordConfirm);
   const isUniversitySelected =
     state.form.selectedUniversity !== null && state.form.selectedUniversity.universityName === state.universityQuery;
@@ -69,6 +71,8 @@ export function useSignupFlow() {
         passwordValidation.passwordValidation.isValid &&
         passwordValidation.isConfirmFilled &&
         passwordValidation.isPasswordMatched
+      : state.step === 5
+        ? nicknameValidation.validation.isValid && nicknameValidation.isAvailable
       : isSignupStepValid(state.step, state.form, state.emailVerification);
   const progressValue = (Math.min(state.step, 5) + 1) / 6;
 
@@ -76,6 +80,7 @@ export function useSignupFlow() {
     state,
     emailDomain,
     emailVerification,
+    nicknameValidation,
     usernameAvailability,
     passwordValidation,
     filteredUniversities,

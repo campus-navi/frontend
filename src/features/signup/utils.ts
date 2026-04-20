@@ -1,5 +1,13 @@
-import { signupPasswordPolicy, signupUsernamePolicy } from '@/features/signup/constants';
-import type { EmailVerificationState, PasswordValidationResult, SignupForm, SignupPayload, SignupStep, UsernameValidationResult } from '@/features/signup/types';
+import { signupNicknamePolicy, signupPasswordPolicy, signupUsernamePolicy } from '@/features/signup/constants';
+import type {
+  EmailVerificationState,
+  NicknameValidationResult,
+  PasswordValidationResult,
+  SignupForm,
+  SignupPayload,
+  SignupStep,
+  UsernameValidationResult,
+} from '@/features/signup/types';
 
 export function formatRemainingTime(timeLeft: number) {
   const minutes = Math.floor(timeLeft / 60)
@@ -121,7 +129,7 @@ export function isSignupStepValid(step: SignupStep, form: SignupForm, emailVerif
   if (step === 2) return form.departmentId !== null;
   if (step === 3) return Boolean(form.admissionYear);
   if (step === 4) return validateSignupUsername(form.username).isValid && validateSignupPassword(form.password).isValid;
-  if (step === 5) return form.nickname.trim().length >= 2;
+  if (step === 5) return validateSignupNickname(form.nickname).isValid;
 
   return true;
 }
@@ -199,6 +207,43 @@ export function validateSignupPassword(password: string): PasswordValidationResu
     isValid: true,
     message: '사용 가능한 비밀번호입니다.',
     checks,
+  };
+}
+
+export function validateSignupNickname(nickname: string): NicknameValidationResult {
+  const trimmedNickname = nickname.trim();
+
+  if (!trimmedNickname) {
+    return {
+      isValid: false,
+      message: null,
+    };
+  }
+
+  if (/\s/.test(nickname)) {
+    return {
+      isValid: false,
+      message: '닉네임에는 공백을 포함할 수 없습니다.',
+    };
+  }
+
+  if (!/^[A-Za-z0-9가-힣_]+$/.test(trimmedNickname)) {
+    return {
+      isValid: false,
+      message: '한글, 영문, 숫자, 밑줄(_)만 사용 가능합니다.',
+    };
+  }
+
+  if (trimmedNickname.length < signupNicknamePolicy.minLength || trimmedNickname.length > signupNicknamePolicy.maxLength) {
+    return {
+      isValid: false,
+      message: `닉네임은 ${signupNicknamePolicy.minLength}~${signupNicknamePolicy.maxLength}자 이내로 입력해주세요.`,
+    };
+  }
+
+  return {
+    isValid: true,
+    message: null,
   };
 }
 

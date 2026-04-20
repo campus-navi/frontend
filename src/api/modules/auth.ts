@@ -16,6 +16,10 @@ export interface CheckUsernameAvailabilityPayload extends ApiObjectData {
   username: string;
 }
 
+export interface CheckNicknameAvailabilityPayload extends ApiObjectData {
+  nickname: string;
+}
+
 export interface VerifySignupEmailCodePayload extends ApiObjectData {
   code: string;
   email: string;
@@ -60,6 +64,14 @@ export const authApi = {
       params: payload,
       requiresAuth: false,
       url: '/auth/check-username',
+    });
+  },
+  checkNicknameAvailability(payload: CheckNicknameAvailabilityPayload) {
+    return request<string>({
+      method: 'get',
+      params: payload,
+      requiresAuth: false,
+      url: '/auth/check-nickname',
     });
   },
   verifySignupEmailCode(payload: VerifySignupEmailCodePayload) {
