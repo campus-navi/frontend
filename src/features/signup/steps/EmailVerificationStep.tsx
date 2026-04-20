@@ -52,7 +52,6 @@ export function EmailVerificationStep({
     isVerificationCodeFocused || hasVerificationCodeInput ? 'border-[#707070]' : 'border-[#E8E8E8]';
   const sendButtonClassName = isSendEnabled ? 'bg-[#333333] text-white' : 'bg-[#E7E7E7] text-[#BBBBBB]';
   const labelClassName = 'text-[14px] font-medium leading-[140%] text-[#5C5C5C]';
-
   useEffect(() => {
     const focusTimer = window.setTimeout(() => {
       emailInputRef.current?.focus();
@@ -82,7 +81,7 @@ export function EmailVerificationStep({
       </h1>
 
       {isCodeSent ? (
-        <div className="signup-slide-down mt-10">
+        <div className="signup-slide-down mt-10 mb-8">
           <p className={labelClassName}>인증코드</p>
           <div className={['mt-5 flex items-center gap-3 border-b-2 pb-3 transition-colors', verificationCodeLineBorderClassName].join(' ')}>
             <input
@@ -124,7 +123,7 @@ export function EmailVerificationStep({
         </div>
       ) : null}
 
-      <div className={isCodeSent ? 'mt-8' : 'mt-10'}>
+      <div className={isCodeSent ? 'mt-0' : 'mt-10'}>
         <p className={labelClassName}>학교 이메일</p>
         <div className="mt-2 flex items-end gap-2">
           <div className={['min-w-0 flex-1 border-b-2 transition-colors', emailLineBorderClassName].join(' ')}>
