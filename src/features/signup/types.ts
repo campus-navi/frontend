@@ -5,6 +5,7 @@ export const totalSignupSteps = 6;
 export type SignupStep = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 export type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
 export type UsernameAvailabilityStatus = 'idle' | 'checking' | 'available' | 'duplicate' | 'error';
+export type NicknameAvailabilityStatus = 'idle' | 'checking' | 'available' | 'duplicate' | 'error';
 
 export type SelectedUniversity = {
   campusId: number | string;
@@ -48,6 +49,11 @@ export type PasswordValidationResult = {
     hasWhitespace: boolean;
     isLengthValid: boolean;
   };
+};
+
+export type NicknameValidationResult = {
+  isValid: boolean;
+  message: string | null;
 };
 
 export type EmailVerificationSendErrorReason =

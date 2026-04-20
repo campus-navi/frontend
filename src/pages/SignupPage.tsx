@@ -23,6 +23,7 @@ export default function SignupPage() {
     state,
     emailDomain,
     emailVerification,
+    nicknameValidation,
     usernameAvailability,
     passwordValidation,
     filteredUniversities,
@@ -211,7 +212,14 @@ export default function SignupPage() {
               />
             ) : null}
 
-            {state.step === 5 ? <NicknameStep nickname={state.form.nickname} onChange={actions.updateNickname} /> : null}
+            {state.step === 5 ? (
+              <NicknameStep
+                nickname={state.form.nickname}
+                helperText={nicknameValidation.helperText}
+                helperTone={nicknameValidation.helperTone}
+                onChange={actions.updateNickname}
+              />
+            ) : null}
 
             {state.step === 6 ? (
               <SuccessStep form={state.form} emailDomain={emailDomain} />

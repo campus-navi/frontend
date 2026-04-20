@@ -23,6 +23,12 @@ export const signupUsernamePolicy = {
   minLength: 4,
 } as const;
 
+export const signupNicknamePolicy = {
+  checkDebounceMs: 500,
+  maxLength: 20,
+  minLength: 2,
+} as const;
+
 export const signupPasswordPolicy = {
   maxLength: 16,
   minLength: 8,
