@@ -2,7 +2,8 @@ import type { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } fr
 
 export type ApiObjectData = Record<string, unknown>;
 export type ApiResponseArrayData = ApiObjectData[];
-export type ApiResponseData = ApiObjectData | ApiResponseArrayData | null;
+export type ApiPrimitiveData = string | number | boolean;
+export type ApiResponseData = ApiObjectData | ApiResponseArrayData | ApiPrimitiveData | null;
 
 export interface ApiPagination {
   page: number;
