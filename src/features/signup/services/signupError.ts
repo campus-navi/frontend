@@ -12,6 +12,7 @@ const VERIFIED_TOKEN_EXPIRED_CODES = new Set([
   'SIGNUP_VERIFIED_TOKEN_EXPIRED',
   'EMAIL_VERIFIED_TOKEN_EXPIRED',
   'EMAIL_VERIFY_TOKEN_EXPIRED',
+  'EMAIL_NOT_VERIFIED',
 ]);
 
 export type SignupSubmitErrorAction =
@@ -54,9 +55,9 @@ export function mapSignupSubmitError(error: ApiError): SignupSubmitErrorAction {
 
   if (isVerifiedTokenExpiredError(error)) {
     return {
-      type: 'verification_expired',
+      type: 'duplicate_restart',
       title: '이메일 인증이 만료되었습니다',
-      description: '이메일 인증을 다시 진행한 뒤 회원가입을 완료해주세요.',
+      description: '인증 정보가 만료되어 처음 단계부터 다시 진행해주세요.',
     };
   }
 

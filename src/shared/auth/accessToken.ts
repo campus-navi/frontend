@@ -25,7 +25,7 @@ export function extractBearerAccessToken(authorizationHeader: string | null | un
   }
 
   const matchedToken = authorizationHeader.match(/^Bearer\s+(.+)$/i);
-  const accessToken = matchedToken?.[1]?.trim() ?? '';
+  const accessToken = matchedToken?.[1]?.trim() ?? authorizationHeader.trim();
 
   return accessToken ? accessToken : null;
 }
