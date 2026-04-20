@@ -4,6 +4,7 @@ export const totalSignupSteps = 7;
 
 export type SignupStep = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
+export type UsernameAvailabilityStatus = 'idle' | 'checking' | 'available' | 'duplicate' | 'error';
 
 export type SelectedUniversity = {
   campusId: number | string;
@@ -30,6 +31,11 @@ export type SignupPayload = {
   password: string;
   nickname: string;
   verifiedToken: string;
+};
+
+export type UsernameValidationResult = {
+  isValid: boolean;
+  message: string | null;
 };
 
 export type EmailVerificationSendErrorReason =

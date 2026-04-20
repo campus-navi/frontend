@@ -11,7 +11,7 @@ export function isSuccessResponse<TData extends ApiResponseData>(response: unkno
 
   return Boolean(
     'data' in success &&
-      (success.data === null || typeof success.data === 'object') &&
+      (success.data === null || typeof success.data === 'object' || ['string', 'number', 'boolean'].includes(typeof success.data)) &&
       success.success !== false,
   );
 }

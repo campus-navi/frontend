@@ -4,6 +4,7 @@ import { admissionYears } from '@/features/signup/constants';
 import { useDepartmentSearch } from '@/features/signup/hooks/useDepartmentSearch';
 import { useEmailVerification } from '@/features/signup/hooks/useEmailVerification';
 import { useDebouncedValue } from '@/features/signup/hooks/useDebouncedValue';
+import { useUsernameAvailability } from '@/features/signup/hooks/useUsernameAvailability';
 import { useUniversitySearch } from '@/features/signup/hooks/useUniversitySearch';
 import { useSignupFlowStore } from '@/features/signup/store/signupFlowStore';
 import {
@@ -24,6 +25,7 @@ export function useSignupFlow() {
   const departmentSearch = useDepartmentSearch(state.form.selectedUniversity?.campusId);
   const emailDomain = state.form.selectedUniversity?.emailDomain ?? 'school.ac.kr';
   const emailVerification = useEmailVerification(emailDomain);
+  const usernameAvailability = useUsernameAvailability(state.form.username);
   const isUniversitySelected =
     state.form.selectedUniversity !== null && state.form.selectedUniversity.universityName === state.universityQuery;
   const isDepartmentSelected = state.form.departmentId !== null && state.form.department === state.departmentQuery;
@@ -58,13 +60,17 @@ export function useSignupFlow() {
     },
     [debouncedDepartmentQuery, departmentSearch.data, isDepartmentSearchVisible, isDepartmentSelected],
   );
-  const isCurrentStepValid = isSignupStepValid(state.step, state.form, state.emailVerification);
+  const isCurrentStepValid =
+    state.step === 4
+      ? usernameAvailability.validation.isValid && usernameAvailability.isAvailable
+      : isSignupStepValid(state.step, state.form, state.emailVerification);
   const progressValue = (Math.min(state.step, 6) + 1) / 7;
 
   return {
     state,
     emailDomain,
     emailVerification,
+    usernameAvailability,
     filteredUniversities,
     filteredDepartments,
     isCurrentStepValid,

@@ -16,3 +16,9 @@ export const signupEmailVerificationPolicy = {
   verifyMaxAttempts: 5,
   verifiedTokenExpiresInMs: 10 * 60 * 1000,
 } as const;
+
+export const signupUsernamePolicy = {
+  checkDebounceMs: 500,
+  maxLength: 30,
+  minLength: 4,
+} as const;

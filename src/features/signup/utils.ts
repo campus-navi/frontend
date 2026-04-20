@@ -1,4 +1,5 @@
-import type { EmailVerificationState, SignupForm, SignupPayload, SignupStep } from '@/features/signup/types';
+import { signupUsernamePolicy } from '@/features/signup/constants';
+import type { EmailVerificationState, SignupForm, SignupPayload, SignupStep, UsernameValidationResult } from '@/features/signup/types';
 
 export function formatRemainingTime(timeLeft: number) {
   const minutes = Math.floor(timeLeft / 60)
@@ -119,11 +120,39 @@ export function isSignupStepValid(step: SignupStep, form: SignupForm, emailVerif
   if (step === 1) return Boolean(emailVerification?.verifiedToken.isVerified);
   if (step === 2) return form.departmentId !== null;
   if (step === 3) return Boolean(form.admissionYear);
-  if (step === 4) return /^[a-z0-9_]{4,20}$/.test(form.username);
+  if (step === 4) return validateSignupUsername(form.username).isValid;
   if (step === 5) return form.password.length >= 8 && form.password === form.passwordConfirm;
   if (step === 6) return form.nickname.trim().length >= 2;
 
   return true;
+}
+
+export function validateSignupUsername(username: string): UsernameValidationResult {
+  if (!username) {
+    return {
+      isValid: false,
+      message: null,
+    };
+  }
+
+  if (!/^[a-z0-9_]+$/.test(username)) {
+    return {
+      isValid: false,
+      message: '영문 소문자, 숫자, 밑줄(_)만 사용가능합니다.',
+    };
+  }
+
+  if (username.length < signupUsernamePolicy.minLength || username.length > signupUsernamePolicy.maxLength) {
+    return {
+      isValid: false,
+      message: `아이디는 ${signupUsernamePolicy.minLength}~${signupUsernamePolicy.maxLength}자 이내로 입력해주세요.`,
+    };
+  }
+
+  return {
+    isValid: true,
+    message: null,
+  };
 }
 
 export function buildSignupPayload(form: SignupForm, emailVerification: EmailVerificationState): SignupPayload | null {

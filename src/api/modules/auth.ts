@@ -12,6 +12,10 @@ export interface SendSignupEmailVerificationPayload extends ApiObjectData {
   email: string;
 }
 
+export interface CheckUsernameAvailabilityPayload extends ApiObjectData {
+  username: string;
+}
+
 export interface VerifySignupEmailCodePayload extends ApiObjectData {
   code: string;
   email: string;
@@ -48,6 +52,14 @@ export const authApi = {
       method: 'post',
       requiresAuth: false,
       url: '/auth/email/send',
+    });
+  },
+  checkUsernameAvailability(payload: CheckUsernameAvailabilityPayload) {
+    return request<string>({
+      method: 'get',
+      params: payload,
+      requiresAuth: false,
+      url: '/auth/check-username',
     });
   },
   verifySignupEmailCode(payload: VerifySignupEmailCodePayload) {
