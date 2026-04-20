@@ -375,7 +375,7 @@ export const useSignupFlowStore = create<SignupFlowStore>((set, get) => ({
       set((state) => ({
         form: {
           ...state.form,
-          username: value.toLowerCase().replace(/[^a-z0-9_]/g, ''),
+          username: value,
         },
       })),
     updateVerificationCode: (value) =>

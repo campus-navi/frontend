@@ -24,6 +24,7 @@ export default function SignupPage() {
     state,
     emailDomain,
     emailVerification,
+    usernameAvailability,
     filteredUniversities,
     filteredDepartments,
     isCurrentStepValid,
@@ -191,7 +192,14 @@ export default function SignupPage() {
               />
             ) : null}
 
-            {state.step === 4 ? <UsernameStep username={state.form.username} onChange={actions.updateUsername} /> : null}
+            {state.step === 4 ? (
+              <UsernameStep
+                helperText={usernameAvailability.helperText}
+                helperTone={usernameAvailability.helperTone}
+                username={state.form.username}
+                onChange={actions.updateUsername}
+              />
+            ) : null}
 
             {state.step === 5 ? (
               <PasswordStep
