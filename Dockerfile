@@ -11,6 +11,6 @@ RUN npm run build
 # runtime stage
 FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
-
+# just for testing, you can remove it later
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
