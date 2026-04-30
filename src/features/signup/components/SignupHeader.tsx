@@ -8,7 +8,7 @@ type SignupHeaderProps = {
 export function SignupHeader({ progressValue, onBack }: SignupHeaderProps) {
   return (
     <div>
-      <AppHeader onBack={onBack} />
+      <AppHeader title="회원가입" onBack={onBack} />
       {typeof progressValue === 'number' ? (
         <div className="h-[3px] w-full bg-[#D9D9D9]">
           <div
