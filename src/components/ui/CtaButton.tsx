@@ -1,30 +1,72 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
+type CtaButtonVariant = 'primary' | 'secondary' | 'tertiary';
+type CtaButtonSize = 'xlg' | 'md' | 'sm' | 'xsm';
+type CtaButtonState = 'default' | 'disabled' | 'ghosted';
+
 type CtaButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   children: ReactNode;
-  active?: boolean;
+  variant?: CtaButtonVariant;
+  size?: CtaButtonSize;
+  state?: CtaButtonState;
   fullWidth?: boolean;
+};
+
+const variantClassNames: Record<CtaButtonVariant, Record<CtaButtonState, string>> = {
+  primary: {
+    default: 'bg-[#31FFCC] text-[#333333]',
+    ghosted: 'bg-[#31FFCC]/30 text-[#333333]',
+    disabled: 'bg-[#E7E7E7] text-[#BBBBBB]',
+  },
+  secondary: {
+    default: 'bg-[#1E2530] text-white',
+    ghosted: 'bg-[#1E2530]/30 text-white',
+    disabled: 'bg-[#E7E7E7] text-[#BBBBBB]',
+  },
+  tertiary: {
+    default: 'border border-[#D6D6D6] bg-white text-[#333333]',
+    ghosted: 'border border-[#D6D6D6] bg-white/30 text-[#333333]',
+    disabled: 'bg-[#E7E7E7] text-[#BBBBBB]',
+  },
+};
+
+const sizeClassNames: Record<CtaButtonSize, string> = {
+  xlg: 'h-14 rounded-[12px] px-4 py-5 text-base font-semibold leading-none',
+  md: 'h-12 rounded-[10px] p-4 text-base font-medium leading-none',
+  sm: 'h-[34px] rounded-[8px] px-3 py-2.5 text-sm font-semibold leading-none',
+  xsm: 'h-7 rounded-[6px] px-3 py-2 text-xs font-semibold leading-none',
 };
 
 export function CtaButton({
   children,
-  active = false,
+  variant = 'primary',
+  size = 'xlg',
+  state,
   fullWidth = true,
   className = '',
   type = 'button',
+  disabled = false,
   ...props
 }: CtaButtonProps) {
-  const baseClassName =
-    'rounded-[8px] px-4 py-[clamp(16px,4.5vw,20px)] text-[clamp(15px,4vw,16px)] font-semibold leading-none tracking-[0.015em] transition-colors duration-200';
+  const resolvedState = disabled || state === 'disabled' ? 'disabled' : state ?? 'default';
+  const isDisabled = disabled || state === 'disabled';
+  const baseClassName = 'inline-flex items-center justify-center tracking-normal transition-colors duration-200';
   const widthClassName = fullWidth ? 'w-full' : '';
-  const stateClassName = active
-    ? 'bg-[#565656] text-white hover:bg-[#4b4b4b]'
-    : 'bg-[#B6B6B6] text-white hover:bg-[#a9a9a9]';
 
   return (
     <button
       type={type}
-      className={[baseClassName, widthClassName, stateClassName, className].filter(Boolean).join(' ')}
+      disabled={isDisabled}
+      className={[
+        baseClassName,
+        widthClassName,
+        sizeClassNames[size],
+        variantClassNames[variant][resolvedState],
+        isDisabled ? 'cursor-not-allowed' : '',
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
       {...props}
     >
       {children}
