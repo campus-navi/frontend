@@ -29,27 +29,33 @@ export function AppHeader({
       <div className="relative flex h-16 items-center px-4">
         <div className="z-10 flex min-w-10 items-center">
           {variant === 'back' ? (
-            <button
-              type="button"
-              onClick={onBack}
-              className="flex h-10 w-10 items-center justify-center text-[#333333] disabled:opacity-40"
-              disabled={!onBack}
-              aria-label="뒤로 가기"
-            >
-              <BackIcon />
-            </button>
+            onBack ? (
+              <button
+                type="button"
+                onClick={onBack}
+                className="flex h-10 w-10 items-center justify-center text-[#333333]"
+                aria-label="뒤로 가기"
+              >
+                <BackIcon />
+              </button>
+            ) : (
+              <div className="h-10 w-10" aria-hidden="true" />
+            )
           ) : null}
 
           {variant === 'exit' ? (
-            <button
-              type="button"
-              onClick={onExit}
-              className="flex h-10 w-10 items-center justify-center text-[#333333] disabled:opacity-40"
-              disabled={!onExit}
-              aria-label="닫기"
-            >
-              <CloseIcon />
-            </button>
+            onExit ? (
+              <button
+                type="button"
+                onClick={onExit}
+                className="flex h-10 w-10 items-center justify-center text-[#333333]"
+                aria-label="닫기"
+              >
+                <CloseIcon />
+              </button>
+            ) : (
+              <div className="h-10 w-10" aria-hidden="true" />
+            )
           ) : null}
 
           {isMain ? <NaviLogo className="h-8 w-[120px]" aria-label="NAVI" /> : null}
