@@ -4,7 +4,6 @@ import { ClearIcon, SearchIcon } from '@/features/signup/components/SignupIcons'
 import type { SearchSelectStepProps } from '@/features/signup/types';
 
 export function SearchSelectField({
-  emptyDescription,
   emptyMessage,
   errorMessage,
   hideEmptyState = false,
@@ -13,7 +12,6 @@ export function SearchSelectField({
   label,
   loadingMessage = '목록을 불러오는 중입니다.',
   onRetry,
-  resultsLabel = '검색 결과',
   title,
   placeholder,
   selectedSuggestionId,
@@ -118,8 +116,6 @@ export function SearchSelectField({
 
       {shouldShowResults ? (
         <div className="relative mt-6 flex min-h-0 w-full flex-1 flex-col overflow-hidden">
-          <p className="mb-3 text-[14px] font-semibold text-[#515151]">{resultsLabel}</p>
-
           {isLoading ? <p className="text-[15px] text-[#8B8B8B]">{loadingMessage}</p> : null}
 
           {!isLoading && errorMessage ? (
@@ -139,17 +135,18 @@ export function SearchSelectField({
           ) : null}
 
           {showEmptyState && emptyMessage ? (
-            <div className="border-b border-[#E7E7E7] pb-4">
-              <p className="text-[15px] font-semibold text-[#444444]">{emptyMessage}</p>
-              {emptyDescription ? <p className="mt-2 text-[14px] leading-6 text-[#7D7D7D]">{emptyDescription}</p> : null}
+            <div className="flex min-h-[180px] w-full items-start justify-center pt-12">
+              <p className="text-center text-[15px] font-medium leading-6 text-[#A6A6A6]">
+                {emptyMessage}
+              </p>
             </div>
           ) : null}
 
           {!isLoading && !errorMessage && suggestions.length > 0 ? (
-            <div className="relative min-h-0 w-full flex-1">
+            <div className="relative min-h-0 w-full max-h-[clamp(180px,38svh,328px)] flex-1 overflow-hidden">
               <ul
                 ref={listRef}
-                className="flex min-h-0 flex-1 w-full flex-col items-start gap-[6px] overflow-y-auto overscroll-contain pr-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                className="flex h-full min-h-0 w-full flex-col items-start gap-[6px] overflow-y-auto overscroll-contain pr-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                 style={{ WebkitOverflowScrolling: 'touch' }}
               >
                 {suggestions.map((item) => (
@@ -157,13 +154,14 @@ export function SearchSelectField({
                     <button
                       type="button"
                       onClick={() => onSelect(item)}
-                      className="flex min-h-[42px] w-full items-center gap-3 px-3 text-left"
+                      className="flex min-h-[42px] w-full items-center gap-3 text-left"
                     >
                       <span
                         className={[
-                          'h-4 w-4 flex-none rounded-[2px]',
-                          selectedSuggestionId === item.id ? 'bg-[#6C6C6C]' : 'bg-[#EFEFEF]',
+                          'h-4 w-4 flex-none rounded-[2px] border border-transparent bg-[#EFEFEF]',
+                          selectedSuggestionId === item.id ? 'border-[#DADADA] bg-[#E8E8E8]' : '',
                         ].join(' ')}
+                        aria-hidden="true"
                       />
                       <span className="text-[15px] font-semibold leading-[1.35] text-[#404040]">{item.label}</span>
                     </button>
