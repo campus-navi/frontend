@@ -112,11 +112,7 @@ export default function LoginPage() {
           </div>
 
           <div className="mt-auto pt-8">
-            <CtaButton
-              active={isLoginEnabled}
-              disabled={!isLoginEnabled}
-              className="py-[18px] text-[18px] disabled:cursor-not-allowed disabled:bg-[#E4E4E4] disabled:text-[#BDBDBD] disabled:hover:bg-[#E4E4E4]"
-            >
+            <CtaButton disabled={!isLoginEnabled}>
               로그인
             </CtaButton>
 

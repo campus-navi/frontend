@@ -27,8 +27,12 @@ export default function OnboardingPage() {
           </div>
 
           <div className="w-full space-y-4 pt-[clamp(24px,8vh,72px)]">
-            <CtaButton onClick={() => navigate('/login')}>로그인</CtaButton>
-            <CtaButton onClick={() => navigate('/signup')}>회원가입</CtaButton>
+            <CtaButton variant="primary" onClick={() => navigate('/login')}>
+              로그인
+            </CtaButton>
+            <CtaButton variant="tertiary" onClick={() => navigate('/signup')}>
+              회원가입
+            </CtaButton>
           </div>
         </section>
       </div>

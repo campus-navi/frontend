@@ -243,9 +243,7 @@ export default function SignupPage() {
           {state.step !== 1 ? (
             <div className="mt-auto pt-8">
               <CtaButton
-                active={isCurrentStepValid && !signupSubmit.isPending}
                 disabled={!isCurrentStepValid || signupSubmit.isPending}
-                className="py-[18px] text-[18px] disabled:cursor-not-allowed disabled:bg-[#E4E4E4] disabled:text-[#BDBDBD] disabled:hover:bg-[#E4E4E4]"
                 onClick={state.step === 5 ? () => void signupSubmit.submit() : actions.nextStep}
               >
                 {state.step === 5 ? (signupSubmit.isPending ? '회원가입 중...' : '회원가입 완료') : '다음'}

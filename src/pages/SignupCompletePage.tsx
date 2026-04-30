@@ -42,7 +42,7 @@ export default function SignupCompletePage() {
           </div>
 
           <div className="mt-auto pt-8">
-            <CtaButton active className="py-[18px] text-[18px]" onClick={() => navigate('/', { replace: true })}>
+            <CtaButton onClick={() => navigate('/', { replace: true })}>
               메인으로 이동
             </CtaButton>
           </div>
