@@ -123,7 +123,6 @@ export type SignupState = {
 };
 
 export type SearchSelectStepProps = {
-  emptyDescription?: string;
   label: string;
   title: ReactNode;
   placeholder: string;

@@ -35,7 +35,6 @@ export function UniversityStep({
 
   return (
     <SearchSelectField
-      emptyDescription="학교 이름을 다시 확인해 주세요. 띄어쓰기 없이 입력해도 검색할 수 있어요."
       emptyMessage="조회된 대학이 없어요."
       errorMessage={errorMessage}
       hideEmptyState={shouldHideUniversityEmptyState(query)}
