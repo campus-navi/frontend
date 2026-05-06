@@ -64,7 +64,7 @@ export function EmailVerificationStep({
   }, []);
 
   useEffect(() => {
-    if (!isCodeSent || isVerified) {
+    if (!isCodeSent || isVerified || verification.send.expiresAt === null) {
       return undefined;
     }
 
@@ -73,7 +73,7 @@ export function EmailVerificationStep({
     }, 220);
 
     return () => window.clearTimeout(focusTimer);
-  }, [isCodeSent, isVerified]);
+  }, [isCodeSent, isVerified, verification.send.expiresAt]);
 
   return (
     <div>
@@ -91,6 +91,8 @@ export function EmailVerificationStep({
               ref={verificationCodeInputRef}
               type="text"
               inputMode="numeric"
+              pattern="[0-9]*"
+              autoComplete="one-time-code"
               maxLength={6}
               value={verification.verify.code}
               onChange={(event) => onVerificationCodeChange(event.target.value)}
