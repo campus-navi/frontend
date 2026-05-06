@@ -55,6 +55,8 @@ export function EmailVerificationStep({
     isVerificationCodeFocused || hasVerificationCodeInput ? 'border-[#707070]' : 'border-[#E8E8E8]';
   const sendButtonState = isSendEnabled ? 'default' : isCodeSent ? 'ghosted' : 'disabled';
   const labelClassName = 'text-[14px] font-medium leading-[140%] text-[#5C5C5C]';
+  const emailHelperClassName =
+    verification.send.errorReason === 'already_registered' ? 'text-[#D34B4B]' : 'text-[#5C5C5C]';
   useEffect(() => {
     const focusTimer = window.setTimeout(() => {
       emailInputRef.current?.focus();
@@ -179,7 +181,9 @@ export function EmailVerificationStep({
             )}
           </CtaButton>
         </div>
-        {emailHelperMessage ? <p className="mt-3 text-[12px] font-medium leading-[140%] text-[#5C5C5C]">{emailHelperMessage}</p> : null}
+        {emailHelperMessage ? (
+          <p className={['mt-3 text-[12px] font-medium leading-[140%]', emailHelperClassName].join(' ')}>{emailHelperMessage}</p>
+        ) : null}
       </div>
     </div>
   ); 

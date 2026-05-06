@@ -95,7 +95,12 @@ export function useEmailVerification(emailDomain: string) {
       : !isSendVerifyBlocked && (needsResendBecauseExpired || emailVerification.verify.errorReason === 'code_not_found')
         ? '유효시간이 만료되었습니다. 인증코드를 다시 전송해주세요.'
         : null;
-  const emailHelperMessage = hasActiveVerificationSession && lastSentEmail ? '해당 이메일로 인증번호를 전송했습니다.' : null;
+  const emailHelperMessage =
+    emailVerification.send.errorReason === 'already_registered'
+      ? emailVerification.send.errorMessage
+      : hasActiveVerificationSession && lastSentEmail
+        ? '해당 이메일로 인증번호를 전송했습니다.'
+        : null;
 
   const sendCode = async () => {
     if (sendInFlightRef.current) {
