@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { CtaButton } from '@/components/ui/CtaButton';
 import { SignupTextField } from '@/features/signup/components/SignupTextField';
 import type { EmailVerificationState } from '@/features/signup/types';
 
@@ -8,6 +9,7 @@ type EmailVerificationStepProps = {
   emailDomain: string;
   isCodeSent: boolean;
   isSendEnabled: boolean;
+  isSendPending: boolean;
   isVerifyButtonEnabled: boolean;
   isVerificationCodeReadOnly: boolean;
   codeHelperMessage: string | null;
@@ -27,6 +29,7 @@ export function EmailVerificationStep({
   emailDomain,
   isCodeSent,
   isSendEnabled,
+  isSendPending,
   isVerifyButtonEnabled,
   isVerificationCodeReadOnly,
   codeHelperMessage,
@@ -50,7 +53,7 @@ export function EmailVerificationStep({
   const hasVerificationCodeInput = Boolean(verification.verify.code.trim());
   const verificationCodeLineBorderClassName =
     isVerificationCodeFocused || hasVerificationCodeInput ? 'border-[#707070]' : 'border-[#E8E8E8]';
-  const sendButtonClassName = isSendEnabled ? 'bg-[#333333] text-white' : 'bg-[#E7E7E7] text-[#BBBBBB]';
+  const sendButtonState = isSendEnabled ? 'default' : isCodeSent ? 'ghosted' : 'disabled';
   const labelClassName = 'text-[14px] font-medium leading-[140%] text-[#5C5C5C]';
   useEffect(() => {
     const focusTimer = window.setTimeout(() => {
@@ -101,21 +104,18 @@ export function EmailVerificationStep({
               ].join(' ')}
             />
             {verificationTimerLabel ? <span className="text-[14px] text-[#8E8E8E]">{verificationTimerLabel}</span> : null}
-            <button
+            <CtaButton
               type="button"
+              variant="primary"
+              state={isVerifyButtonEnabled ? 'default' : 'disabled'}
+              size="sm"
+              fullWidth={false}
               disabled={!isVerifyButtonEnabled}
               onClick={onSubmitVerification}
-              className={[
-                'flex h-[34px] w-[82px] shrink-0 items-center justify-center rounded-[8px] px-3 py-[10px] text-[14px] font-semibold leading-none tracking-[0.015em] transition-colors',
-                isVerified
-                  ? 'bg-[#E8F4EA] text-[#3A7A44]'
-                  : isVerifyButtonEnabled
-                    ? 'bg-[#3F4045] text-white'
-                    : 'bg-[#E6E6E6] text-[#B8B8B8]',
-              ].join(' ')}
+              className="w-[82px] shrink-0"
             >
               {verifyButtonLabel}
-            </button>
+            </CtaButton>
           </div>
           {codeHelperMessage ? (
             <p className="mt-3 text-[12px] font-medium leading-[140%] text-[#5C5C5C]">{codeHelperMessage}</p>
@@ -156,17 +156,26 @@ export function EmailVerificationStep({
           >
             @{emailDomain}
           </div>
-          <button
+          <CtaButton
             type="button"
+            variant={isCodeSent ? 'tertiary' : 'primary'}
+            state={sendButtonState}
+            size="sm"
+            fullWidth={false}
             disabled={!isSendEnabled}
             onClick={onSendVerification}
-            className={[
-              'flex h-[34px] w-[82px] shrink-0 items-center justify-center rounded-[8px] px-3 py-[10px] text-[14px] font-semibold leading-none tracking-[0.015em] transition-colors',
-              sendButtonClassName,
-            ].join(' ')}
+            className="w-[82px] shrink-0"
           >
-            <span className="whitespace-nowrap">{sendButtonLabel}</span>
-          </button>
+            {isSendPending ? (
+              <span
+                aria-label="전송 중"
+                className="h-4 w-4 animate-spin rounded-full border-2 border-[#BBBBBB] border-t-transparent"
+                role="status"
+              />
+            ) : (
+              <span className="whitespace-nowrap">{sendButtonLabel}</span>
+            )}
+          </CtaButton>
         </div>
         {emailHelperMessage ? <p className="mt-3 text-[12px] font-medium leading-[140%] text-[#5C5C5C]">{emailHelperMessage}</p> : null}
       </div>

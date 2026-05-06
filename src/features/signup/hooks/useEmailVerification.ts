@@ -77,7 +77,7 @@ export function useEmailVerification(emailDomain: string) {
   const canVerify =
     hasActiveVerificationSession && !isVerified && !isVerifying && !isVerifyBlocked && !needsResendBecauseExpired && isCodeReady;
   const canSend = Boolean(emailLocalPart.trim()) && !isSending && sendBlockedSecondsLeft <= 0 && resendCooldownSecondsLeft <= 0;
-  const sendButtonLabel = isSending ? '전송중' : isCodeSent ? '재전송' : '인증전송';
+  const sendButtonLabel = isCodeSent ? '다시전송' : '본인인증';
   const verifyButtonLabel = isVerified ? '인증완료' : isVerifying ? '확인중' : '인증하기';
   const verificationTimerLabel =
     isVerified || !hasActiveVerificationSession || isSending || isVerifyBlocked || isSendVerifyBlocked
@@ -95,7 +95,7 @@ export function useEmailVerification(emailDomain: string) {
       : !isSendVerifyBlocked && (needsResendBecauseExpired || emailVerification.verify.errorReason === 'code_not_found')
         ? '유효시간이 만료되었습니다. 인증코드를 다시 전송해주세요.'
         : null;
-  const emailHelperMessage = hasActiveVerificationSession && lastSentEmail ? `${lastSentEmail}로 인증번호를 전송했습니다.` : null;
+  const emailHelperMessage = hasActiveVerificationSession && lastSentEmail ? '해당 이메일로 인증번호를 전송했습니다.' : null;
 
   const sendCode = async () => {
     if (sendInFlightRef.current) {
@@ -213,6 +213,7 @@ export function useEmailVerification(emailDomain: string) {
       codeHelperMessage,
       emailHelperMessage,
       isCodeSent,
+      isSending,
       isVerificationCodeReadOnly: isVerified || isVerifyBlocked,
       sendButtonLabel,
       verificationTimerLabel,

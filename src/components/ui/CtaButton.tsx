@@ -15,17 +15,17 @@ type CtaButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 const variantClassNames: Record<CtaButtonVariant, Record<CtaButtonState, string>> = {
   primary: {
     default: 'bg-[#31FFCC] text-[#333333]',
-    ghosted: 'bg-[#31FFCC]/30 text-[#333333]',
+    ghosted: 'bg-[#31FFCC] text-[#333333] opacity-30',
     disabled: 'bg-[#E7E7E7] text-[#BBBBBB]',
   },
   secondary: {
     default: 'bg-[#1E2530] text-white',
-    ghosted: 'bg-[#1E2530]/30 text-white',
+    ghosted: 'bg-[#1E2530] text-white opacity-30',
     disabled: 'bg-[#E7E7E7] text-[#BBBBBB]',
   },
   tertiary: {
     default: 'border border-[#D6D6D6] bg-white text-[#333333]',
-    ghosted: 'border border-[#D6D6D6] bg-white/30 text-[#333333]',
+    ghosted: 'border border-[#D6D6D6] bg-white text-[#333333] opacity-30',
     disabled: 'bg-[#E7E7E7] text-[#BBBBBB]',
   },
 };
@@ -48,7 +48,7 @@ export function CtaButton({
   disabled = false,
   ...props
 }: CtaButtonProps) {
-  const resolvedState = disabled || state === 'disabled' ? 'disabled' : state ?? 'default';
+  const resolvedState = state ?? (disabled ? 'disabled' : 'default');
   const isDisabled = disabled || state === 'disabled';
   const baseClassName = 'inline-flex items-center justify-center tracking-normal transition-colors duration-200';
   const widthClassName = fullWidth ? 'w-full' : '';

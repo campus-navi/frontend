@@ -1,8 +1,11 @@
 import { useEffect } from 'react';
 
+import { CtaButton } from '@/components/ui/CtaButton';
+
 type AlertModalProps = {
   confirmLabel?: string;
   description: string;
+  isConfirmCta?: boolean;
   isOpen: boolean;
   placement?: 'bottom-sheet' | 'center';
   title: string;
@@ -12,6 +15,7 @@ type AlertModalProps = {
 export function AlertModal({
   confirmLabel = '확인',
   description,
+  isConfirmCta = false,
   isOpen,
   placement = 'center',
   title,
@@ -68,13 +72,19 @@ export function AlertModal({
         </div>
 
         <div className="flex w-full items-start gap-2 px-5 pt-0">
-          <button
-            type="button"
-            onClick={onConfirm}
-            className="flex h-14 w-full items-center justify-center rounded-[12px] bg-[#333333] px-4 py-5 text-[16px] font-semibold leading-none tracking-[0.015em] text-white transition-colors hover:bg-[#2b2b2b]"
-          >
-            {confirmLabel}
-          </button>
+          {isConfirmCta ? (
+            <CtaButton type="button" variant="primary" state="default" size="xlg" onClick={onConfirm}>
+              {confirmLabel}
+            </CtaButton>
+          ) : (
+            <button
+              type="button"
+              onClick={onConfirm}
+              className="flex h-14 w-full items-center justify-center rounded-[12px] bg-[#333333] px-4 py-5 text-[16px] font-semibold leading-none tracking-[0.015em] text-white transition-colors hover:bg-[#2b2b2b]"
+            >
+              {confirmLabel}
+            </button>
+          )}
         </div>
       </div>
     </div>
