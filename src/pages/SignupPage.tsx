@@ -132,6 +132,7 @@ export default function SignupPage() {
         isOpen={isEmailVerificationSuccessModalOpen}
         title="인증 성공"
         description="인증이 완료되었습니다."
+        isConfirmCta
         onConfirm={handleEmailVerificationSuccessConfirm}
       />
       <AlertModal
@@ -172,6 +173,7 @@ export default function SignupPage() {
                 emailDomain={emailDomain}
                 isCodeSent={emailVerification.ui.isCodeSent}
                 isSendEnabled={emailVerification.ui.canSend}
+                isSendPending={emailVerification.ui.isSending}
                 isVerifyButtonEnabled={emailVerification.ui.canVerify}
                 isVerificationCodeReadOnly={emailVerification.ui.isVerificationCodeReadOnly}
                 codeHelperMessage={emailVerification.ui.codeHelperMessage}
