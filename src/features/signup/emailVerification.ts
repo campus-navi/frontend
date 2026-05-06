@@ -174,6 +174,7 @@ export function getEmailVerificationErrorModal(
   if (
     verification.send.status === 'error' &&
     verification.send.errorMessage &&
+    verification.send.errorReason !== 'already_registered' &&
     verification.send.errorReason !== 'resend_cooldown'
   ) {
     return {
