@@ -19,10 +19,15 @@ type UseSignupSubmitParams = {
 type SignupSubmitModalState = SignupSubmitErrorAction | null;
 
 function createSignupCompleteSnapshot(form: SignupForm, emailDomain: string): SignupCompleteSnapshot {
+  if (form.grade === null) {
+    throw new Error('grade가 없어 회원가입 완료 정보를 생성할 수 없습니다.');
+  }
+
   return {
     admissionYear: form.admissionYear,
     department: form.department,
     email: createSchoolEmail(form.emailLocalPart, emailDomain),
+    grade: form.grade,
     nickname: form.nickname,
     universityName: form.selectedUniversity?.universityName ?? '대학교 미선택',
     username: form.username,

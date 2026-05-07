@@ -1,49 +1,80 @@
+import { Tags } from '@/components/ui/Tags';
+import { ToolTip } from '@/components/ui/ToolTip';
 import type { SignupCompleteSnapshot } from '@/features/signup/types';
 
 type SuccessStepProps = {
   snapshot: SignupCompleteSnapshot;
 };
 
+const completeTitle = ['캠퍼스 네비', '가입이 완료되었어요!'];
+
 export function SuccessStep({ snapshot }: SuccessStepProps) {
+  const gradeLabel = snapshot.grade >= 4 ? '4학년 이상' : `${snapshot.grade}학년`;
+  const nickname = snapshot.nickname.trim() || '익명';
+
   return (
-    <div className="flex h-full flex-col justify-center">
-      <div className="relative overflow-hidden rounded-[32px] bg-[linear-gradient(160deg,#f5f7fb_0%,#eef3ff_55%,#ffffff_100%)] px-7 py-8 shadow-[0_18px_40px_rgba(31,41,55,0.08)]">
-        <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-[#DDE8FF]/80 blur-2xl" />
-        <div className="absolute -bottom-12 -left-10 h-32 w-32 rounded-full bg-[#E9F4E8]/80 blur-2xl" />
-        <div className="relative">
-          <h1 className="mt-3 text-[30px] font-bold leading-[1.25] tracking-[-0.03em] text-[#273041]">
-            캠퍼스 계정 준비가
-            <br />
-            완료되었어요
-          </h1>
-          <p className="mt-4 text-[15px] leading-[1.6] text-[#667085]">
-            학교 인증과 기본 정보 입력이 모두 끝났습니다. 이제 같은 학교 사람들과 연결될 준비가 되었어요.
-          </p>
+    <div className="flex flex-col gap-6">
+      <div className="flex h-[124px] flex-col justify-center gap-2.5 px-4 py-3">
+        <h1 className="w-[240px] text-2xl font-semibold leading-[1.4] tracking-normal text-[#202020]">
+          {completeTitle[0]}
+          <br />
+          {completeTitle[1]}
+        </h1>
+        <p className="text-base font-medium leading-[1.4] tracking-normal text-[#838383]">
+          아래 정보가 맞는지 확인해주세요.
+        </p>
+      </div>
 
-          <div className="mt-8 rounded-[24px] border border-white/70 bg-white/85 p-5 backdrop-blur">
-            <div className="flex flex-wrap gap-2">
-              <span className="rounded-full bg-[#F1F5FF] px-3 py-1.5 text-sm font-medium text-[#4460A8]">
-                {snapshot.universityName}
-              </span>
-              <span className="rounded-full bg-[#F4F6F8] px-3 py-1.5 text-sm font-medium text-[#556070]">{snapshot.department}</span>
-              <span className="rounded-full bg-[#EDF9EF] px-3 py-1.5 text-sm font-medium text-[#2F7A45]">{snapshot.admissionYear}학번</span>
-            </div>
-
-            <dl className="mt-5 space-y-3 text-left">
-              <div className="flex items-center justify-between gap-4">
-                <dt className="text-sm text-[#8B95A7]">학교 메일</dt>
-                <dd className="text-sm font-semibold text-[#2A3342]">{snapshot.email}</dd>
-              </div>
-              <div className="flex items-center justify-between gap-4">
-                <dt className="text-sm text-[#8B95A7]">아이디</dt>
-                <dd className="text-sm font-semibold text-[#2A3342]">{snapshot.username}</dd>
-              </div>
-              <div className="flex items-center justify-between gap-4">
-                <dt className="text-sm text-[#8B95A7]">닉네임</dt>
-                <dd className="text-sm font-semibold text-[#2A3342]">{snapshot.nickname}</dd>
-              </div>
-            </dl>
+      <div className="px-4">
+        <div className="relative h-[204px] rounded-2xl bg-white p-4 shadow-[0_0_16px_rgba(0,0,0,0.08)]">
+          <div className="flex min-h-[72px] flex-wrap content-start items-center gap-2">
+            <Tags size="lg" type="tertiary">
+              {snapshot.universityName}
+            </Tags>
+            <Tags size="lg" type="tertiary">
+              {snapshot.admissionYear}학번
+            </Tags>
+            <Tags size="lg" type="tertiary">
+              {gradeLabel}
+            </Tags>
+            <Tags size="lg" type="tertiary">
+              {snapshot.department}
+            </Tags>
           </div>
+
+          <div className="mt-3 h-px bg-[#F4F4F4]" />
+
+          <dl className="mt-3 flex flex-col gap-2 text-left">
+            <div className="flex h-5 items-center justify-between gap-4">
+              <dt className="shrink-0 text-xs font-medium leading-[1.4] text-[#565656]/40">학교 메일</dt>
+              <dd className="min-w-0 truncate text-right text-sm font-medium leading-[1.4] text-[#565656]">
+                {snapshot.email}
+              </dd>
+            </div>
+            <div className="flex h-5 items-center justify-between gap-4">
+              <dt className="shrink-0 text-xs font-medium leading-[1.4] text-[#565656]/40">아이디</dt>
+              <dd className="min-w-0 truncate text-right text-sm font-medium leading-[1.4] text-[#565656]">
+                {snapshot.username}
+              </dd>
+            </div>
+            <div className="flex h-5 items-center justify-between gap-4">
+              <dt className="shrink-0 text-xs font-medium leading-[1.4] text-[#565656]/40">닉네임</dt>
+              <dd className="min-w-0 truncate text-right text-sm font-medium leading-[1.4] text-[#565656]">
+                {nickname}
+              </dd>
+            </div>
+          </dl>
+
+          <ToolTip
+            id="signup-complete-nickname-tooltip"
+            type="RightUp"
+            className="absolute -bottom-[24px] right-[-8px] z-10 h-[30px] max-w-[329px] leading-[22px]"
+          >
+            닉네임은 기본적으로 "익명"으로 대체됩니다.
+          </ToolTip>
+          <span className="sr-only" aria-describedby="signup-complete-nickname-tooltip">
+            닉네임 안내
+          </span>
         </div>
       </div>
     </div>

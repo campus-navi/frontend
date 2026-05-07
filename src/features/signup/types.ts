@@ -41,6 +41,7 @@ export type SignupCompleteSnapshot = {
   admissionYear: number;
   department: string;
   email: string;
+  grade: SignupGrade;
   nickname: string;
   universityName: string;
   username: string;
