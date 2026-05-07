@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-export const totalSignupSteps = 6;
+export const totalSignupSteps = 7;
 
 export type SignupStep = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 export type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
