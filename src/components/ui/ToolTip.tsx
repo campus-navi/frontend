@@ -1,4 +1,4 @@
-import { useState, type HTMLAttributes, type KeyboardEvent, type ReactNode } from 'react';
+import { useState, type HTMLAttributes, type ReactNode } from 'react';
 
 type ToolTipType = 'RightDown' | 'LeftDown' | 'LeftUp' | 'RightUp';
 type ToolTipPlacement = 'top' | 'bottom';
@@ -40,7 +40,6 @@ export function ToolTip({
   contentClassName = '',
   className = '',
   onClick,
-  onKeyDown,
   ...props
 }: ToolTipProps) {
   const [isVisible, setIsVisible] = useState(true);
@@ -54,21 +53,6 @@ export function ToolTip({
     setIsVisible(false);
   };
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    onKeyDown?.(event);
-
-    if (event.defaultPrevented) {
-      return;
-    }
-
-    if (event.key !== 'Enter' && event.key !== ' ') {
-      return;
-    }
-
-    event.preventDefault();
-    close();
-  };
-
   return (
     <div
       role="tooltip"
@@ -76,8 +60,6 @@ export function ToolTip({
         onClick?.(event);
         close();
       }}
-      onKeyDown={handleKeyDown}
-      tabIndex={0}
       className={[
         'relative inline-flex h-7 w-fit max-w-[calc(100vw-32px)] cursor-pointer items-center justify-end rounded-[8px] bg-[#101112] px-3 py-1 text-right text-sm font-normal leading-[1.4] text-white outline-none focus-visible:ring-2 focus-visible:ring-[#31FFCC]',
         className,
