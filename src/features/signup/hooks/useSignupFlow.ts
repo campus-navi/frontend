@@ -1,4 +1,4 @@
-import { useDeferredValue, useMemo } from 'react';
+import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 
 import { admissionYears } from '@/features/signup/constants';
 import { useDepartmentSearch } from '@/features/signup/hooks/useDepartmentSearch';
@@ -20,6 +20,7 @@ import {
 
 export function useSignupFlow() {
   const { actions: storeActions, ...state } = useSignupFlowStore();
+  const [accountInputPhase, setAccountInputPhase] = useState<'username' | 'password' | 'passwordConfirm'>('username');
   const deferredUniversityQuery = useDeferredValue(state.universityQuery);
   const debouncedUniversityQuery = useDebouncedValue(deferredUniversityQuery, 180);
   const deferredDepartmentQuery = useDeferredValue(state.departmentQuery);
@@ -65,13 +66,44 @@ export function useSignupFlow() {
     },
     [debouncedDepartmentQuery, departmentSearch.data, isDepartmentSearchVisible, isDepartmentSelected],
   );
+  const isUsernameStepReady = usernameAvailability.validation.isValid && usernameAvailability.isAvailable;
+  const isPasswordStepReady = passwordValidation.passwordValidation.isValid;
+  const isPasswordConfirmStepReady =
+    isUsernameStepReady &&
+    isPasswordStepReady &&
+    passwordValidation.isConfirmFilled &&
+    passwordValidation.isPasswordMatched;
+
+  useEffect(() => {
+    if (state.step !== 5) {
+      setAccountInputPhase('username');
+      return;
+    }
+
+    if (!isUsernameStepReady) {
+      setAccountInputPhase('username');
+      return;
+    }
+
+    if (accountInputPhase === 'username' && isPasswordConfirmStepReady) {
+      setAccountInputPhase('passwordConfirm');
+      return;
+    }
+
+    if (accountInputPhase === 'passwordConfirm' && !isPasswordStepReady) {
+      setAccountInputPhase('password');
+    }
+  }, [accountInputPhase, isPasswordConfirmStepReady, isPasswordStepReady, isUsernameStepReady, state.step]);
+
+  const isAccountStepCtaEnabled =
+    accountInputPhase === 'username'
+      ? isUsernameStepReady
+      : accountInputPhase === 'password'
+        ? isPasswordStepReady
+        : isPasswordConfirmStepReady;
   const isCurrentStepValid =
     state.step === 5
-      ? usernameAvailability.validation.isValid &&
-        usernameAvailability.isAvailable &&
-        passwordValidation.passwordValidation.isValid &&
-        passwordValidation.isConfirmFilled &&
-        passwordValidation.isPasswordMatched
+      ? isAccountStepCtaEnabled
       : state.step === 6
         ? nicknameValidation.validation.isValid && nicknameValidation.isAvailable
       : isSignupStepValid(state.step, state.form, state.emailVerification);
@@ -84,6 +116,9 @@ export function useSignupFlow() {
     nicknameValidation,
     usernameAvailability,
     passwordValidation,
+    accountInputPhase,
+    shouldShowPasswordField: accountInputPhase !== 'username',
+    shouldShowPasswordConfirmField: accountInputPhase === 'passwordConfirm',
     filteredUniversities,
     filteredDepartments,
     isCurrentStepValid,
@@ -98,6 +133,22 @@ export function useSignupFlow() {
       returnToEmailVerificationStep: storeActions.returnToEmailVerificationStep,
       returnToUniversityStep: storeActions.returnToUniversityStep,
       nextStep: () => {
+        if (state.step === 5) {
+          if (accountInputPhase === 'username') {
+            if (isUsernameStepReady) {
+              setAccountInputPhase('password');
+            }
+            return;
+          }
+
+          if (accountInputPhase === 'password') {
+            if (isPasswordStepReady) {
+              setAccountInputPhase('passwordConfirm');
+            }
+            return;
+          }
+        }
+
         if (!isCurrentStepValid) return;
         storeActions.nextStep();
       },
