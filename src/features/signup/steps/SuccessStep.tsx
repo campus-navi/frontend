@@ -73,9 +73,14 @@ export function SuccessStep({ snapshot }: SuccessStepProps) {
           >
             닉네임은 기본적으로 "익명"으로 대체됩니다.
           </ToolTip>
-          <span className="sr-only" aria-describedby="signup-complete-nickname-tooltip">
+          <button
+            type="button"
+            className="sr-only"
+            aria-label="닉네임 안내"
+            aria-describedby="signup-complete-nickname-tooltip"
+          >
             닉네임 안내
-          </span>
+          </button>
         </div>
       </div>
     </div>
