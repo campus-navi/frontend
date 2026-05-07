@@ -67,7 +67,8 @@ export function SuccessStep({ snapshot }: SuccessStepProps) {
 
           <ToolTip
             id="signup-complete-nickname-tooltip"
-            type="RightUp"
+            placement="bottom"
+            align="end"
             className="absolute -bottom-[24px] right-[-8px] z-10 h-[30px] max-w-[329px] leading-[22px]"
           >
             닉네임은 기본적으로 "익명"으로 대체됩니다.

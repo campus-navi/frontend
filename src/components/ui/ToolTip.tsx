@@ -1,10 +1,16 @@
 import { useState, type HTMLAttributes, type KeyboardEvent, type ReactNode } from 'react';
 
 type ToolTipType = 'RightDown' | 'LeftDown' | 'LeftUp' | 'RightUp';
+type ToolTipPlacement = 'top' | 'bottom';
+type ToolTipAlign = 'start' | 'end';
 
 type ToolTipProps = HTMLAttributes<HTMLDivElement> & {
   children: ReactNode;
+  placement?: ToolTipPlacement;
+  align?: ToolTipAlign;
   type?: ToolTipType;
+  arrowClassName?: string;
+  contentClassName?: string;
 };
 
 const arrowClassNames: Record<ToolTipType, string> = {
@@ -14,15 +20,31 @@ const arrowClassNames: Record<ToolTipType, string> = {
   RightUp: '-top-[7px] right-3 border-x-[7px] border-b-[8px] border-x-transparent border-b-[#101112]',
 };
 
+const tooltipTypeByPlacement: Record<ToolTipPlacement, Record<ToolTipAlign, ToolTipType>> = {
+  top: {
+    start: 'LeftDown',
+    end: 'RightDown',
+  },
+  bottom: {
+    start: 'LeftUp',
+    end: 'RightUp',
+  },
+};
+
 export function ToolTip({
   children,
-  type = 'RightDown',
+  placement,
+  align = 'end',
+  type,
+  arrowClassName = '',
+  contentClassName = '',
   className = '',
   onClick,
   onKeyDown,
   ...props
 }: ToolTipProps) {
   const [isVisible, setIsVisible] = useState(true);
+  const tooltipType = type ?? tooltipTypeByPlacement[placement ?? 'top'][align];
 
   if (!isVisible) {
     return null;
@@ -64,9 +86,9 @@ export function ToolTip({
         .join(' ')}
       {...props}
     >
-      <span className="whitespace-nowrap">{children}</span>
+      <span className={['whitespace-nowrap', contentClassName].filter(Boolean).join(' ')}>{children}</span>
       <span
-        className={['absolute h-0 w-0', arrowClassNames[type]]
+        className={['absolute h-0 w-0', arrowClassNames[tooltipType], arrowClassName]
           .filter(Boolean)
           .join(' ')}
         aria-hidden="true"
