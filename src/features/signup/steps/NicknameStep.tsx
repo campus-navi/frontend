@@ -28,7 +28,11 @@ export function NicknameStep({ helperText, helperTone = 'default', nickname, onC
 
   return (
     <div>
-      <h1 className="text-[22px] font-bold leading-[1.45] tracking-[-0.03em] text-[#303030]">닉네임을 입력해주세요</h1>
+      <h1 className="text-[22px] font-bold leading-[1.45] tracking-[-0.03em] text-[#303030]">
+        게시판에서 사용할
+        <br />
+        닉네임을 만들어주세요.
+      </h1>
       <div className="mt-10">
         <SignupTextField
           label="닉네임"
