@@ -7,6 +7,7 @@ import type {
   EmailVerificationVerifyErrorReason,
   SelectedUniversity,
   SignupForm,
+  SignupGrade,
   SignupState,
   SignupStep,
 } from '@/features/signup/types';
@@ -36,6 +37,7 @@ type SignupFlowStore = SignupState & {
     resetFlow: () => void;
     selectAdmissionYear: (value: number) => void;
     selectDepartment: (value: { id: number | string; name: string }) => void;
+    selectGrade: (value: SignupGrade | null) => void;
     selectUniversity: (value: SelectedUniversity) => void;
     setStep: (step: SignupStep) => void;
     startEmailVerificationSend: () => EmailVerificationRequestContext;
@@ -103,6 +105,7 @@ const initialFormState: SignupForm = {
   department: '',
   departmentId: null,
   emailLocalPart: '',
+  grade: null,
   nickname: '',
   password: '',
   passwordConfirm: '',
@@ -123,6 +126,7 @@ const resetEmailVerificationDependentFields = (form: SignupForm): SignupForm => 
   department: '',
   departmentId: null,
   emailLocalPart: '',
+  grade: null,
   nickname: '',
   password: '',
   passwordConfirm: '',
@@ -244,6 +248,10 @@ export const useSignupFlowStore = create<SignupFlowStore>((set, get) => ({
       set((state) => ({
         departmentQuery: value.name,
         form: { ...state.form, department: value.name, departmentId: Number(value.id) },
+      })),
+    selectGrade: (value) =>
+      set((state) => ({
+        form: { ...state.form, grade: value },
       })),
     selectUniversity: (value) =>
       set((state) => ({
