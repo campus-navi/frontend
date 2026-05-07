@@ -23,7 +23,7 @@ function getKeyboardInset() {
   }
 
   const viewport = window.visualViewport;
-  return Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
+  return Math.max(0, window.innerHeight - viewport.height);
 }
 
 function useKeyboardInset() {
@@ -46,13 +46,11 @@ function useKeyboardInset() {
 
     updateKeyboardInset();
     viewport.addEventListener('resize', updateKeyboardInset);
-    viewport.addEventListener('scroll', updateKeyboardInset);
     window.addEventListener('orientationchange', updateKeyboardInset);
 
     return () => {
       window.cancelAnimationFrame(animationFrame);
       viewport.removeEventListener('resize', updateKeyboardInset);
-      viewport.removeEventListener('scroll', updateKeyboardInset);
       window.removeEventListener('orientationchange', updateKeyboardInset);
     };
   }, []);
@@ -87,7 +85,12 @@ export default function SignupPage() {
   const universitySearchError = universitySearch.isError ? universitySearch.error : null;
   const isUniversityServerError = isApiError(universitySearchError) && universitySearchError.status === 500;
   const emailVerificationErrorModal = getEmailVerificationErrorModal(state.emailVerification);
-  const ctaBottomPaddingClassName = keyboardInset > 0 ? 'pb-3' : 'pb-[max(24px,env(safe-area-inset-bottom))]';
+  const isKeyboardCtaStep = state.step === 5;
+  const isKeyboardOpen = isKeyboardCtaStep && keyboardInset > 0;
+  const ctaContainerSpacingClassName = isKeyboardOpen
+    ? 'px-0 pb-0 pt-0'
+    : 'px-5 pb-[max(24px,env(safe-area-inset-bottom))] pt-2';
+  const ctaButtonClassName = isKeyboardOpen ? '!rounded-none' : '';
   const wasEmailVerifiedRef = useRef(state.emailVerification.verifiedToken.isVerified);
   const signupSubmit = useSignupSubmit({
     emailDomain,
@@ -196,6 +199,7 @@ export default function SignupPage() {
         <section
           className={[
             'relative flex min-h-0 flex-1 flex-col overflow-hidden px-5',
+            isKeyboardCtaStep ? '' : 'pb-[max(24px,env(safe-area-inset-bottom))]',
             'pt-12',
           ].join(' ')}
         >
@@ -297,18 +301,28 @@ export default function SignupPage() {
 
           </div>
 
-          {state.step !== 1 ? (
+          {isKeyboardCtaStep ? (
             <div aria-hidden="true" className="mt-auto h-[calc(88px+max(24px,env(safe-area-inset-bottom)))] shrink-0" />
           ) : null}
 
-          {state.step !== 1 ? (
+          {isKeyboardCtaStep ? (
             <div
               className={[
-                'fixed left-1/2 z-20 w-full max-w-[393px] -translate-x-1/2 bg-white px-5 pt-2 transition-[bottom] duration-200 ease-out',
-                ctaBottomPaddingClassName,
+                'fixed left-1/2 z-20 w-full max-w-[393px] -translate-x-1/2 bg-white transition-[bottom] duration-200 ease-out',
+                ctaContainerSpacingClassName,
               ].join(' ')}
               style={{ bottom: `${keyboardInset}px` }}
             >
+              <CtaButton
+                className={ctaButtonClassName}
+                disabled={!isCurrentStepValid || signupSubmit.isPending}
+                onClick={actions.nextStep}
+              >
+                다음
+              </CtaButton>
+            </div>
+          ) : state.step !== 1 ? (
+            <div className="mt-auto pt-8">
               <CtaButton
                 disabled={!isCurrentStepValid || signupSubmit.isPending}
                 onClick={state.step === 6 ? () => void signupSubmit.submit() : actions.nextStep}
