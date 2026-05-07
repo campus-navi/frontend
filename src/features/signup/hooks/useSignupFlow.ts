@@ -9,6 +9,7 @@ import { useDebouncedValue } from '@/features/signup/hooks/useDebouncedValue';
 import { useUsernameAvailability } from '@/features/signup/hooks/useUsernameAvailability';
 import { useUniversitySearch } from '@/features/signup/hooks/useUniversitySearch';
 import { useSignupFlowStore } from '@/features/signup/store/signupFlowStore';
+import { totalSignupSteps } from '@/features/signup/types';
 import {
   getSuggestions,
   isSignupStepValid,
@@ -65,16 +66,16 @@ export function useSignupFlow() {
     [debouncedDepartmentQuery, departmentSearch.data, isDepartmentSearchVisible, isDepartmentSelected],
   );
   const isCurrentStepValid =
-    state.step === 4
+    state.step === 5
       ? usernameAvailability.validation.isValid &&
         usernameAvailability.isAvailable &&
         passwordValidation.passwordValidation.isValid &&
         passwordValidation.isConfirmFilled &&
         passwordValidation.isPasswordMatched
-      : state.step === 5
+      : state.step === 6
         ? nicknameValidation.validation.isValid && nicknameValidation.isAvailable
       : isSignupStepValid(state.step, state.form, state.emailVerification);
-  const progressValue = (Math.min(state.step, 5) + 1) / 6;
+  const progressValue = (Math.min(state.step, totalSignupSteps - 1) + 1) / totalSignupSteps;
 
   return {
     state,
@@ -114,6 +115,7 @@ export function useSignupFlow() {
       selectDepartment: storeActions.selectDepartment,
       clearDepartmentQuery: storeActions.clearDepartmentQuery,
       selectAdmissionYear: storeActions.selectAdmissionYear,
+      selectGrade: storeActions.selectGrade,
       updateUsername: storeActions.updateUsername,
       updatePassword: storeActions.updatePassword,
       updatePasswordConfirm: storeActions.updatePasswordConfirm,

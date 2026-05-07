@@ -127,8 +127,9 @@ export function isSignupStepValid(step: SignupStep, form: SignupForm, emailVerif
   if (step === 1) return Boolean(emailVerification?.verifiedToken.isVerified);
   if (step === 2) return form.departmentId !== null;
   if (step === 3) return Boolean(form.admissionYear);
-  if (step === 4) return validateSignupUsername(form.username).isValid && validateSignupPassword(form.password).isValid;
-  if (step === 5) return validateSignupNickname(form.nickname).isValid;
+  if (step === 4) return form.grade !== null;
+  if (step === 5) return validateSignupUsername(form.username).isValid && validateSignupPassword(form.password).isValid;
+  if (step === 6) return validateSignupNickname(form.nickname).isValid;
 
   return true;
 }

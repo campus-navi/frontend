@@ -12,6 +12,7 @@ import { useSignupFlowStore } from '@/features/signup/store/signupFlowStore';
 import { AdmissionYearStep } from '@/features/signup/steps/AdmissionYearStep';
 import { DepartmentStep } from '@/features/signup/steps/DepartmentStep';
 import { EmailVerificationStep } from '@/features/signup/steps/EmailVerificationStep';
+import { GradeStep } from '@/features/signup/steps/GradeStep';
 import { NicknameStep } from '@/features/signup/steps/NicknameStep';
 import { UniversityStep } from '@/features/signup/steps/UniversityStep';
 import { AccountStep } from '@/features/signup/steps/AccountStep';
@@ -213,6 +214,13 @@ export default function SignupPage() {
             ) : null}
 
             {state.step === 4 ? (
+              <GradeStep
+                selectedGrade={state.form.grade}
+                onSelect={actions.selectGrade}
+              />
+            ) : null}
+
+            {state.step === 5 ? (
               <AccountStep
                 helperText={usernameAvailability.helperText}
                 helperTone={usernameAvailability.helperTone}
@@ -231,7 +239,7 @@ export default function SignupPage() {
               />
             ) : null}
 
-            {state.step === 5 ? (
+            {state.step === 6 ? (
               <NicknameStep
                 nickname={state.form.nickname}
                 helperText={nicknameValidation.helperText}
@@ -246,9 +254,9 @@ export default function SignupPage() {
             <div className="mt-auto pt-8">
               <CtaButton
                 disabled={!isCurrentStepValid || signupSubmit.isPending}
-                onClick={state.step === 5 ? () => void signupSubmit.submit() : actions.nextStep}
+                onClick={state.step === 6 ? () => void signupSubmit.submit() : actions.nextStep}
               >
-                {state.step === 5 ? (signupSubmit.isPending ? '회원가입 중...' : '회원가입 완료') : '다음'}
+                {state.step === 6 ? (signupSubmit.isPending ? '회원가입 중...' : '회원가입 완료') : '다음'}
               </CtaButton>
             </div>
           ) : null}
