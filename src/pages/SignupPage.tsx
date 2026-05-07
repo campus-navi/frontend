@@ -27,6 +27,8 @@ export default function SignupPage() {
     nicknameValidation,
     usernameAvailability,
     passwordValidation,
+    shouldShowPasswordField,
+    shouldShowPasswordConfirmField,
     filteredUniversities,
     filteredDepartments,
     isCurrentStepValid,
@@ -224,12 +226,12 @@ export default function SignupPage() {
               <AccountStep
                 helperText={usernameAvailability.helperText}
                 helperTone={usernameAvailability.helperTone}
-                isUsernameAvailable={usernameAvailability.isAvailable}
                 password={state.form.password}
                 passwordConfirm={state.form.passwordConfirm}
                 passwordHelperText={passwordValidation.passwordHelperText}
                 passwordHelperTone={passwordValidation.passwordHelperTone}
-                shouldShowPasswordConfirmField={passwordValidation.shouldShowPasswordConfirmField}
+                shouldShowPasswordField={shouldShowPasswordField}
+                shouldShowPasswordConfirmField={shouldShowPasswordConfirmField}
                 confirmHelperText={passwordValidation.confirmHelperText}
                 confirmHelperTone={passwordValidation.confirmHelperTone}
                 username={state.form.username}

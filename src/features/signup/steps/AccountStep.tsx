@@ -2,18 +2,17 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { ClearIcon, EyeIcon, EyeOffIcon } from '@/features/signup/components/SignupIcons';
 import { SignupTextField } from '@/features/signup/components/SignupTextField';
-import { useDebouncedValue } from '@/features/signup/hooks/useDebouncedValue';
 
 type AccountStepProps = {
   confirmHelperText?: string;
   confirmHelperTone?: 'default' | 'success' | 'error';
   helperText: string;
   helperTone?: 'default' | 'success' | 'error';
-  isUsernameAvailable: boolean;
   password: string;
   passwordConfirm: string;
   passwordHelperText: string | null;
   passwordHelperTone: 'default' | 'success' | 'error';
+  shouldShowPasswordField: boolean;
   shouldShowPasswordConfirmField: boolean;
   username: string;
   onChange: (value: string) => void;
@@ -26,11 +25,11 @@ export function AccountStep({
   confirmHelperTone = 'default',
   helperText,
   helperTone = 'default',
-  isUsernameAvailable,
   password,
   passwordConfirm,
   passwordHelperText,
   passwordHelperTone,
+  shouldShowPasswordField,
   shouldShowPasswordConfirmField,
   username,
   onChange,
@@ -41,38 +40,36 @@ export function AccountStep({
   const passwordConfirmInputRef = useRef<HTMLInputElement>(null);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isPasswordConfirmVisible, setIsPasswordConfirmVisible] = useState(false);
-  const debouncedPasswordFieldVisible = useDebouncedValue(isUsernameAvailable, 800);
-  const debouncedPasswordConfirmFieldVisible = useDebouncedValue(shouldShowPasswordConfirmField, 800);
   const previousPasswordFieldVisibleRef = useRef(false);
   const previousPasswordConfirmFieldVisibleRef = useRef(false);
 
   useEffect(() => {
-    if (debouncedPasswordFieldVisible && !previousPasswordFieldVisibleRef.current) {
+    if (shouldShowPasswordField && !previousPasswordFieldVisibleRef.current) {
       passwordInputRef.current?.focus();
     }
 
-    previousPasswordFieldVisibleRef.current = debouncedPasswordFieldVisible;
-  }, [debouncedPasswordFieldVisible]);
+    previousPasswordFieldVisibleRef.current = shouldShowPasswordField;
+  }, [shouldShowPasswordField]);
 
   useEffect(() => {
-    if (debouncedPasswordConfirmFieldVisible && !previousPasswordConfirmFieldVisibleRef.current) {
+    if (shouldShowPasswordConfirmField && !previousPasswordConfirmFieldVisibleRef.current) {
       passwordConfirmInputRef.current?.focus();
     }
 
-    previousPasswordConfirmFieldVisibleRef.current = debouncedPasswordConfirmFieldVisible;
-  }, [debouncedPasswordConfirmFieldVisible]);
+    previousPasswordConfirmFieldVisibleRef.current = shouldShowPasswordConfirmField;
+  }, [shouldShowPasswordConfirmField]);
 
   useEffect(() => {
-    if (!debouncedPasswordFieldVisible) {
+    if (!shouldShowPasswordField) {
       setIsPasswordVisible(false);
     }
-  }, [debouncedPasswordFieldVisible]);
+  }, [shouldShowPasswordField]);
 
   useEffect(() => {
-    if (!debouncedPasswordConfirmFieldVisible) {
+    if (!shouldShowPasswordConfirmField) {
       setIsPasswordConfirmVisible(false);
     }
-  }, [debouncedPasswordConfirmFieldVisible]);
+  }, [shouldShowPasswordConfirmField]);
 
   const usernameActions = useMemo(
     () =>
@@ -99,7 +96,7 @@ export function AccountStep({
             onClick={() => setIsPasswordVisible((prev) => !prev)}
             className="px-1 text-[#8A8A8A] transition-colors hover:text-[#4F4F4F]"
           >
-            {isPasswordVisible ? <EyeOffIcon /> : <EyeIcon />}
+            {isPasswordVisible ? <EyeIcon /> : <EyeOffIcon />}
           </button>
         ) : null}
         {password ? (
@@ -127,7 +124,7 @@ export function AccountStep({
             onClick={() => setIsPasswordConfirmVisible((prev) => !prev)}
             className="px-1 text-[#8A8A8A] transition-colors hover:text-[#4F4F4F]"
           >
-            {isPasswordConfirmVisible ? <EyeOffIcon /> : <EyeIcon />}
+            {isPasswordConfirmVisible ? <EyeIcon /> : <EyeOffIcon />}
           </button>
         ) : null}
         {passwordConfirm ? (
@@ -152,7 +149,7 @@ export function AccountStep({
         정보를 입력해주세요.
       </h1>
       <div className="mt-10">
-        {debouncedPasswordConfirmFieldVisible ? (
+        {shouldShowPasswordConfirmField ? (
           <div className="signup-slide-down mb-8">
             <SignupTextField
               inputRef={passwordConfirmInputRef}
@@ -168,14 +165,14 @@ export function AccountStep({
           </div>
         ) : null}
 
-        {debouncedPasswordFieldVisible ? (
+        {shouldShowPasswordField ? (
           <div className="signup-slide-down mb-8">
             <SignupTextField
               inputRef={passwordInputRef}
               label="비밀번호"
               type={isPasswordVisible ? 'text' : 'password'}
               value={password}
-              placeholder="영문, 숫자, 특수문자를 포함한 8~16자"
+              placeholder="비밀번호를 작성해주세요."
               helperText={passwordHelperText ?? undefined}
               helperTone={passwordHelperTone}
               trailingActions={passwordActions}
@@ -187,7 +184,7 @@ export function AccountStep({
         <SignupTextField
           label="아이디"
           value={username}
-          placeholder="영문 소문자, 숫자 포함 4자 이상"
+          placeholder="아이디를 작성해주세요."
           helperText={helperText}
           helperTone={helperTone}
           trailingActions={usernameActions}
