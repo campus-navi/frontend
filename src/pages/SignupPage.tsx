@@ -17,17 +17,34 @@ import { NicknameStep } from '@/features/signup/steps/NicknameStep';
 import { UniversityStep } from '@/features/signup/steps/UniversityStep';
 import { AccountStep } from '@/features/signup/steps/AccountStep';
 
+function isEditableElement(element: Element | null) {
+  if (!(element instanceof HTMLElement)) {
+    return false;
+  }
+
+  return element.matches('input, textarea, [contenteditable="true"]');
+}
+
+function isTouchViewport() {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  return window.matchMedia('(pointer: coarse)').matches;
+}
+
 function getKeyboardInset() {
   if (typeof window === 'undefined' || !window.visualViewport) {
     return 0;
   }
 
   const viewport = window.visualViewport;
-  return Math.max(0, window.innerHeight - viewport.height);
+  return Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
 }
 
-function useKeyboardInset() {
+function useKeyboardCtaState() {
   const [keyboardInset, setKeyboardInset] = useState(0);
+  const [isInputFocused, setIsInputFocused] = useState(false);
 
   useEffect(() => {
     const viewport = window.visualViewport;
@@ -46,22 +63,46 @@ function useKeyboardInset() {
 
     updateKeyboardInset();
     viewport.addEventListener('resize', updateKeyboardInset);
+    viewport.addEventListener('scroll', updateKeyboardInset);
     window.addEventListener('orientationchange', updateKeyboardInset);
 
     return () => {
       window.cancelAnimationFrame(animationFrame);
       viewport.removeEventListener('resize', updateKeyboardInset);
+      viewport.removeEventListener('scroll', updateKeyboardInset);
       window.removeEventListener('orientationchange', updateKeyboardInset);
     };
   }, []);
 
-  return keyboardInset;
+  useEffect(() => {
+    const updateInputFocus = () => {
+      setIsInputFocused(isEditableElement(document.activeElement));
+    };
+
+    const handleFocusOut = () => {
+      window.setTimeout(updateInputFocus, 0);
+    };
+
+    updateInputFocus();
+    document.addEventListener('focusin', updateInputFocus);
+    document.addEventListener('focusout', handleFocusOut);
+
+    return () => {
+      document.removeEventListener('focusin', updateInputFocus);
+      document.removeEventListener('focusout', handleFocusOut);
+    };
+  }, []);
+
+  return {
+    keyboardInset,
+    isKeyboardOpen: isTouchViewport() && isInputFocused && keyboardInset > 80,
+  };
 }
 
 export default function SignupPage() {
   const navigate = useNavigate();
   const [isEmailVerificationSuccessModalOpen, setIsEmailVerificationSuccessModalOpen] = useState(false);
-  const keyboardInset = useKeyboardInset();
+  const keyboardCta = useKeyboardCtaState();
   const {
     state,
     emailDomain,
@@ -86,11 +127,12 @@ export default function SignupPage() {
   const isUniversityServerError = isApiError(universitySearchError) && universitySearchError.status === 500;
   const emailVerificationErrorModal = getEmailVerificationErrorModal(state.emailVerification);
   const isKeyboardCtaStep = state.step === 5;
-  const isKeyboardOpen = isKeyboardCtaStep && keyboardInset > 0;
+  const isKeyboardOpen = isKeyboardCtaStep && keyboardCta.isKeyboardOpen;
   const ctaContainerSpacingClassName = isKeyboardOpen
     ? 'px-0 pb-0 pt-0'
     : 'px-5 pb-[max(24px,env(safe-area-inset-bottom))] pt-2';
   const ctaButtonClassName = isKeyboardOpen ? '!rounded-none' : '';
+  const ctaPositionTransitionClassName = isKeyboardOpen ? '' : 'transition-[bottom] duration-200 ease-out';
   const wasEmailVerifiedRef = useRef(state.emailVerification.verifiedToken.isVerified);
   const signupSubmit = useSignupSubmit({
     emailDomain,
@@ -308,15 +350,24 @@ export default function SignupPage() {
           {isKeyboardCtaStep ? (
             <div
               className={[
-                'fixed left-1/2 z-20 w-full max-w-[393px] -translate-x-1/2 bg-white transition-[bottom] duration-200 ease-out',
+                'fixed left-1/2 z-20 w-full max-w-[393px] -translate-x-1/2 bg-white',
+                ctaPositionTransitionClassName,
                 ctaContainerSpacingClassName,
               ].join(' ')}
-              style={{ bottom: `${keyboardInset}px` }}
+              style={{ bottom: `${isKeyboardOpen ? keyboardCta.keyboardInset : 0}px` }}
             >
               <CtaButton
                 className={ctaButtonClassName}
                 disabled={!isCurrentStepValid || signupSubmit.isPending}
-                onClick={actions.nextStep}
+                onClick={isKeyboardOpen ? undefined : actions.nextStep}
+                onPointerDown={(event) => {
+                  if (!isKeyboardOpen) {
+                    return;
+                  }
+
+                  event.preventDefault();
+                  actions.nextStep();
+                }}
               >
                 다음
               </CtaButton>
