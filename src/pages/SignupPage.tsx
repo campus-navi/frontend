@@ -94,6 +94,7 @@ function useKeyboardCtaState() {
   }, []);
 
   return {
+    isSupported: typeof window !== 'undefined' && Boolean(window.visualViewport),
     keyboardInset,
     isKeyboardOpen: isTouchViewport() && isInputFocused && keyboardInset > 80,
   };
@@ -126,7 +127,7 @@ export default function SignupPage() {
   const universitySearchError = universitySearch.isError ? universitySearch.error : null;
   const isUniversityServerError = isApiError(universitySearchError) && universitySearchError.status === 500;
   const emailVerificationErrorModal = getEmailVerificationErrorModal(state.emailVerification);
-  const isKeyboardCtaStep = state.step === 5;
+  const isKeyboardCtaStep = state.step === 5 && keyboardCta.isSupported;
   const isKeyboardOpen = isKeyboardCtaStep && keyboardCta.isKeyboardOpen;
   const ctaContainerSpacingClassName = isKeyboardOpen
     ? 'px-0 pb-0 pt-0'
@@ -141,6 +142,7 @@ export default function SignupPage() {
     onResetFlow: actions.resetFlow,
     onReturnToEmailVerificationStep: actions.returnToEmailVerificationStep,
   });
+  const isPrimaryCtaDisabled = !isCurrentStepValid || signupSubmit.isPending;
 
   useEffect(() => {
     const isVerified = state.emailVerification.verifiedToken.isVerified;
@@ -358,10 +360,10 @@ export default function SignupPage() {
             >
               <CtaButton
                 className={ctaButtonClassName}
-                disabled={!isCurrentStepValid || signupSubmit.isPending}
+                disabled={isPrimaryCtaDisabled}
                 onClick={isKeyboardOpen ? undefined : actions.nextStep}
                 onPointerDown={(event) => {
-                  if (!isKeyboardOpen) {
+                  if (!isKeyboardOpen || isPrimaryCtaDisabled) {
                     return;
                   }
 
@@ -375,7 +377,7 @@ export default function SignupPage() {
           ) : state.step !== 1 ? (
             <div className="mt-auto pt-8">
               <CtaButton
-                disabled={!isCurrentStepValid || signupSubmit.isPending}
+                disabled={isPrimaryCtaDisabled}
                 onClick={state.step === 6 ? () => void signupSubmit.submit() : actions.nextStep}
               >
                 {state.step === 6 ? (signupSubmit.isPending ? '회원가입 중...' : '회원가입 완료') : '다음'}
