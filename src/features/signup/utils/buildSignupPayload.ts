@@ -11,9 +11,14 @@ export function buildSignupPayload(form: SignupForm, emailVerification: EmailVer
     throw new Error('verifiedToken이 없어 회원가입 요청을 진행할 수 없습니다.');
   }
 
+  if (form.grade === null) {
+    throw new Error('grade가 없어 회원가입 요청을 진행할 수 없습니다.');
+  }
+
   return {
     departmentId: form.departmentId,
     admissionYear: form.admissionYear,
+    grade: form.grade,
     username: form.username,
     password: form.password,
     nickname: form.nickname,

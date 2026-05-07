@@ -33,6 +33,7 @@ export interface VerifySignupEmailCodeResponseData extends ApiObjectData {
 export interface SignupPayload extends ApiObjectData {
   admissionYear: number;
   departmentId: number;
+  grade: 1 | 2 | 3 | 4;
   nickname: string;
   password: string;
   username: string;

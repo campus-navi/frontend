@@ -6,6 +6,7 @@ export type SignupStep = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 export type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
 export type UsernameAvailabilityStatus = 'idle' | 'checking' | 'available' | 'duplicate' | 'error';
 export type NicknameAvailabilityStatus = 'idle' | 'checking' | 'available' | 'duplicate' | 'error';
+export type SignupGrade = 1 | 2 | 3 | 4;
 
 export type SelectedUniversity = {
   campusId: number | string;
@@ -19,6 +20,7 @@ export type SignupForm = {
   department: string;
   departmentId: number | null;
   admissionYear: number;
+  grade: SignupGrade | null;
   username: string;
   password: string;
   passwordConfirm: string;
@@ -28,6 +30,7 @@ export type SignupForm = {
 export type SignupPayload = {
   departmentId: number;
   admissionYear: number;
+  grade: SignupGrade;
   username: string;
   password: string;
   nickname: string;
