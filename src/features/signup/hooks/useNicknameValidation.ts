@@ -6,7 +6,7 @@ import { useDebouncedValue } from '@/features/signup/hooks/useDebouncedValue';
 import type { NicknameAvailabilityStatus } from '@/features/signup/types';
 import { validateSignupNickname } from '@/features/signup/utils';
 
-const DEFAULT_HELPER_TEXT = '게시판에서 사용할 닉네임을 정해주세요.';
+const DEFAULT_HELPER_TEXT = '익명을 사용하지 않을 때, 사용할 닉네임을 정해주세요.';
 const AVAILABLE_MESSAGE = '사용 가능한 닉네임입니다.';
 const DUPLICATE_MESSAGE = '이미 사용 중인 닉네임입니다.';
 const ERROR_MESSAGE = '닉네임 확인 중 문제가 발생했습니다. 다시 시도해주세요.';
