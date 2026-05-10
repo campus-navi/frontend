@@ -6,7 +6,7 @@ import { apiConfig } from '@/api/config';
 import { createApiError, normalizeApiError } from '@/api/errors';
 import { validateApiResponse } from '@/api/response';
 import type { ApiObjectData, ApiRequestConfig, ApiResponse, ApiResponseData, ApiSuccessResponse, QueuedRequest } from '@/api/types';
-import { extractBearerAccessTokenFromHeaders, tokenStorage } from '@/shared/auth';
+import { extractAccessTokenFromHeaders, tokenStorage } from '@/shared/auth';
 
 declare module 'axios' {
   interface InternalAxiosRequestConfig {
@@ -78,7 +78,7 @@ async function replayQueuedRequests(accessToken: string) {
 }
 
 function extractAccessToken(data: RefreshResponseData, responseHeaders?: AxiosResponse['headers']) {
-  const headerAccessToken = extractBearerAccessTokenFromHeaders(responseHeaders);
+  const headerAccessToken = extractAccessTokenFromHeaders(responseHeaders);
 
   if (headerAccessToken) {
     return headerAccessToken;

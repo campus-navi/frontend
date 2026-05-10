@@ -2,7 +2,7 @@ import { apiClient, normalizeApiError } from '@/api';
 import { validateApiResponse } from '@/api/response';
 import type { ApiObjectData, ApiRequestConfig, ApiResponse } from '@/api/types';
 import type { SignupPayload } from '@/features/signup/types';
-import { extractBearerAccessTokenFromHeaders, tokenStorage } from '@/shared/auth';
+import { extractAccessTokenFromHeaders, tokenStorage } from '@/shared/auth';
 
 export async function submitSignup(payload: SignupPayload) {
   try {
@@ -13,7 +13,7 @@ export async function submitSignup(payload: SignupPayload) {
       url: '/auth/signup',
       withCredentials: true,
     } as ApiRequestConfig);
-    const accessToken = extractBearerAccessTokenFromHeaders(response.headers);
+    const accessToken = extractAccessTokenFromHeaders(response.headers);
 
     validateApiResponse(response.status, response.data as ApiResponse<ApiObjectData>);
 
