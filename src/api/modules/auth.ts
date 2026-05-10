@@ -52,12 +52,6 @@ function storeAccessTokenFromHeaders(headers: Parameters<typeof extractAccessTok
 }
 
 export const authApi = {
-  getMe<TData extends ApiObjectData = ApiObjectData>() {
-    return request<TData>({
-      method: 'get',
-      url: '/auth/me',
-    });
-  },
   async login<TData extends ApiObjectData = ApiObjectData>(payload: LoginPayload) {
     const response = await apiClient.request<ApiResponse<TData>>({
       data: payload,
