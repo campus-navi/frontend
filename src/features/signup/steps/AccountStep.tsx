@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { ClearIcon, EyeIcon, EyeOffIcon } from '@/features/signup/components/SignupIcons';
 import { SignupTextField } from '@/features/signup/components/SignupTextField';
 
@@ -8,6 +9,7 @@ type AccountStepProps = {
   confirmHelperTone?: 'default' | 'success' | 'error';
   helperText: string;
   helperTone?: 'default' | 'success' | 'error';
+  isUsernameChecking?: boolean;
   password: string;
   passwordConfirm: string;
   passwordHelperText: string | null;
@@ -25,6 +27,7 @@ export function AccountStep({
   confirmHelperTone = 'default',
   helperText,
   helperTone = 'default',
+  isUsernameChecking = false,
   password,
   passwordConfirm,
   passwordHelperText,
@@ -74,16 +77,19 @@ export function AccountStep({
   const usernameActions = useMemo(
     () =>
       username ? (
-        <button
-          type="button"
-          aria-label="아이디 지우기"
-          onClick={() => onChange('')}
-          className="text-[#B3B3B3] transition-colors hover:text-[#7A7A7A]"
-        >
-          <ClearIcon />
-        </button>
+        <>
+          {isUsernameChecking ? <LoadingSpinner ariaLabel="아이디 확인 중" className="h-4 w-4 text-[#8D8D8D]" /> : null}
+          <button
+            type="button"
+            aria-label="아이디 지우기"
+            onClick={() => onChange('')}
+            className="text-[#B3B3B3] transition-colors hover:text-[#7A7A7A]"
+          >
+            <ClearIcon />
+          </button>
+        </>
       ) : null,
-    [onChange, username],
+    [isUsernameChecking, onChange, username],
   );
 
   const passwordActions = useMemo(

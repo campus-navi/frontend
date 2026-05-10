@@ -219,6 +219,7 @@ export function useEmailVerification(emailDomain: string) {
       emailHelperMessage,
       isCodeSent,
       isSending,
+      isVerifying,
       isVerificationCodeReadOnly: isVerified || isVerifyBlocked,
       sendButtonLabel,
       verificationTimerLabel,
