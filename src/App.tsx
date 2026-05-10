@@ -12,6 +12,7 @@ export default function App() {
       <Route index element={<OnboardingPage />} />
       <Route path="/home" element={<HomePage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/notice-interests" element={null} />
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/signup/complete" element={<SignupCompletePage />} />
       <Route path="*" element={<Navigate replace to="/" />} />
