@@ -131,8 +131,8 @@ export default function NoticeInterestsPage() {
     setIsNotificationBottomSheetOpen(true);
   };
 
-  const closeNotificationBottomSheet = () => {
-    setIsNotificationBottomSheetOpen(false);
+  const goToComplete = () => {
+    navigate('/notice-interests/complete');
   };
 
   return (
@@ -142,10 +142,10 @@ export default function NoticeInterestsPage() {
         title="알림 권한"
         footer={
           <>
-            <CtaButton type="button" variant="primary" state="default" size="xlg" onClick={closeNotificationBottomSheet}>
+            <CtaButton type="button" variant="primary" state="default" size="xlg" onClick={goToComplete}>
               허용
             </CtaButton>
-            <CtaButton type="button" variant="tertiary" state="default" size="xlg" onClick={closeNotificationBottomSheet}>
+            <CtaButton type="button" variant="tertiary" state="default" size="xlg" onClick={goToComplete}>
               허용 안함
             </CtaButton>
           </>
