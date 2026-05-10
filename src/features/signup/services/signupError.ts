@@ -48,8 +48,8 @@ export function mapSignupSubmitError(error: ApiError): SignupSubmitErrorAction {
   if (error.status === 409 && DUPLICATE_SIGNUP_ERROR_CODES.has(error.code)) {
     return {
       type: 'duplicate_restart',
-      title: '회원가입 정보를 다시 확인해주세요',
-      description: '이미 사용 중인 정보가 있어 처음 단계부터 다시 진행해주세요.',
+      title: '에러',
+      description: '중독된 정보가 존재합니다.\n정보를 다시 입력해주세요.',
     };
   }
 

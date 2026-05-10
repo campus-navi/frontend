@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { isApiError } from '@/api';
 import { AlertModal } from '@/components/ui/AlertModal';
+import { BottomSheet } from '@/components/ui/BottomSheet';
 import { CtaButton } from '@/components/ui/CtaButton';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { SignupHeader } from '@/features/signup/components/SignupHeader';
@@ -216,14 +217,30 @@ export default function SignupPage() {
         description="서버 오류가 발생했습니다. 처음 화면으로 이동해주세요."
         onConfirm={() => navigate('/')}
       />
-      <AlertModal
+      <BottomSheet
         isOpen={Boolean(emailVerificationErrorModal)}
-        placement="bottom-sheet"
         title={emailVerificationErrorModal?.title ?? '에러'}
-        description={emailVerificationErrorModal?.description ?? ''}
-        confirmLabel={emailVerificationErrorModal?.confirmLabel}
-        onConfirm={handleEmailVerificationErrorConfirm}
-      />
+        footer={
+          <CtaButton
+            type="button"
+            variant="primary"
+            state="default"
+            size="xlg"
+            className="text-[#292B2C]"
+            onClick={handleEmailVerificationErrorConfirm}
+          >
+            {emailVerificationErrorModal?.confirmLabel ?? '확인'}
+          </CtaButton>
+        }
+      >
+        <div className="flex h-11 w-full flex-col items-center justify-center px-5">
+          <div className="flex w-full justify-center">
+            <p className="w-full max-w-[311px] text-center text-[16px] font-medium leading-[140%] text-[#202020]">
+              {emailVerificationErrorModal?.description ?? ''}
+            </p>
+          </div>
+        </div>
+      </BottomSheet>
       <AlertModal
         isOpen={isEmailVerificationSuccessModalOpen}
         title="인증 성공"
@@ -235,6 +252,8 @@ export default function SignupPage() {
         isOpen={Boolean(signupSubmit.modal)}
         title={signupSubmit.modal?.title ?? '에러'}
         description={signupSubmit.modal?.description ?? ''}
+        confirmLabel={signupSubmit.modal?.type === 'duplicate_restart' ? '홈으로' : undefined}
+        isConfirmCta={signupSubmit.modal?.type === 'duplicate_restart'}
         onConfirm={signupSubmit.closeModal}
       />
 
