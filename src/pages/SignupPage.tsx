@@ -375,14 +375,14 @@ export default function SignupPage() {
           {isKeyboardCtaStep ? (
             <div
               className={[
-                'fixed left-1/2 z-20 w-full max-w-[393px] -translate-x-1/2 bg-white',
+                "fixed left-1/2 z-20 w-full max-w-[393px] -translate-x-1/2 bg-white before:pointer-events-none before:absolute before:inset-x-0 before:-top-4 before:bottom-0 before:bg-white before:content-['']",
                 ctaPositionTransitionClassName,
                 ctaContainerSpacingClassName,
               ].join(' ')}
               style={{ bottom: `${isKeyboardOpen ? keyboardCta.keyboardInset : 0}px` }}
             >
               <CtaButton
-                className={ctaButtonClassName}
+                className={['relative z-10', ctaButtonClassName].filter(Boolean).join(' ')}
                 disabled={isPrimaryCtaDisabled}
                 onClick={isKeyboardOpen ? undefined : actions.nextStep}
                 onPointerDown={(event) => {
