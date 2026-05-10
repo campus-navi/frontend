@@ -19,7 +19,7 @@ function getAuthorizationHeaderValue(headers: ResponseHeaders) {
   return typeof authorizationHeader === 'string' ? authorizationHeader.trim() : null;
 }
 
-export function extractBearerAccessToken(authorizationHeader: string | null | undefined) {
+export function extractAccessToken(authorizationHeader: string | null | undefined) {
   if (!authorizationHeader) {
     return null;
   }
@@ -30,6 +30,9 @@ export function extractBearerAccessToken(authorizationHeader: string | null | un
   return accessToken ? accessToken : null;
 }
 
-export function extractBearerAccessTokenFromHeaders(headers: ResponseHeaders) {
-  return extractBearerAccessToken(getAuthorizationHeaderValue(headers));
+export function extractAccessTokenFromHeaders(headers: ResponseHeaders) {
+  return extractAccessToken(getAuthorizationHeaderValue(headers));
 }
+
+export const extractBearerAccessToken = extractAccessToken;
+export const extractBearerAccessTokenFromHeaders = extractAccessTokenFromHeaders;

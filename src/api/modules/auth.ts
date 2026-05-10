@@ -1,7 +1,8 @@
 import { apiConfig } from '@/api/config';
-import { request } from '@/api/client';
-import type { ApiObjectData } from '@/api/types';
-import { tokenStorage } from '@/shared/auth';
+import { apiClient, request } from '@/api/client';
+import { validateApiResponse } from '@/api/response';
+import type { ApiObjectData, ApiRequestConfig, ApiResponse } from '@/api/types';
+import { extractAccessTokenFromHeaders, tokenStorage } from '@/shared/auth';
 
 export interface LoginPayload extends ApiObjectData {
   password: string;
@@ -40,6 +41,16 @@ export interface SignupPayload extends ApiObjectData {
   verifiedToken: string;
 }
 
+function storeAccessTokenFromHeaders(headers: Parameters<typeof extractAccessTokenFromHeaders>[0], errorMessage: string) {
+  const accessToken = extractAccessTokenFromHeaders(headers);
+
+  if (!accessToken) {
+    throw new Error(errorMessage);
+  }
+
+  tokenStorage.setAccessToken(accessToken);
+}
+
 export const authApi = {
   getMe<TData extends ApiObjectData = ApiObjectData>() {
     return request<TData>({
@@ -47,13 +58,18 @@ export const authApi = {
       url: '/auth/me',
     });
   },
-  login<TData extends ApiObjectData = ApiObjectData>(payload: LoginPayload) {
-    return request<TData>({
+  async login<TData extends ApiObjectData = ApiObjectData>(payload: LoginPayload) {
+    const response = await apiClient.request<ApiResponse<TData>>({
       data: payload,
       method: 'post',
       requiresAuth: false,
       url: '/auth/login',
-    });
+    } as ApiRequestConfig);
+    const validatedResponse = validateApiResponse(response.status, response.data);
+
+    storeAccessTokenFromHeaders(response.headers, '로그인 성공 응답에서 access token을 찾을 수 없습니다.');
+
+    return validatedResponse;
   },
   async logout<TData extends ApiObjectData = ApiObjectData>() {
     const response = await request<TData>({
