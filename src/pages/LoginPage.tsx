@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { authApi, normalizeApiError } from '@/api';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { CtaButton } from '@/components/ui/CtaButton';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { NaviLogo } from '@/components/ui/NaviLogo';
 import { ClearIcon, EyeIcon, EyeOffIcon } from '@/features/signup/components/SignupIcons';
 
@@ -174,11 +175,7 @@ export default function LoginPage() {
           <div className="mt-auto pt-8">
             <CtaButton onClick={() => void handleLogin()}>
               {isLoginPending ? (
-                <span
-                  aria-label="로그인 중"
-                  className="h-4 w-4 animate-spin rounded-full border-2 border-[#BBBBBB] border-t-transparent"
-                  role="status"
-                />
+                <LoadingSpinner ariaLabel="로그인 중" />
               ) : (
                 '로그인'
               )}

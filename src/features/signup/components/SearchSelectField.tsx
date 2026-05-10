@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { ClearIcon, SearchIcon } from '@/features/signup/components/SignupIcons';
 import type { SearchSelectStepProps } from '@/features/signup/types';
 
@@ -116,7 +117,12 @@ export function SearchSelectField({
 
       {shouldShowResults ? (
         <div className="relative mt-6 flex min-h-0 w-full flex-1 flex-col overflow-hidden">
-          {isLoading ? <p className="text-[15px] text-[#8B8B8B]">{loadingMessage}</p> : null}
+          {isLoading ? (
+            <p className="flex items-center gap-2 text-[15px] text-[#8B8B8B]">
+              <LoadingSpinner ariaLabel={loadingMessage} className="h-3.5 w-3.5" />
+              <span>{loadingMessage}</span>
+            </p>
+          ) : null}
 
           {!isLoading && errorMessage ? (
             <div className="border-b border-[#E7E7E7] pb-4">

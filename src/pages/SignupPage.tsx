@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { isApiError } from '@/api';
 import { AlertModal } from '@/components/ui/AlertModal';
 import { CtaButton } from '@/components/ui/CtaButton';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { SignupHeader } from '@/features/signup/components/SignupHeader';
 import { getEmailVerificationErrorModal } from '@/features/signup/emailVerification';
 import { useSignupFlow } from '@/features/signup/hooks/useSignupFlow';
@@ -270,6 +271,7 @@ export default function SignupPage() {
                 isCodeSent={emailVerification.ui.isCodeSent}
                 isSendEnabled={emailVerification.ui.canSend}
                 isSendPending={emailVerification.ui.isSending}
+                isVerifyPending={emailVerification.ui.isVerifying}
                 isVerifyButtonEnabled={emailVerification.ui.canVerify}
                 isVerificationCodeReadOnly={emailVerification.ui.isVerificationCodeReadOnly}
                 codeHelperMessage={emailVerification.ui.codeHelperMessage}
@@ -319,6 +321,7 @@ export default function SignupPage() {
               <AccountStep
                 helperText={usernameAvailability.helperText}
                 helperTone={usernameAvailability.helperTone}
+                isUsernameChecking={usernameAvailability.availability.status === 'checking'}
                 password={state.form.password}
                 passwordConfirm={state.form.passwordConfirm}
                 passwordHelperText={passwordValidation.passwordHelperText}
@@ -339,6 +342,7 @@ export default function SignupPage() {
                 nickname={state.form.nickname}
                 helperText={nicknameValidation.helperText}
                 helperTone={nicknameValidation.helperTone}
+                isNicknameChecking={nicknameValidation.availability.status === 'checking'}
                 onChange={actions.updateNickname}
               />
             ) : null}
@@ -380,7 +384,15 @@ export default function SignupPage() {
                 disabled={isPrimaryCtaDisabled}
                 onClick={state.step === 6 ? () => void signupSubmit.submit() : actions.nextStep}
               >
-                {state.step === 6 ? (signupSubmit.isPending ? '회원가입 중...' : '회원가입 완료') : '다음'}
+                {state.step === 6 ? (
+                  signupSubmit.isPending ? (
+                    <LoadingSpinner ariaLabel="회원가입 중" />
+                  ) : (
+                    '회원가입 완료'
+                  )
+                ) : (
+                  '다음'
+                )}
               </CtaButton>
             </div>
           ) : null}

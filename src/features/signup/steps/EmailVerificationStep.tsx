@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { CtaButton } from '@/components/ui/CtaButton';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { SignupTextField } from '@/features/signup/components/SignupTextField';
 import type { EmailVerificationState } from '@/features/signup/types';
 
@@ -10,6 +11,7 @@ type EmailVerificationStepProps = {
   isCodeSent: boolean;
   isSendEnabled: boolean;
   isSendPending: boolean;
+  isVerifyPending: boolean;
   isVerifyButtonEnabled: boolean;
   isVerificationCodeReadOnly: boolean;
   codeHelperMessage: string | null;
@@ -30,6 +32,7 @@ export function EmailVerificationStep({
   isCodeSent,
   isSendEnabled,
   isSendPending,
+  isVerifyPending,
   isVerifyButtonEnabled,
   isVerificationCodeReadOnly,
   codeHelperMessage,
@@ -118,7 +121,7 @@ export function EmailVerificationStep({
               onClick={onSubmitVerification}
               className="w-[82px] shrink-0"
             >
-              {verifyButtonLabel}
+              {isVerifyPending ? <LoadingSpinner ariaLabel="확인 중" /> : verifyButtonLabel}
             </CtaButton>
           </div>
           {codeHelperMessage ? (
@@ -171,11 +174,7 @@ export function EmailVerificationStep({
             className="w-[82px] shrink-0"
           >
             {isSendPending ? (
-              <span
-                aria-label="전송 중"
-                className="h-4 w-4 animate-spin rounded-full border-2 border-[#BBBBBB] border-t-transparent"
-                role="status"
-              />
+              <LoadingSpinner ariaLabel="전송 중" />
             ) : (
               <span className="whitespace-nowrap">{sendButtonLabel}</span>
             )}
