@@ -21,10 +21,19 @@ export function AlertModal({
   title,
   onConfirm,
 }: AlertModalProps) {
+  const isBottomSheet = placement === 'bottom-sheet';
+
   const body = (
     <div className="flex w-full items-start px-5 py-6">
-      <div className="flex h-10 w-full items-center justify-center">
-        <p className="text-center text-[14px] font-medium leading-[140%] text-[#5E5E5E]">{description}</p>
+      <div className="flex min-h-11 w-full items-center justify-center">
+        <p
+          className={[
+            'whitespace-pre-line text-center font-medium leading-[140%]',
+            isBottomSheet ? 'text-[14px] text-[#5E5E5E]' : 'text-[16px] text-[#5E5E5E]',
+          ].join(' ')}
+        >
+          {description}
+        </p>
       </div>
     </div>
   );
@@ -43,7 +52,7 @@ export function AlertModal({
     </button>
   );
 
-  if (placement === 'bottom-sheet') {
+  if (isBottomSheet) {
     return (
       <BottomSheet isOpen={isOpen} title={title} titleId="alert-modal-title" footer={footer}>
         {body}

@@ -40,9 +40,9 @@ export function Modal({ children, footer, footerLayout = 'horizontal', isOpen, t
       aria-modal="true"
       aria-labelledby={resolvedTitleId}
     >
-      <div className="flex w-full max-w-[353px] flex-col items-start rounded-[28px] bg-white px-0 pb-4 pt-3 shadow-[0_20px_48px_rgba(0,0,0,0.18)]">
-        <div className="relative flex h-12 w-full items-center justify-center px-5 py-3">
-          <h2 id={resolvedTitleId} className="text-center text-[18px] font-semibold leading-[120%] text-[#131416]">
+      <div className="flex w-full max-w-[353px] flex-col items-start rounded-[28px] bg-white px-0 pb-5 pt-3 shadow-[0_20px_48px_rgba(0,0,0,0.18)]">
+        <div className="relative flex h-[49px] w-full items-center justify-center px-5 py-3">
+          <h2 id={resolvedTitleId} className="text-center text-[18px] font-semibold leading-[140%] text-[#292B2C]">
             {title}
           </h2>
         </div>
@@ -52,7 +52,7 @@ export function Modal({ children, footer, footerLayout = 'horizontal', isOpen, t
         {footer ? (
           <div
             className={[
-              'flex w-full items-start gap-2 px-5 pt-0',
+              'flex w-full items-start gap-2 px-5 pt-2',
               footerLayout === 'vertical' ? 'flex-col' : 'flex-row',
             ].join(' ')}
           >
