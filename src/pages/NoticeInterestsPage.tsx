@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { AppHeader } from '@/components/ui/AppHeader';
+import { BottomSheet } from '@/components/ui/BottomSheet';
 import { CtaButton } from '@/components/ui/CtaButton';
 
 type NoticeInterest = {
@@ -109,6 +110,7 @@ const noticeInterests: NoticeInterest[] = [
 export default function NoticeInterestsPage() {
   const navigate = useNavigate();
   const [interestIds, setInterestIds] = useState<number[]>([]);
+  const [isNotificationBottomSheetOpen, setIsNotificationBottomSheetOpen] = useState(false);
   const isCtaEnabled = interestIds.length >= 3;
 
   const toggleInterest = (interestId: number) => {
@@ -122,12 +124,58 @@ export default function NoticeInterestsPage() {
   };
 
   const handleNext = () => {
-    // TODO: Connect the notification permission BottomSheet in a later issue.
-    void interestIds;
+    if (!isCtaEnabled) {
+      return;
+    }
+
+    setIsNotificationBottomSheetOpen(true);
+  };
+
+  const closeNotificationBottomSheet = () => {
+    setIsNotificationBottomSheetOpen(false);
   };
 
   return (
     <main className="min-h-[100svh] bg-white">
+      <BottomSheet
+        isOpen={isNotificationBottomSheetOpen}
+        title="알림 권한"
+        footer={
+          <>
+            <CtaButton type="button" variant="primary" state="default" size="xlg" onClick={closeNotificationBottomSheet}>
+              허용
+            </CtaButton>
+            <CtaButton type="button" variant="tertiary" state="default" size="xlg" onClick={closeNotificationBottomSheet}>
+              허용 안함
+            </CtaButton>
+          </>
+        }
+      >
+        <div className="flex w-full flex-col items-center px-5 pb-4 pt-2 text-center">
+          <svg
+            aria-hidden="true"
+            width="120"
+            height="120"
+            viewBox="0 0 120 120"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-[120px] w-[120px]"
+          >
+            <path
+              d="M67.9666 51.0333C69.1279 50.7221 70.1905 51.7848 69.8794 52.9461L57.7832 98.0896C57.3321 99.7732 54.8799 99.5647 54.7195 97.8292L52.1614 70.1626C52.0922 69.4137 51.499 68.8205 50.75 68.7513L23.0835 66.1932C21.348 66.0327 21.1395 63.5806 22.8231 63.1295L67.9666 51.0333Z"
+              fill="#292B2C"
+            />
+            <path
+              d="M52.5544 68.9154C51.3983 69.2214 50.3357 68.1587 50.6416 67.0026L62.5356 22.0613C62.9792 20.3853 65.4234 20.6016 65.5895 22.3316L68.2362 49.9095C68.3079 50.656 68.9011 51.2492 69.6476 51.3208L97.2254 53.9676C98.9554 54.1336 99.1718 56.5778 97.4958 57.0214L52.5544 68.9154Z"
+              fill="#292B2C"
+            />
+          </svg>
+          <p className="mt-4 whitespace-pre-line text-[18px] font-semibold leading-[140%] text-[#202020]">
+            {'관심 공고가 올라오면 놓치지 않게\n바로 알려드릴게요.'}
+          </p>
+          <p className="mt-2 text-[15px] font-medium leading-[140%] text-[#6C6C6C]">알림을 보내도록 허용할까요?</p>
+        </div>
+      </BottomSheet>
       <div className="mx-auto flex min-h-[100svh] w-full max-w-[393px] flex-col bg-white">
         <div>
           <AppHeader title="맞춤 공지 설정" onBack={() => navigate('/home')} />
