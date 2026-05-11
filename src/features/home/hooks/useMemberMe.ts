@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { memberApi } from '@/api';
+import { MEMBER_ME_QUERY_KEY } from '@/features/home/memberMeQueryKey';
 
 export function useMemberMe() {
   return useQuery({
@@ -9,7 +10,7 @@ export function useMemberMe() {
 
       return response.data;
     },
-    queryKey: ['members', 'me'],
+    queryKey: MEMBER_ME_QUERY_KEY,
     retry: false,
   });
 }
