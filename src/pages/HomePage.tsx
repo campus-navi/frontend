@@ -1,8 +1,21 @@
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type MouseEvent,
+  type PointerEvent,
+  type TransitionEvent,
+} from 'react';
+
 import { AppHeader } from '@/components/ui/AppHeader';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { MobileGnb } from '@/components/ui/MobileGnb';
 import { RadioChip } from '@/components/ui/RadioChip';
 import { SvgIcon } from '@/components/ui/SvgIcon';
 import { Tags } from '@/components/ui/Tags';
+import { useFeedCards } from '@/features/home/hooks/useFeedCards';
+import type { FeedCardPost } from '@/api';
 
 const TEMP_NICKNAME = '익명';
 const HAS_NEW_NOTIFICATION = true;
@@ -32,7 +45,15 @@ const communityPosts = [
   },
 ];
 
+type FeaturedNoticeTab = 'new' | 'recommended';
+
 export default function HomePage() {
+  const [featuredNoticeTab, setFeaturedNoticeTab] = useState<FeaturedNoticeTab>('new');
+  const { data: feedCards, isError, isLoading } = useFeedCards();
+  const featuredPosts = featuredNoticeTab === 'new'
+    ? feedCards?.newPosts ?? []
+    : feedCards?.recommendedPosts ?? [];
+
   return (
     <main className="min-h-[100svh] bg-white">
       <div className="mx-auto flex min-h-[100svh] w-full max-w-[393px] flex-col bg-white pb-[86px]">
@@ -47,16 +68,31 @@ export default function HomePage() {
           <SectionTitle suffix="주요 공지" />
 
           <div className="flex items-center gap-2" role="tablist" aria-label="공지 유형">
-            <RadioChip selected size="md" role="tab" aria-selected="true">
+            <RadioChip
+              selected={featuredNoticeTab === 'new'}
+              size="md"
+              role="tab"
+              aria-selected={featuredNoticeTab === 'new'}
+              onClick={() => setFeaturedNoticeTab('new')}
+            >
               신규
             </RadioChip>
-            <RadioChip size="md" role="tab" aria-selected="false">
+            <RadioChip
+              selected={featuredNoticeTab === 'recommended'}
+              size="md"
+              role="tab"
+              aria-selected={featuredNoticeTab === 'recommended'}
+              onClick={() => setFeaturedNoticeTab('recommended')}
+            >
               추천
             </RadioChip>
           </div>
 
-          <FeaturedNoticeCard />
-          <ProgressDots total={10} activeIndex={0} />
+          <FeaturedNoticeContent
+            isError={isError}
+            isLoading={isLoading}
+            posts={featuredPosts}
+          />
         </section>
 
         <section className="flex flex-col gap-4 bg-white py-5">
@@ -96,6 +132,215 @@ export default function HomePage() {
   );
 }
 
+function FeaturedNoticeContent({
+  isError,
+  isLoading,
+  posts,
+}: {
+  isError: boolean;
+  isLoading: boolean;
+  posts: FeedCardPost[];
+}) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [dragOffsetX, setDragOffsetX] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isSnapping, setIsSnapping] = useState(false);
+  const dragStartX = useRef<number | null>(null);
+  const carouselViewportRef = useRef<HTMLDivElement | null>(null);
+  const hasDraggedRef = useRef(false);
+  const snapFrameRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    setActiveIndex(0);
+    setDragOffsetX(0);
+    setIsDragging(false);
+    setIsSnapping(false);
+    dragStartX.current = null;
+    hasDraggedRef.current = false;
+
+    if (snapFrameRef.current !== null) {
+      window.cancelAnimationFrame(snapFrameRef.current);
+      snapFrameRef.current = null;
+    }
+  }, [posts]);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[481px] items-center justify-center rounded-2xl bg-[#FAFAFC] text-[#292B2C]">
+        <LoadingSpinner ariaLabel="주요 공지를 불러오는 중" className="h-8 w-8" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return <FeaturedNoticePlaceholder>주요 공지를 불러오지 못했어요.</FeaturedNoticePlaceholder>;
+  }
+
+  if (posts.length === 0) {
+    return <FeaturedNoticePlaceholder>표시할 주요 공지가 없어요.</FeaturedNoticePlaceholder>;
+  }
+
+  const activePost = posts[activeIndex % posts.length];
+  const previousIndex = (activeIndex - 1 + posts.length) % posts.length;
+  const nextIndex = (activeIndex + 1) % posts.length;
+  const previousPost = posts[previousIndex];
+  const nextPost = posts[nextIndex];
+
+  const handleDragStart = (event: PointerEvent<HTMLDivElement>) => {
+    if (posts.length <= 1 || isSnapping) {
+      return;
+    }
+
+    dragStartX.current = event.clientX;
+    hasDraggedRef.current = false;
+    setIsDragging(true);
+    setIsSnapping(false);
+
+    if (snapFrameRef.current !== null) {
+      window.cancelAnimationFrame(snapFrameRef.current);
+      snapFrameRef.current = null;
+    }
+
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const handleDragMove = (event: PointerEvent<HTMLDivElement>) => {
+    if (dragStartX.current === null) {
+      return;
+    }
+
+    const dragDistance = event.clientX - dragStartX.current;
+    hasDraggedRef.current = Math.abs(dragDistance) > 8;
+    setDragOffsetX(dragDistance);
+  };
+
+  const handleDragEnd = (event: PointerEvent<HTMLDivElement>) => {
+    if (dragStartX.current === null) {
+      return;
+    }
+
+    const dragDistance = event.clientX - dragStartX.current;
+    const viewportWidth = carouselViewportRef.current?.clientWidth ?? 0;
+    dragStartX.current = null;
+    setIsDragging(false);
+
+    if (Math.abs(dragDistance) < 48) {
+      hasDraggedRef.current = Math.abs(dragDistance) > 8;
+      setIsSnapping(true);
+      setDragOffsetX(0);
+      return;
+    }
+
+    if (dragDistance < 0) {
+      setActiveIndex(nextIndex);
+      setIsSnapping(false);
+      setDragOffsetX(viewportWidth + dragDistance);
+      snapFrameRef.current = window.requestAnimationFrame(() => {
+        setIsSnapping(true);
+        setDragOffsetX(0);
+        snapFrameRef.current = null;
+      });
+      return;
+    }
+
+    setActiveIndex(previousIndex);
+    setIsSnapping(false);
+    setDragOffsetX(-viewportWidth + dragDistance);
+    snapFrameRef.current = window.requestAnimationFrame(() => {
+      setIsSnapping(true);
+      setDragOffsetX(0);
+      snapFrameRef.current = null;
+    });
+  };
+
+  const handleDragCancel = () => {
+    dragStartX.current = null;
+    setDragOffsetX(0);
+    setIsDragging(false);
+    setIsSnapping(true);
+  };
+
+  const handleTrackTransitionEnd = (event: TransitionEvent<HTMLDivElement>) => {
+    if (event.propertyName !== 'transform') {
+      return;
+    }
+
+    setDragOffsetX(0);
+    setIsSnapping(false);
+  };
+
+  const handleOpenCardNews = (postId: number) => {
+    void postId;
+    // TODO: 카드뉴스 확장 보기 또는 카드뉴스 상세 화면 라우트가 생기면 연결한다.
+  };
+
+  const handleOpenNoticeDetail = (postId: number) => {
+    void postId;
+    // TODO: 공지 글 상세 페이지 라우트가 생기면 연결한다.
+  };
+
+  const handleCardClick = () => {
+    if (hasDraggedRef.current || isSnapping) {
+      hasDraggedRef.current = false;
+      return;
+    }
+
+    handleOpenCardNews(activePost.postId);
+  };
+
+  const handleNoticeDetailClick = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    handleOpenNoticeDetail(activePost.postId);
+  };
+
+  const trackStyle = {
+    transform: `translate3d(calc(-100% + ${dragOffsetX}px), 0, 0)`,
+    transition: isDragging || !isSnapping ? 'none' : 'transform 220ms ease-out',
+  } satisfies CSSProperties;
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div
+        className="relative overflow-hidden rounded-2xl touch-pan-y select-none"
+        ref={carouselViewportRef}
+        onPointerCancel={handleDragCancel}
+        onPointerDown={handleDragStart}
+        onPointerMove={handleDragMove}
+        onPointerUp={handleDragEnd}
+        onClick={handleCardClick}
+      >
+        <div
+          className="grid grid-cols-[100%_100%_100%]"
+          onTransitionEnd={handleTrackTransitionEnd}
+          style={trackStyle}
+        >
+          <FeaturedNoticeCard post={previousPost} />
+          <FeaturedNoticeCard post={activePost} />
+          <FeaturedNoticeCard post={nextPost} />
+        </div>
+        <button
+          type="button"
+          className="absolute bottom-4 left-4 right-4 z-20 flex h-12 items-center justify-center rounded-[10px] bg-[#292B2C] px-4 text-[16px] font-medium leading-none tracking-[0.015em] text-white"
+          data-post-id={activePost.postId}
+          onClick={handleNoticeDetailClick}
+          onPointerDown={(event) => event.stopPropagation()}
+        >
+          공지 자세히 보기
+        </button>
+      </div>
+      <ProgressDots total={posts.length} activeIndex={activeIndex} />
+    </div>
+  );
+}
+
+function FeaturedNoticePlaceholder({ children }: { children: string }) {
+  return (
+    <div className="flex h-[481px] items-center justify-center rounded-2xl bg-[#FAFAFC] px-6 text-center text-[14px] font-medium leading-[1.4] text-[#767676]">
+      {children}
+    </div>
+  );
+}
+
 function SectionTitle({ suffix }: { suffix: string }) {
   return (
     <h1 className="flex items-center gap-1 text-[20px] font-bold leading-[1.2] tracking-[-0.02em] text-[#333333]">
@@ -131,34 +376,26 @@ function SeeAllButton() {
   );
 }
 
-function FeaturedNoticeCard() {
+function FeaturedNoticeCard({ post }: { post: FeedCardPost }) {
   return (
-    <article className="relative flex h-[481px] overflow-hidden rounded-2xl bg-[#D6D8CF] p-4">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_70%,#8BB178_0_22%,transparent_23%),linear-gradient(180deg,rgba(255,255,255,0.08)_0%,rgba(51,51,51,0.82)_100%)]" />
-      <div className="absolute left-6 right-6 top-9 flex flex-col items-center text-center text-[#18245A]">
-        <p className="text-[22px] font-medium leading-none">2025 크림슨 SW아카데미</p>
-        <p className="mt-2 text-[44px] font-black leading-none tracking-[-0.03em] text-black">AI Driven</p>
-        <p className="mt-3 text-[26px] font-black leading-tight text-black">창업 캠프(w. aws)</p>
-      </div>
-      <div className="relative z-10 mt-auto flex w-full flex-col gap-3">
+    <article
+      className="relative flex h-[481px] overflow-hidden bg-[#D6D8CF] bg-cover bg-center p-4"
+      data-post-id={post.postId}
+      style={{ backgroundImage: `url(${post.imageUrl})` }}
+    >
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,rgba(51,51,51,0.82)_100%)]" />
+      <div className="relative z-10 mt-auto flex w-full flex-col gap-3 pb-16">
         <Tags size="lg" type="tertiary" className="h-8">
-          수강
+          {post.tagName}
         </Tags>
         <div className="flex flex-col gap-1">
           <h2 className="line-clamp-2 text-[20px] font-semibold leading-[1.4] text-white">
-            2026-1 프로젝트학기제 및 지역사회연계 프로젝트 신청 안내 (2/25 마감)
+            {post.title}
           </h2>
           <p className="line-clamp-2 text-[14px] font-normal leading-[1.4] text-[#DCDFE2]">
-            3학년 2학기 이상 재학생 대상, 2월 25일 13시까지 이메일 접수. 성과 발표 우수팀 상장 및
-            장학금 지급, 상세 양식 첨부
+            {post.summary}
           </p>
         </div>
-        <button
-          type="button"
-          className="flex h-12 w-full items-center justify-center rounded-[10px] bg-[#292B2C] px-4 text-[16px] font-medium leading-none tracking-[0.015em] text-white"
-        >
-          공지 자세히 보기
-        </button>
       </div>
     </article>
   );
