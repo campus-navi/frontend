@@ -256,7 +256,7 @@ function CardNewsCarousel({
     dragStartX.current = null;
     setDragOffsetX(0);
     setIsDragging(false);
-    setIsSnapping(true);
+    setIsSnapping(false);
   };
 
   const handleTrackTransitionEnd = (event: TransitionEvent<HTMLDivElement>) => {
