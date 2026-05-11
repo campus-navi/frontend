@@ -3,13 +3,15 @@ import { useParams } from 'react-router-dom';
 import { AppHeader } from '@/components/ui/AppHeader';
 
 function parsePostId(value: string | undefined) {
-  if (!value || value.trim() === '') {
+  const normalizedValue = value?.trim();
+
+  if (!normalizedValue || !/^[1-9]\d*$/.test(normalizedValue)) {
     return null;
   }
 
-  const postId = Number(value);
+  const postId = Number(normalizedValue);
 
-  return Number.isFinite(postId) ? postId : null;
+  return Number.isInteger(postId) && postId > 0 ? postId : null;
 }
 
 export default function InfoPostDetailPage() {
