@@ -9,13 +9,17 @@ import {
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { CtaButton } from '@/components/ui/CtaButton';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { MobileGnb } from '@/components/ui/MobileGnb';
+import { Modal } from '@/components/ui/Modal';
 import { RadioChip } from '@/components/ui/RadioChip';
 import { SvgIcon } from '@/components/ui/SvgIcon';
 import { Tags } from '@/components/ui/Tags';
+import { dismissNoticeInterestPrompt, useHasDismissedNoticeInterestPrompt } from '@/features/home/noticeInterestPromptDismissState';
 import { useFeedCards } from '@/features/home/hooks/useFeedCards';
+import { useMemberMe } from '@/features/home/hooks/useMemberMe';
 import type { FeedCardPost } from '@/api';
 
 const TEMP_NICKNAME = '익명';
@@ -52,11 +56,24 @@ const communityPosts = [
 type FeaturedNoticeTab = 'new' | 'recommended';
 
 export default function HomePage() {
+  const navigate = useNavigate();
   const [featuredNoticeTab, setFeaturedNoticeTab] = useState<FeaturedNoticeTab>('new');
   const { data: feedCards, isError, isLoading } = useFeedCards();
+  const { data: memberMe } = useMemberMe();
+  const hasDismissedNoticeInterestPrompt = useHasDismissedNoticeInterestPrompt();
   const featuredPosts = featuredNoticeTab === 'new'
     ? feedCards?.newPosts ?? []
     : feedCards?.recommendedPosts ?? [];
+  const nickname = memberMe?.nickname ?? TEMP_NICKNAME;
+  const isNoticeInterestPromptOpen = memberMe?.hasSetInterests === false && !hasDismissedNoticeInterestPrompt;
+
+  const goToNoticeInterests = () => {
+    navigate('/notice-interests');
+  };
+
+  const closeNoticeInterestPrompt = () => {
+    dismissNoticeInterestPrompt();
+  };
 
   return (
     <main className="min-h-[100svh] bg-white">
@@ -69,7 +86,7 @@ export default function HomePage() {
         <div className="h-[calc(60px+max(20px,env(safe-area-inset-top)))] shrink-0" aria-hidden="true" />
 
         <section className="flex flex-col gap-5 bg-white px-4 py-4">
-          <SectionTitle suffix="주요 공지" />
+          <SectionTitle nickname={nickname} suffix="주요 공지" />
 
           <div className="flex items-center gap-2" role="tablist" aria-label="공지 유형">
             <RadioChip
@@ -110,7 +127,7 @@ export default function HomePage() {
 
         <section className="flex flex-col gap-5 bg-white px-4 py-4">
           <div className="flex items-center justify-between gap-3">
-            <SectionTitle suffix="머시기 글" />
+            <SectionTitle nickname={nickname} suffix="머시기 글" />
             <SeeAllButton />
           </div>
 
@@ -132,6 +149,38 @@ export default function HomePage() {
       </div>
 
       <MobileGnb activeItem="home" />
+
+      <Modal
+        isOpen={isNoticeInterestPromptOpen}
+        title={<span className="sr-only">어떤 공지를 보여드릴까요?</span>}
+        titleId="notice-interest-prompt-title"
+        footerLayout="vertical"
+        footer={
+          <>
+            <CtaButton type="button" variant="primary" state="default" size="xlg" onClick={goToNoticeInterests}>
+              맞춤 공지 설정하기
+            </CtaButton>
+            <CtaButton type="button" variant="tertiary" state="default" size="xlg" onClick={closeNoticeInterestPrompt}>
+              다음에 할게요
+            </CtaButton>
+          </>
+        }
+      >
+        <div className="flex w-full flex-col items-center px-5 pb-5 pt-1">
+          <img
+            src="/images/notice-interest-prompt.svg"
+            alt=""
+            className="h-[150px] w-full object-contain"
+            aria-hidden="true"
+          />
+          <h3 className="mt-4 text-center text-[18px] font-semibold leading-[1.4] tracking-normal text-[#292B2C]">
+            어떤 공지를 보여드릴까요?
+          </h3>
+          <p className="mt-3 whitespace-pre-line text-center text-[16px] font-medium leading-[1.5] tracking-normal text-[#5E5E5E]">
+            {`${nickname}님을 위한 컨텐츠를 위해\n간단한 설문조사에 참여해주세요.`}
+          </p>
+        </div>
+      </Modal>
     </main>
   );
 }
@@ -400,10 +449,10 @@ function FeaturedNoticePlaceholder({ children }: { children: string }) {
   );
 }
 
-function SectionTitle({ suffix }: { suffix: string }) {
+function SectionTitle({ nickname, suffix }: { nickname: string; suffix: string }) {
   return (
     <h1 className="flex items-center gap-1 text-[20px] font-bold leading-[1.2] tracking-[-0.02em] text-[#333333]">
-      <span>{TEMP_NICKNAME}님을 위한</span>
+      <span>{nickname}님을 위한</span>
       <span className="text-[#939393]">{suffix}</span>
     </h1>
   );
