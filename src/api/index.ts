@@ -4,6 +4,7 @@ export { ApiError, createApiError, isApiError, normalizeApiError } from '@/api/e
 export { authApi } from '@/api/modules/auth';
 export { commentApi } from '@/api/modules/comment';
 export { departmentApi } from '@/api/modules/department';
+export { feedApi } from '@/api/modules/feed';
 export { mypageApi } from '@/api/modules/mypage';
 export { postApi } from '@/api/modules/post';
 export { universityApi } from '@/api/modules/university';
@@ -18,4 +19,5 @@ export type {
   ApiResponseData,
   ApiSuccessResponse,
 } from '@/api/types';
+export type { FeedCardPost, FeedCards } from '@/api/modules/feed';
 export { tokenStorage } from '@/shared/auth';
