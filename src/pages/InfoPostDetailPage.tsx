@@ -27,6 +27,7 @@ export default function InfoPostDetailPage() {
     isLoading,
   } = useOfficialPostDetail(postId);
   const errorMessage = getDetailErrorMessage(error, postId);
+  const safeSourceUrl = getSafeHttpUrl(post?.sourceUrl ?? null);
 
   return (
     <main className="min-h-[100svh] bg-white">
@@ -76,17 +77,17 @@ export default function InfoPostDetailPage() {
 
             <section className="flex flex-col gap-2">
               <h2 className="text-[16px] font-semibold leading-[1.4] text-[#292B2C]">원문</h2>
-              {post.sourceUrl ? (
+              {safeSourceUrl ? (
                 <a
                   className="break-all text-[15px] font-normal leading-[1.5] text-[#007AFF] underline"
-                  href={post.sourceUrl}
-                  rel="noreferrer"
+                  href={safeSourceUrl}
+                  rel="noreferrer noopener"
                   target="_blank"
                 >
-                  {post.sourceUrl}
+                  {safeSourceUrl}
                 </a>
               ) : (
-                <p className="text-[15px] font-normal leading-[1.5] text-[#9D9D9D]">원문 링크가 없어요.</p>
+                <p className="text-[15px] font-normal leading-[1.5] text-[#9D9D9D]">유효한 원문 링크가 없어요.</p>
               )}
             </section>
 
@@ -145,6 +146,20 @@ function formatDateTime(date: string | null, time: string | null) {
 
 function formatBoolean(value: boolean) {
   return value ? 'ON' : 'OFF';
+}
+
+function getSafeHttpUrl(value: string | null) {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    const url = new URL(value);
+
+    return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : null;
+  } catch {
+    return null;
+  }
 }
 
 function getDetailErrorMessage(error: unknown, postId: number | null) {
