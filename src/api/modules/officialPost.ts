@@ -36,10 +36,47 @@ export interface OfficialPostDetail extends ApiObjectData {
   title: string;
 }
 
+export type OfficialPostListSort = 'LATEST' | 'DEADLINE';
+
+export interface OfficialPostSummary extends ApiObjectData {
+  endDate: string | null;
+  postId: number;
+  publishedAt: string;
+  tagName: string;
+  title: string;
+}
+
+export interface OfficialPostList extends ApiObjectData {
+  content: OfficialPostSummary[];
+  hasNext: boolean;
+  nextCursor: string | null;
+}
+
+export interface OfficialPostListParams {
+  cursor?: string;
+  q?: string;
+  sort?: OfficialPostListSort;
+  tagCode?: string;
+}
+
 interface OfficialPostAttachmentResponse extends ApiObjectData {
   id?: number | string;
   isDownloaded?: boolean;
   name?: string;
+}
+
+interface OfficialPostSummaryResponse extends ApiObjectData {
+  endDate?: string | null;
+  postId?: number | string;
+  publishedAt?: string;
+  tagName?: string;
+  title?: string;
+}
+
+interface OfficialPostListResponse extends ApiObjectData {
+  content?: OfficialPostSummaryResponse[];
+  hasNext?: boolean;
+  nextCursor?: string | null;
 }
 
 interface OfficialPostDetailResponse extends ApiObjectData {
@@ -91,6 +128,14 @@ function createInvalidOfficialPostResponseError() {
   });
 }
 
+function createInvalidOfficialPostListResponseError() {
+  return createApiError({
+    code: COMMON_ERROR_CODES.INVALID_RESPONSE,
+    message: '교내정보 목록 응답 형식이 올바르지 않습니다.',
+    status: 200,
+  });
+}
+
 function normalizeNullableString(value: unknown): string | null {
   return typeof value === 'string' ? value : null;
 }
@@ -110,6 +155,41 @@ function normalizeAttachment(item: OfficialPostAttachmentResponse): OfficialPost
     id,
     isDownloaded,
     name,
+  };
+}
+
+function normalizeOfficialPostSummary(item: OfficialPostSummaryResponse): OfficialPostSummary {
+  const { postId, publishedAt, tagName, title } = item;
+
+  if (
+    (typeof postId !== 'number' && typeof postId !== 'string') ||
+    typeof title !== 'string' ||
+    typeof tagName !== 'string' ||
+    typeof publishedAt !== 'string'
+  ) {
+    throw createInvalidOfficialPostListResponseError();
+  }
+
+  return {
+    endDate: normalizeNullableString(item.endDate),
+    postId: normalizePostId(postId),
+    publishedAt,
+    tagName,
+    title,
+  };
+}
+
+function normalizeOfficialPostList(data: OfficialPostListResponse): OfficialPostList {
+  const { content, hasNext, nextCursor } = data;
+
+  if (!Array.isArray(content) || typeof hasNext !== 'boolean') {
+    throw createInvalidOfficialPostListResponseError();
+  }
+
+  return {
+    content: content.map(normalizeOfficialPostSummary),
+    hasNext,
+    nextCursor: typeof nextCursor === 'string' ? nextCursor : null,
   };
 }
 
@@ -174,6 +254,21 @@ function normalizeOfficialPostDetail(data: OfficialPostDetailResponse): Official
 }
 
 export const officialPostApi = {
+  async list(params: OfficialPostListParams = {}) {
+    const response = await request<OfficialPostListResponse>({
+      method: 'get',
+      params: {
+        ...params,
+        sort: params.sort ?? 'LATEST',
+      },
+      url: '/official-posts',
+    });
+
+    return {
+      ...response,
+      data: normalizeOfficialPostList(response.data),
+    };
+  },
   async getDetail(postId: number) {
     const response = await request<OfficialPostDetailResponse>({
       method: 'get',
