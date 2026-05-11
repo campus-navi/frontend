@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 
+import CardNewsDetailPage from '@/pages/CardNewsDetailPage';
 import HomePage from '@/pages/HomePage';
 import InfoPage from '@/pages/InfoPage';
 import InfoPostDetailPage from '@/pages/InfoPostDetailPage';
@@ -14,6 +15,7 @@ export default function App() {
   return (
     <Routes>
       <Route index element={<OnboardingPage />} />
+      <Route path="/card-news/:postId" element={<CardNewsDetailPage />} />
       <Route path="/home" element={<HomePage />} />
       <Route path="/info" element={<InfoPage />} />
       <Route path="/info/posts/:postId" element={<InfoPostDetailPage />} />
