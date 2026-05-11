@@ -69,14 +69,9 @@ export default function InfoPostDetailPage() {
 
             <section className="flex flex-col gap-2">
               <h2 className="text-[16px] font-semibold leading-[1.4] text-[#292B2C]">본문</h2>
-              {post.contentHtml ? (
-                <div
-                  className="break-words text-[15px] font-normal leading-[1.6] text-[#565656] [&_a]:text-[#007AFF] [&_a]:underline [&_img]:h-auto [&_img]:max-w-full [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5"
-                  dangerouslySetInnerHTML={{ __html: post.contentHtml }}
-                />
-              ) : (
-                <p className="text-[15px] font-normal leading-[1.6] text-[#9D9D9D]">본문이 없어요.</p>
-              )}
+              <p className="text-[15px] font-normal leading-[1.6] text-[#9D9D9D]">
+                본문 내용은 상세 UI 작업에서 표시할 예정입니다.
+              </p>
             </section>
 
             <section className="flex flex-col gap-2">
