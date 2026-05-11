@@ -6,6 +6,7 @@ export { commentApi } from '@/api/modules/comment';
 export { departmentApi } from '@/api/modules/department';
 export { feedApi } from '@/api/modules/feed';
 export { mypageApi } from '@/api/modules/mypage';
+export { officialPostApi } from '@/api/modules/officialPost';
 export { postApi } from '@/api/modules/post';
 export { universityApi } from '@/api/modules/university';
 export { userApi } from '@/api/modules/user';
@@ -20,4 +21,5 @@ export type {
   ApiSuccessResponse,
 } from '@/api/types';
 export type { FeedCardPost, FeedCards } from '@/api/modules/feed';
+export type { OfficialPostAttachment, OfficialPostDetail } from '@/api/modules/officialPost';
 export { tokenStorage } from '@/shared/auth';
