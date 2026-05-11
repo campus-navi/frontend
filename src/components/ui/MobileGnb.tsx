@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { NavLink } from 'react-router-dom';
 
 import { SvgIcon } from '@/components/ui/SvgIcon';
 
@@ -8,8 +9,8 @@ type MobileGnbProps = {
   activeItem: MobileGnbItem;
 };
 
-const items: Array<{ id: MobileGnbItem; label: string; icon: ReactNode }> = [
-  { id: 'home', label: '홈', icon: <HomeIcon /> },
+const items: Array<{ id: MobileGnbItem; label: string; path?: string; icon: ReactNode }> = [
+  { id: 'home', label: '홈', path: '/home', icon: <HomeIcon /> },
   { id: 'community', label: '커뮤니티', icon: <CommunityIcon /> },
   { id: 'date', label: '시간표', icon: <CalendarIcon /> },
   { id: 'info', label: '교내정보', icon: <InfoIcon /> },
@@ -24,23 +25,33 @@ export function MobileGnb({ activeItem }: MobileGnbProps) {
     >
       <ul className="grid h-full grid-cols-5">
         {items.map((item) => {
-          const isActive = item.id === activeItem;
+          const baseClassName =
+            'flex h-full w-full flex-col items-center justify-center gap-1 text-[14px] font-normal leading-[18px] tracking-[-0.02em] transition-colors';
 
           return (
             <li key={item.id} className="min-w-0">
-              <button
-                type="button"
-                className={[
-                  'flex h-full w-full flex-col items-center justify-center gap-1 text-[14px] font-normal leading-[18px] tracking-[-0.02em] transition-colors',
-                  isActive ? 'text-[#292B2C]' : 'text-[#BFC4C8]',
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-                aria-current={isActive ? 'page' : undefined}
-              >
-                {item.icon}
-                <span className="whitespace-nowrap">{item.label}</span>
-              </button>
+              {item.path ? (
+                <NavLink
+                  to={item.path}
+                  className={({ isActive }) =>
+                    [baseClassName, isActive || item.id === activeItem ? 'text-[#292B2C]' : 'text-[#BFC4C8]']
+                      .filter(Boolean)
+                      .join(' ')
+                  }
+                >
+                  {item.icon}
+                  <span className="whitespace-nowrap">{item.label}</span>
+                </NavLink>
+              ) : (
+                <button
+                  type="button"
+                  className={[baseClassName, 'cursor-default text-[#BFC4C8]'].join(' ')}
+                  aria-disabled="true"
+                >
+                  {item.icon}
+                  <span className="whitespace-nowrap">{item.label}</span>
+                </button>
+              )}
             </li>
           );
         })}
