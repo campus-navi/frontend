@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
 import { SvgIcon } from '@/components/ui/SvgIcon';
 
@@ -9,18 +9,15 @@ type MobileGnbProps = {
   activeItem: MobileGnbItem;
 };
 
-const items: Array<{ id: MobileGnbItem; label: string; path: string; icon: ReactNode }> = [
+const items: Array<{ id: MobileGnbItem; label: string; path?: string; icon: ReactNode }> = [
   { id: 'home', label: '홈', path: '/home', icon: <HomeIcon /> },
-  { id: 'community', label: '커뮤니티', path: '/community', icon: <CommunityIcon /> },
-  { id: 'date', label: '시간표', path: '/schedule', icon: <CalendarIcon /> },
-  { id: 'info', label: '교내정보', path: '/info', icon: <InfoIcon /> },
-  { id: 'my', label: '마이페이지', path: '/my', icon: <MyIcon /> },
+  { id: 'community', label: '커뮤니티', icon: <CommunityIcon /> },
+  { id: 'date', label: '시간표', icon: <CalendarIcon /> },
+  { id: 'info', label: '교내정보', icon: <InfoIcon /> },
+  { id: 'my', label: '마이페이지', icon: <MyIcon /> },
 ];
 
 export function MobileGnb({ activeItem }: MobileGnbProps) {
-  const location = useLocation();
-  const hasMatchedRoute = items.some((item) => item.path === location.pathname);
-
   return (
     <nav
       className="fixed bottom-0 left-1/2 z-30 h-[86px] w-full max-w-[393px] -translate-x-1/2 border-t border-[#DCDFE2] bg-white px-1 pb-8 pt-2"
@@ -28,22 +25,33 @@ export function MobileGnb({ activeItem }: MobileGnbProps) {
     >
       <ul className="grid h-full grid-cols-5">
         {items.map((item) => {
+          const baseClassName =
+            'flex h-full w-full flex-col items-center justify-center gap-1 text-[14px] font-normal leading-[18px] tracking-[-0.02em] transition-colors';
+
           return (
             <li key={item.id} className="min-w-0">
-              <NavLink
-                to={item.path}
-                className={({ isActive }) =>
-                  [
-                    'flex h-full w-full flex-col items-center justify-center gap-1 text-[14px] font-normal leading-[18px] tracking-[-0.02em] transition-colors',
-                    isActive || (!hasMatchedRoute && item.id === activeItem) ? 'text-[#292B2C]' : 'text-[#BFC4C8]',
-                  ]
-                    .filter(Boolean)
-                    .join(' ')
-                }
-              >
-                {item.icon}
-                <span className="whitespace-nowrap">{item.label}</span>
-              </NavLink>
+              {item.path ? (
+                <NavLink
+                  to={item.path}
+                  className={({ isActive }) =>
+                    [baseClassName, isActive || item.id === activeItem ? 'text-[#292B2C]' : 'text-[#BFC4C8]']
+                      .filter(Boolean)
+                      .join(' ')
+                  }
+                >
+                  {item.icon}
+                  <span className="whitespace-nowrap">{item.label}</span>
+                </NavLink>
+              ) : (
+                <button
+                  type="button"
+                  className={[baseClassName, 'cursor-default text-[#BFC4C8]'].join(' ')}
+                  aria-disabled="true"
+                >
+                  {item.icon}
+                  <span className="whitespace-nowrap">{item.label}</span>
+                </button>
+              )}
             </li>
           );
         })}
