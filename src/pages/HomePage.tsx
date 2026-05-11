@@ -316,8 +316,7 @@ function FeaturedNoticeContent({
   };
 
   const handleOpenCardNews = (postId: number) => {
-    void postId;
-    // TODO: 카드뉴스 확장 보기 또는 카드뉴스 상세 화면 라우트가 생기면 연결한다.
+    navigate(`/card-news/${postId}`);
   };
 
   const handleOpenNoticeDetail = (postId: number) => {
@@ -437,7 +436,7 @@ function FeaturedNoticeCard({ post }: { post: FeedCardPost }) {
           <h2 className="line-clamp-2 text-[20px] font-semibold leading-[1.4] text-white">
             {post.title}
           </h2>
-          <p className="line-clamp-2 text-[14px] font-normal leading-[1.4] text-[#DCDFE2]">
+          <p className="line-clamp-3 text-[14px] font-normal leading-[1.4] text-[#DCDFE2]">
             {post.summary}
           </p>
         </div>
