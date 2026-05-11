@@ -233,6 +233,7 @@ export default function SignupPage() {
       return;
     }
 
+    setIsTermsAgreementSheetOpen(false);
     void signupSubmit.submit();
   };
 
