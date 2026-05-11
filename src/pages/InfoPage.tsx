@@ -71,8 +71,12 @@ function OfficialPostListItem({ onClick, post }: { onClick: () => void; post: Of
         {post.title}
       </h2>
       <p className="text-[13px] font-normal leading-[1.4] text-[#767676]">
-        마감일 {post.endDate ?? '-'}
+        마감일 {formatOptionalText(post.endDate)}
       </p>
     </button>
   );
+}
+
+function formatOptionalText(value: string | null) {
+  return value?.trim() || '-';
 }
