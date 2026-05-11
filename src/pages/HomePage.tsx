@@ -7,6 +7,7 @@ import {
   type PointerEvent,
   type TransitionEvent,
 } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { AppHeader } from '@/components/ui/AppHeader';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
@@ -144,6 +145,7 @@ function FeaturedNoticeContent({
   isLoading: boolean;
   posts: FeedCardPost[];
 }) {
+  const navigate = useNavigate();
   const [activeIndex, setActiveIndex] = useState(0);
   const [dragOffsetX, setDragOffsetX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -319,8 +321,7 @@ function FeaturedNoticeContent({
   };
 
   const handleOpenNoticeDetail = (postId: number) => {
-    void postId;
-    // TODO: 공지 글 상세 페이지 라우트가 생기면 연결한다.
+    navigate(`/info/posts/${postId}`);
   };
 
   const handleCardClick = () => {
