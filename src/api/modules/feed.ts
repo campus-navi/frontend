@@ -33,6 +33,28 @@ interface FeedCardsResponse extends ApiObjectData {
   recommendedPosts?: FeedCardPostResponse[];
 }
 
+function normalizePostId(postId: number | string): number {
+  if (typeof postId === 'string' && postId.trim() === '') {
+    throw createApiError({
+      code: COMMON_ERROR_CODES.INVALID_RESPONSE,
+      message: '카드뉴스 응답 형식이 올바르지 않습니다.',
+      status: 200,
+    });
+  }
+
+  const normalizedPostId = Number(postId);
+
+  if (!Number.isFinite(normalizedPostId)) {
+    throw createApiError({
+      code: COMMON_ERROR_CODES.INVALID_RESPONSE,
+      message: '카드뉴스 응답 형식이 올바르지 않습니다.',
+      status: 200,
+    });
+  }
+
+  return normalizedPostId;
+}
+
 function normalizeFeedCardPost(item: FeedCardPostResponse): FeedCardPost {
   const { postId, title, tagName, summary, imageUrl, publishedAt } = item;
 
@@ -52,7 +74,7 @@ function normalizeFeedCardPost(item: FeedCardPostResponse): FeedCardPost {
 
   return {
     imageUrl: typeof imageUrl === 'string' && imageUrl.trim() ? imageUrl : DEFAULT_FEED_CARD_IMAGE_URL,
-    postId: Number(postId),
+    postId: normalizePostId(postId),
     publishedAt,
     summary,
     tagName,
