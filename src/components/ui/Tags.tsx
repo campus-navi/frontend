@@ -31,7 +31,7 @@ export function Tags({
   return (
     <span
       className={[
-        'inline-flex shrink-0 items-center justify-center whitespace-nowrap tracking-normal',
+        'inline-flex shrink-0 self-start items-center justify-center whitespace-nowrap tracking-normal',
         sizeClassNames[size],
         typeClassNames[type],
         className,

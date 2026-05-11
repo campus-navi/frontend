@@ -21,15 +21,17 @@ export function RadioChip({
   type = 'button',
   ...props
 }: RadioChipProps) {
+  const reservedLabel = typeof children === 'string' || typeof children === 'number' ? children : null;
+
   return (
     <button
       type={type}
       aria-pressed={selected}
       className={[
-        'inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full transition-colors',
+        'inline-grid shrink-0 place-items-center whitespace-nowrap rounded-full border transition-colors',
         sizeClassNames[size],
         selected
-          ? 'border-0 bg-[#292B2C] font-semibold text-white'
+          ? 'border-[#292B2C] bg-[#292B2C] font-semibold text-white'
           : 'border border-[#DCDFE2] bg-transparent font-medium text-[#BFC4C8]',
         className,
       ]
@@ -37,7 +39,12 @@ export function RadioChip({
         .join(' ')}
       {...props}
     >
-      {children}
+      <span className="[grid-area:1/1]">{children}</span>
+      {reservedLabel !== null ? (
+        <span aria-hidden="true" className="invisible h-0 overflow-hidden font-semibold [grid-area:1/1]">
+          {reservedLabel}
+        </span>
+      ) : null}
     </button>
   );
 }
