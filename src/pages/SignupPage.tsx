@@ -7,6 +7,10 @@ import { BottomSheet } from '@/components/ui/BottomSheet';
 import { CtaButton } from '@/components/ui/CtaButton';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { SignupHeader } from '@/features/signup/components/SignupHeader';
+import {
+  SignupTermsAgreementSheet,
+  type SignupTermId,
+} from '@/features/signup/components/SignupTermsAgreementSheet';
 import { getEmailVerificationErrorModal } from '@/features/signup/emailVerification';
 import { useSignupFlow } from '@/features/signup/hooks/useSignupFlow';
 import { useSignupSubmit } from '@/features/signup/hooks/useSignupSubmit';
@@ -43,6 +47,8 @@ function getKeyboardInset() {
   const viewport = window.visualViewport;
   return Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
 }
+
+const requiredSignupTermIds: SignupTermId[] = ['privacy', 'age', 'externalApi'];
 
 function useKeyboardCtaState() {
   const [keyboardInset, setKeyboardInset] = useState(0);
@@ -104,7 +110,10 @@ function useKeyboardCtaState() {
 
 export default function SignupPage() {
   const navigate = useNavigate();
-  const [isEmailVerificationSuccessModalOpen, setIsEmailVerificationSuccessModalOpen] = useState(false);
+  const [isEmailVerificationSuccessModalOpen, setIsEmailVerificationSuccessModalOpen] =
+    useState(false);
+  const [isTermsAgreementSheetOpen, setIsTermsAgreementSheetOpen] = useState(false);
+  const [agreedSignupTermIds, setAgreedSignupTermIds] = useState<SignupTermId[]>([]);
   const keyboardCta = useKeyboardCtaState();
   const {
     state,
@@ -127,7 +136,8 @@ export default function SignupPage() {
     actions,
   } = useSignupFlow();
   const universitySearchError = universitySearch.isError ? universitySearch.error : null;
-  const isUniversityServerError = isApiError(universitySearchError) && universitySearchError.status === 500;
+  const isUniversityServerError =
+    isApiError(universitySearchError) && universitySearchError.status === 500;
   const emailVerificationErrorModal = getEmailVerificationErrorModal(state.emailVerification);
   const isKeyboardCtaStep = state.step === 5 && keyboardCta.isSupported;
   const isKeyboardOpen = isKeyboardCtaStep && keyboardCta.isKeyboardOpen;
@@ -135,7 +145,9 @@ export default function SignupPage() {
     ? 'px-0 pb-0 pt-0'
     : 'px-5 pb-[max(24px,env(safe-area-inset-bottom))] pt-2';
   const ctaButtonClassName = isKeyboardOpen ? '!rounded-none' : '';
-  const ctaPositionTransitionClassName = isKeyboardOpen ? '' : 'transition-[bottom] duration-200 ease-out';
+  const ctaPositionTransitionClassName = isKeyboardOpen
+    ? ''
+    : 'transition-[bottom] duration-200 ease-out';
   const wasEmailVerifiedRef = useRef(state.emailVerification.verifiedToken.isVerified);
   const signupSubmit = useSignupSubmit({
     emailDomain,
@@ -145,6 +157,9 @@ export default function SignupPage() {
     onReturnToEmailVerificationStep: actions.returnToEmailVerificationStep,
   });
   const isPrimaryCtaDisabled = !isCurrentStepValid || signupSubmit.isPending;
+  const isAllRequiredTermsAgreed = requiredSignupTermIds.every((termId) =>
+    agreedSignupTermIds.includes(termId),
+  );
 
   useEffect(() => {
     const isVerified = state.emailVerification.verifiedToken.isVerified;
@@ -161,7 +176,10 @@ export default function SignupPage() {
       return;
     }
 
-    if (emailVerificationErrorModal.scope === 'send' && state.emailVerification.send.errorReason === 'ip_blocked') {
+    if (
+      emailVerificationErrorModal.scope === 'send' &&
+      state.emailVerification.send.errorReason === 'ip_blocked'
+    ) {
       actions.clearEmailVerificationSendError();
       navigate('/');
       return;
@@ -180,6 +198,44 @@ export default function SignupPage() {
     actions.nextStep();
   };
 
+  const openTermsAgreementSheet = () => {
+    if (!isCurrentStepValid || signupSubmit.isPending) {
+      return;
+    }
+
+    setIsTermsAgreementSheetOpen(true);
+  };
+
+  const closeTermsAgreementSheet = () => {
+    if (signupSubmit.isPending) {
+      return;
+    }
+
+    setIsTermsAgreementSheetOpen(false);
+  };
+
+  const toggleSignupTerm = (termId: SignupTermId) => {
+    setAgreedSignupTermIds((currentTermIds) => {
+      if (currentTermIds.includes(termId)) {
+        return currentTermIds.filter((currentTermId) => currentTermId !== termId);
+      }
+
+      return [...currentTermIds, termId];
+    });
+  };
+
+  const toggleAllSignupTerms = () => {
+    setAgreedSignupTermIds(isAllRequiredTermsAgreed ? [] : requiredSignupTermIds);
+  };
+
+  const handleTermsAgreementSubmit = () => {
+    if (!isAllRequiredTermsAgreed || signupSubmit.isPending) {
+      return;
+    }
+
+    void signupSubmit.submit();
+  };
+
   useEffect(() => {
     return () => {
       useSignupFlowStore.getState().actions.resetFlow();
@@ -187,6 +243,11 @@ export default function SignupPage() {
   }, []);
 
   const handleBack = () => {
+    if (isTermsAgreementSheetOpen) {
+      closeTermsAgreementSheet();
+      return;
+    }
+
     if (signupSubmit.isPending) {
       return;
     }
@@ -256,6 +317,15 @@ export default function SignupPage() {
         isConfirmCta={signupSubmit.modal?.type === 'duplicate_restart'}
         onConfirm={signupSubmit.closeModal}
       />
+      <SignupTermsAgreementSheet
+        agreedTermIds={agreedSignupTermIds}
+        isOpen={isTermsAgreementSheetOpen}
+        isSubmitting={signupSubmit.isPending}
+        onClose={closeTermsAgreementSheet}
+        onSubmit={handleTermsAgreementSubmit}
+        onToggleAll={toggleAllSignupTerms}
+        onToggleTerm={toggleSignupTerm}
+      />
 
       <div className="mx-auto flex h-[100svh] w-full max-w-[393px] flex-col overflow-hidden bg-white">
         <SignupHeader progressValue={progressValue} onBack={handleBack} />
@@ -275,7 +345,11 @@ export default function SignupPage() {
                 query={state.universityQuery}
                 selectedUniversity={state.form.selectedUniversity}
                 suggestions={filteredUniversities}
-                errorMessage={universitySearch.isError && !isUniversityServerError ? universitySearch.error.message : undefined}
+                errorMessage={
+                  universitySearch.isError && !isUniversityServerError
+                    ? universitySearch.error.message
+                    : undefined
+                }
                 onChange={actions.updateUniversityQuery}
                 onClear={actions.clearUniversityQuery}
                 onRetry={() => void universitySearch.refetch()}
@@ -317,7 +391,9 @@ export default function SignupPage() {
                 onChange={actions.updateDepartmentQuery}
                 onClear={actions.clearDepartmentQuery}
                 onRetry={() => void departmentSearch.refetch()}
-                onSelect={(department) => actions.selectDepartment({ id: department.id, name: department.label })}
+                onSelect={(department) =>
+                  actions.selectDepartment({ id: department.id, name: department.label })
+                }
               />
             ) : null}
 
@@ -330,10 +406,7 @@ export default function SignupPage() {
             ) : null}
 
             {state.step === 4 ? (
-              <GradeStep
-                selectedGrade={state.form.grade}
-                onSelect={actions.selectGrade}
-              />
+              <GradeStep selectedGrade={state.form.grade} onSelect={actions.selectGrade} />
             ) : null}
 
             {state.step === 5 ? (
@@ -365,11 +438,13 @@ export default function SignupPage() {
                 onChange={actions.updateNickname}
               />
             ) : null}
-
           </div>
 
           {isKeyboardCtaStep ? (
-            <div aria-hidden="true" className="mt-auto h-[calc(88px+max(24px,env(safe-area-inset-bottom)))] shrink-0" />
+            <div
+              aria-hidden="true"
+              className="mt-auto h-[calc(88px+max(24px,env(safe-area-inset-bottom)))] shrink-0"
+            />
           ) : null}
 
           {isKeyboardCtaStep ? (
@@ -401,13 +476,13 @@ export default function SignupPage() {
             <div className="mt-auto pt-8">
               <CtaButton
                 disabled={isPrimaryCtaDisabled}
-                onClick={state.step === 6 ? () => void signupSubmit.submit() : actions.nextStep}
+                onClick={state.step === 6 ? openTermsAgreementSheet : actions.nextStep}
               >
                 {state.step === 6 ? (
                   signupSubmit.isPending ? (
                     <LoadingSpinner ariaLabel="회원가입 중" />
                   ) : (
-                    '회원가입 완료'
+                    '다음'
                   )
                 ) : (
                   '다음'
