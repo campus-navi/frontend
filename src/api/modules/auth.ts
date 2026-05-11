@@ -2,6 +2,7 @@ import { apiConfig } from '@/api/config';
 import { apiClient, request } from '@/api/client';
 import { validateApiResponse } from '@/api/response';
 import type { ApiObjectData, ApiRequestConfig, ApiResponse } from '@/api/types';
+import { resetNoticeInterestPromptDismiss } from '@/features/home/noticeInterestPromptDismissState';
 import { extractAccessTokenFromHeaders, tokenStorage } from '@/shared/auth';
 
 export interface LoginPayload extends ApiObjectData {
@@ -62,6 +63,7 @@ export const authApi = {
     const validatedResponse = validateApiResponse(response.status, response.data);
 
     storeAccessTokenFromHeaders(response.headers, '로그인 성공 응답에서 access token을 찾을 수 없습니다.');
+    resetNoticeInterestPromptDismiss();
 
     return validatedResponse;
   },
@@ -73,6 +75,7 @@ export const authApi = {
     });
 
     tokenStorage.clearAccessToken();
+    resetNoticeInterestPromptDismiss();
     return response;
   },
   sendSignupEmailVerification(payload: SendSignupEmailVerificationPayload) {
