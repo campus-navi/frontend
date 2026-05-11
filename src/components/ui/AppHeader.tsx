@@ -24,7 +24,7 @@ export function AppHeader({
 }: AppHeaderProps) {
   const isMain = variant === 'main';
 
-  const headerClassName = isMain ? className : ['pt-[max(20px,env(safe-area-inset-top))]', className].filter(Boolean).join(' ');
+  const headerClassName = ['pt-[max(20px,env(safe-area-inset-top))]', className].filter(Boolean).join(' ');
   const innerClassName = isMain ? 'relative flex h-[60px] items-center px-4' : 'relative flex h-16 items-center px-4';
   const leadingClassName = isMain ? 'z-10 flex h-8 w-[75px] items-center' : 'z-10 flex min-w-10 items-center';
   const trailingClassName = isMain

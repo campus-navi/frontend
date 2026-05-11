@@ -41,7 +41,7 @@ export default function HomePage() {
           rightSlot={<NotificationButton hasNewNotification={HAS_NEW_NOTIFICATION} />}
           className="fixed left-1/2 top-0 z-40 w-full max-w-[393px] -translate-x-1/2 bg-white"
         />
-        <div className="h-[60px] shrink-0" aria-hidden="true" />
+        <div className="h-[calc(60px+max(20px,env(safe-area-inset-top)))] shrink-0" aria-hidden="true" />
 
         <section className="flex flex-col gap-5 bg-white px-4 py-4">
           <SectionTitle suffix="주요 공지" />
