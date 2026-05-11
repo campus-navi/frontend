@@ -13,7 +13,7 @@ const items: Array<{ id: MobileGnbItem; label: string; path?: string; icon: Reac
   { id: 'home', label: '홈', path: '/home', icon: <HomeIcon /> },
   { id: 'community', label: '커뮤니티', icon: <CommunityIcon /> },
   { id: 'date', label: '시간표', icon: <CalendarIcon /> },
-  { id: 'info', label: '교내정보', icon: <InfoIcon /> },
+  { id: 'info', label: '교내정보', path: '/info', icon: <InfoIcon /> },
   { id: 'my', label: '마이페이지', icon: <MyIcon /> },
 ];
 
