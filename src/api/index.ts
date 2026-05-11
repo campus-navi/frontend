@@ -21,5 +21,12 @@ export type {
   ApiSuccessResponse,
 } from '@/api/types';
 export type { FeedCardPost, FeedCards } from '@/api/modules/feed';
-export type { OfficialPostAttachment, OfficialPostDetail } from '@/api/modules/officialPost';
+export type {
+  OfficialPostAttachment,
+  OfficialPostDetail,
+  OfficialPostList,
+  OfficialPostListParams,
+  OfficialPostListSort,
+  OfficialPostSummary,
+} from '@/api/modules/officialPost';
 export { tokenStorage } from '@/shared/auth';
