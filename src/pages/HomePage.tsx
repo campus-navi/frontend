@@ -315,8 +315,23 @@ function FeaturedNoticeContent({
     unlockSnap();
   };
 
-  const handleOpenCardNews = (postId: number) => {
-    navigate(`/card-news/${postId}`);
+  const handleOpenCardNews = (post: FeedCardPost) => {
+    navigate(`/card-news/${post.postId}`, {
+      state: {
+        cards: posts.map(({ imageUrl, postId, summary, tagName, title }) => ({
+          imageUrl,
+          postId,
+          summary,
+          tagName,
+          title,
+        })),
+        imageUrl: post.imageUrl,
+        postId: post.postId,
+        summary: post.summary,
+        tagName: post.tagName,
+        title: post.title,
+      },
+    });
   };
 
   const handleOpenNoticeDetail = (postId: number) => {
@@ -329,7 +344,7 @@ function FeaturedNoticeContent({
       return;
     }
 
-    handleOpenCardNews(activePost.postId);
+    handleOpenCardNews(activePost);
   };
 
   const handleNoticeDetailClick = (event: MouseEvent<HTMLButtonElement>) => {
@@ -436,7 +451,7 @@ function FeaturedNoticeCard({ post }: { post: FeedCardPost }) {
           <h2 className="line-clamp-2 text-[20px] font-semibold leading-[1.4] text-white">
             {post.title}
           </h2>
-          <p className="line-clamp-3 text-[14px] font-normal leading-[1.4] text-[#DCDFE2]">
+          <p className="line-clamp-2 min-h-[39.2px] text-[14px] font-normal leading-[1.4] text-[#DCDFE2]">
             {post.summary}
           </p>
         </div>
