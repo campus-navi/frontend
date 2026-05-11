@@ -19,6 +19,9 @@ import type { FeedCardPost } from '@/api';
 
 const TEMP_NICKNAME = '익명';
 const HAS_NEW_NOTIFICATION = true;
+const CARD_CLICK_DRAG_THRESHOLD = 8;
+const CARD_SWIPE_THRESHOLD = 48;
+const CARD_SNAP_DURATION_MS = 220;
 const deadlineCards = [
   { id: 1, daysLeft: 'D-6', category: '수강', title: '공지글입니다.\n두줄까지 쓸 수 있어요', meta: '04/10 | OO학사팀' },
   { id: 2, daysLeft: 'D-3', category: '장학', title: '성적 장학금 신청 안내', meta: '04/12 | 장학팀' },
@@ -149,6 +152,7 @@ function FeaturedNoticeContent({
   const carouselViewportRef = useRef<HTMLDivElement | null>(null);
   const hasDraggedRef = useRef(false);
   const snapFrameRef = useRef<number | null>(null);
+  const snapTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     setActiveIndex(0);
@@ -161,6 +165,11 @@ function FeaturedNoticeContent({
     if (snapFrameRef.current !== null) {
       window.cancelAnimationFrame(snapFrameRef.current);
       snapFrameRef.current = null;
+    }
+
+    if (snapTimeoutRef.current !== null) {
+      window.clearTimeout(snapTimeoutRef.current);
+      snapTimeoutRef.current = null;
     }
   }, [posts]);
 
@@ -210,8 +219,51 @@ function FeaturedNoticeContent({
     }
 
     const dragDistance = event.clientX - dragStartX.current;
-    hasDraggedRef.current = Math.abs(dragDistance) > 8;
+    hasDraggedRef.current = Math.abs(dragDistance) > CARD_CLICK_DRAG_THRESHOLD;
     setDragOffsetX(dragDistance);
+  };
+
+  const clearSnapUnlockTimer = () => {
+    if (snapTimeoutRef.current === null) {
+      return;
+    }
+
+    window.clearTimeout(snapTimeoutRef.current);
+    snapTimeoutRef.current = null;
+  };
+
+  const unlockSnap = () => {
+    setDragOffsetX(0);
+    setIsSnapping(false);
+    clearSnapUnlockTimer();
+  };
+
+  const scheduleSnapUnlock = () => {
+    clearSnapUnlockTimer();
+    snapTimeoutRef.current = window.setTimeout(unlockSnap, CARD_SNAP_DURATION_MS + 80);
+  };
+
+  const snapBackToCurrentPost = (dragDistance: number) => {
+    setIsSnapping(false);
+    setDragOffsetX(dragDistance);
+    snapFrameRef.current = window.requestAnimationFrame(() => {
+      setIsSnapping(true);
+      setDragOffsetX(0);
+      scheduleSnapUnlock();
+      snapFrameRef.current = null;
+    });
+  };
+
+  const snapToPost = (nextActiveIndex: number, nextDragOffsetX: number) => {
+    setActiveIndex(nextActiveIndex);
+    setIsSnapping(false);
+    setDragOffsetX(nextDragOffsetX);
+    snapFrameRef.current = window.requestAnimationFrame(() => {
+      setIsSnapping(true);
+      setDragOffsetX(0);
+      scheduleSnapUnlock();
+      snapFrameRef.current = null;
+    });
   };
 
   const handleDragEnd = (event: PointerEvent<HTMLDivElement>) => {
@@ -224,33 +276,26 @@ function FeaturedNoticeContent({
     dragStartX.current = null;
     setIsDragging(false);
 
-    if (Math.abs(dragDistance) < 48) {
-      hasDraggedRef.current = Math.abs(dragDistance) > 8;
-      setIsSnapping(true);
+    if (Math.abs(dragDistance) <= CARD_CLICK_DRAG_THRESHOLD) {
+      hasDraggedRef.current = false;
+      setIsSnapping(false);
       setDragOffsetX(0);
+      return;
+    }
+
+    hasDraggedRef.current = true;
+
+    if (Math.abs(dragDistance) < CARD_SWIPE_THRESHOLD) {
+      snapBackToCurrentPost(dragDistance);
       return;
     }
 
     if (dragDistance < 0) {
-      setActiveIndex(nextIndex);
-      setIsSnapping(false);
-      setDragOffsetX(viewportWidth + dragDistance);
-      snapFrameRef.current = window.requestAnimationFrame(() => {
-        setIsSnapping(true);
-        setDragOffsetX(0);
-        snapFrameRef.current = null;
-      });
+      snapToPost(nextIndex, viewportWidth + dragDistance);
       return;
     }
 
-    setActiveIndex(previousIndex);
-    setIsSnapping(false);
-    setDragOffsetX(-viewportWidth + dragDistance);
-    snapFrameRef.current = window.requestAnimationFrame(() => {
-      setIsSnapping(true);
-      setDragOffsetX(0);
-      snapFrameRef.current = null;
-    });
+    snapToPost(previousIndex, -viewportWidth + dragDistance);
   };
 
   const handleDragCancel = () => {
@@ -265,8 +310,7 @@ function FeaturedNoticeContent({
       return;
     }
 
-    setDragOffsetX(0);
-    setIsSnapping(false);
+    unlockSnap();
   };
 
   const handleOpenCardNews = (postId: number) => {
@@ -295,7 +339,7 @@ function FeaturedNoticeContent({
 
   const trackStyle = {
     transform: `translate3d(calc(-100% + ${dragOffsetX}px), 0, 0)`,
-    transition: isDragging || !isSnapping ? 'none' : 'transform 220ms ease-out',
+    transition: isDragging || !isSnapping ? 'none' : `transform ${CARD_SNAP_DURATION_MS}ms ease-out`,
   } satisfies CSSProperties;
 
   return (
