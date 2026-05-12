@@ -2,6 +2,7 @@ import { useSyncExternalStore } from 'react';
 
 const NOTICE_INTEREST_PROMPT_DISMISSED_KEY = 'notice-interest-prompt-dismissed';
 const listeners = new Set<() => void>();
+let hasDismissedNoticeInterestPromptFallback = false;
 
 function emitChange() {
   listeners.forEach((listener) => listener());
@@ -18,16 +19,19 @@ function readDismissedFromSessionStorage() {
 function writeDismissedToSessionStorage() {
   try {
     sessionStorage.setItem(NOTICE_INTEREST_PROMPT_DISMISSED_KEY, 'true');
+    hasDismissedNoticeInterestPromptFallback = false;
   } catch {
-    // If sessionStorage is unavailable, keep the modal closable for this render cycle.
+    hasDismissedNoticeInterestPromptFallback = true;
   }
 }
 
 function removeDismissedFromSessionStorage() {
+  hasDismissedNoticeInterestPromptFallback = false;
+
   try {
     sessionStorage.removeItem(NOTICE_INTEREST_PROMPT_DISMISSED_KEY);
   } catch {
-    // If sessionStorage is unavailable, there is nothing persisted to clear.
+    // storage 접근 실패로 인증 상태 초기화 흐름이 막히지 않도록 무시한다.
   }
 }
 
@@ -40,7 +44,7 @@ function subscribe(listener: () => void) {
 }
 
 export function getHasDismissedNoticeInterestPrompt() {
-  return readDismissedFromSessionStorage();
+  return readDismissedFromSessionStorage() || hasDismissedNoticeInterestPromptFallback;
 }
 
 export function dismissNoticeInterestPrompt() {
