@@ -59,8 +59,6 @@ jobs:
           platforms: linux/amd64,linux/arm64
           build-args: |
             VITE_API_BASE_URL=https://campus-navi.com/api/v1
-            VITE_SIGNUP_USE_MOCK=false
-            VITE_SIGNUP_MOCK_CODE=246810
           tags: |
             ${{ steps.login-ecr.outputs.registry }}/campus-navi-frontend-server:${{ github.sha }}
             ${{ steps.login-ecr.outputs.registry }}/campus-navi-frontend-server:latest
