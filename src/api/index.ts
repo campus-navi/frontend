@@ -5,6 +5,7 @@ export { authApi } from '@/api/modules/auth';
 export { commentApi } from '@/api/modules/comment';
 export { departmentApi } from '@/api/modules/department';
 export { feedApi } from '@/api/modules/feed';
+export { memberApi } from '@/api/modules/member';
 export { mypageApi } from '@/api/modules/mypage';
 export { officialPostApi } from '@/api/modules/officialPost';
 export { postApi } from '@/api/modules/post';
@@ -21,6 +22,7 @@ export type {
   ApiSuccessResponse,
 } from '@/api/types';
 export type { FeedCardPost, FeedCards } from '@/api/modules/feed';
+export type { MemberMe } from '@/api/modules/member';
 export type {
   OfficialPostAttachment,
   OfficialPostDetail,
