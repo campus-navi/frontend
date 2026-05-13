@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { isApiError } from '@/api';
@@ -14,9 +14,7 @@ import { OfficialPostTabs } from '@/features/official-posts/components/OfficialP
 import { OfficialPostTitleSection } from '@/features/official-posts/components/OfficialPostTitleSection';
 import { useOfficialPostDetail } from '@/features/official-posts/hooks/useOfficialPostDetail';
 
-const DESIGN_LNB_SOLID_Y = 393;
 const LNB_OVERLAY_HEIGHT = 84;
-const LNB_SOLID_SCROLL_Y = DESIGN_LNB_SOLID_Y - LNB_OVERLAY_HEIGHT;
 
 function parsePostId(value: string | undefined) {
   const normalizedValue = value?.trim();
@@ -40,12 +38,45 @@ export default function InfoPostDetailPage() {
     isError,
     isLoading,
   } = useOfficialPostDetail(postId);
+  const heroImageRef = useRef<HTMLDivElement | null>(null);
+  const [heroImageHeight, setHeroImageHeight] = useState<number | null>(null);
   const [isLnbSolid, setIsLnbSolid] = useState(false);
   const errorMessage = getDetailErrorMessage(error, postId);
+  const lnbSolidScrollY =
+    heroImageHeight === null ? Number.POSITIVE_INFINITY : Math.max(heroImageHeight - LNB_OVERLAY_HEIGHT, 0);
+
+  useEffect(() => {
+    if (!post) {
+      setHeroImageHeight(null);
+      return;
+    }
+
+    const heroImageElement = heroImageRef.current;
+
+    if (!heroImageElement) {
+      return;
+    }
+
+    const updateHeroImageHeight = () => {
+      setHeroImageHeight(heroImageElement.getBoundingClientRect().height);
+    };
+
+    updateHeroImageHeight();
+
+    const resizeObserver =
+      typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(updateHeroImageHeight);
+    resizeObserver?.observe(heroImageElement);
+    window.addEventListener('resize', updateHeroImageHeight);
+
+    return () => {
+      resizeObserver?.disconnect();
+      window.removeEventListener('resize', updateHeroImageHeight);
+    };
+  }, [post]);
 
   useEffect(() => {
     const updateLnbState = () => {
-      setIsLnbSolid(window.scrollY >= LNB_SOLID_SCROLL_Y);
+      setIsLnbSolid(window.scrollY >= lnbSolidScrollY);
     };
 
     updateLnbState();
@@ -54,7 +85,7 @@ export default function InfoPostDetailPage() {
     return () => {
       window.removeEventListener('scroll', updateLnbState);
     };
-  }, []);
+  }, [lnbSolidScrollY]);
 
   const headerClassName = [
     'fixed left-1/2 top-0 z-50 w-full max-w-[393px] -translate-x-1/2 transition-colors duration-200',
@@ -77,7 +108,9 @@ export default function InfoPostDetailPage() {
 
         {!isLoading && post ? (
           <>
-            <OfficialPostHeroImage imageUrls={post.imageUrls} title={post.title} />
+            <div ref={heroImageRef}>
+              <OfficialPostHeroImage imageUrls={post.imageUrls} title={post.title} />
+            </div>
 
             <article className="flex flex-col bg-white pb-[112px]">
               <OfficialPostTitleSection post={post} />
