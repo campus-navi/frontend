@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import type { OfficialPostListParams, OfficialPostListSort, OfficialPostTagCode } from '@/api';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { MobileGnb } from '@/components/ui/MobileGnb';
-import { useOfficialPostList } from '@/features/info/hooks/useOfficialPostList';
+import { useOfficialPostList } from '@/features/official-posts/hooks/useOfficialPostList';
 import {
   OfficialPostListControls,
   type OfficialPostCategoryFilter,
