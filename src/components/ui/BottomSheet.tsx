@@ -58,12 +58,12 @@ export function BottomSheet({ children, footer, isOpen, title, titleId, type = '
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex justify-center overflow-hidden px-0"
+      className="fixed inset-0 z-50 flex justify-center overflow-hidden bg-black/45 px-0"
       role="dialog"
       aria-modal="true"
       aria-labelledby={resolvedTitleId}
     >
-      <div className="flex h-full w-full max-w-[393px] items-end overflow-hidden bg-black/45">
+      <div className="flex h-full w-full max-w-[393px] items-end overflow-hidden">
         <div className="flex max-h-[100svh] w-full animate-[signup-sheet-up_280ms_cubic-bezier(0.22,1,0.36,1)] flex-col items-start gap-4 overflow-hidden rounded-t-[28px] bg-white px-0 shadow-[0_20px_48px_rgba(0,0,0,0.18)]">
           <div className="flex h-[77px] w-full flex-col items-start">
             <div className="flex h-5 w-full flex-col items-start pt-4">
