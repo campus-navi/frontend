@@ -12,7 +12,7 @@ import { OfficialPostHeroImage } from '@/features/official-posts/components/Offi
 import { OfficialPostSummaryAI } from '@/features/official-posts/components/OfficialPostSummaryAI';
 import { OfficialPostTabs } from '@/features/official-posts/components/OfficialPostTabs';
 import { OfficialPostTitleSection } from '@/features/official-posts/components/OfficialPostTitleSection';
-import { useOfficialPostDetail } from '@/features/info/hooks/useOfficialPostDetail';
+import { useOfficialPostDetail } from '@/features/official-posts/hooks/useOfficialPostDetail';
 
 const DESIGN_LNB_SOLID_Y = 386;
 const LNB_OVERLAY_HEIGHT = 84;
