@@ -9,6 +9,7 @@ import { OfficialPostBottomFloating } from '@/features/official-posts/components
 import { OfficialPostContent } from '@/features/official-posts/components/OfficialPostContent';
 import { OfficialPostDetails } from '@/features/official-posts/components/OfficialPostDetails';
 import { OfficialPostHeroImage } from '@/features/official-posts/components/OfficialPostHeroImage';
+import { OfficialPostImageViewer } from '@/features/official-posts/components/OfficialPostImageViewer';
 import { OfficialPostSummaryAI } from '@/features/official-posts/components/OfficialPostSummaryAI';
 import { OfficialPostTabs } from '@/features/official-posts/components/OfficialPostTabs';
 import { OfficialPostTitleSection } from '@/features/official-posts/components/OfficialPostTitleSection';
@@ -41,6 +42,7 @@ export default function InfoPostDetailPage() {
   const heroImageRef = useRef<HTMLDivElement | null>(null);
   const [heroImageHeight, setHeroImageHeight] = useState<number | null>(null);
   const [isLnbSolid, setIsLnbSolid] = useState(false);
+  const [viewerInitialIndex, setViewerInitialIndex] = useState<number | null>(null);
   const errorMessage = getDetailErrorMessage(error, postId);
   const lnbSolidScrollY =
     heroImageHeight === null ? Number.POSITIVE_INFINITY : Math.max(heroImageHeight - LNB_OVERLAY_HEIGHT, 0);
@@ -109,7 +111,11 @@ export default function InfoPostDetailPage() {
         {!isLoading && post ? (
           <>
             <div ref={heroImageRef}>
-              <OfficialPostHeroImage imageUrls={post.imageUrls} title={post.title} />
+              <OfficialPostHeroImage
+                imageUrls={post.imageUrls}
+                title={post.title}
+                onImageClick={setViewerInitialIndex}
+              />
             </div>
 
             <article className="flex flex-col bg-white pb-[112px]">
@@ -125,6 +131,15 @@ export default function InfoPostDetailPage() {
             </article>
 
             <OfficialPostBottomFloating endDate={post.endDate} isScrapped={post.isScrapped} />
+
+            {viewerInitialIndex !== null ? (
+              <OfficialPostImageViewer
+                imageUrls={post.imageUrls}
+                initialIndex={viewerInitialIndex}
+                title={post.title}
+                onClose={() => setViewerInitialIndex(null)}
+              />
+            ) : null}
           </>
         ) : null}
       </div>
