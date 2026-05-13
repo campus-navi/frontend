@@ -6,53 +6,78 @@ import { CtaButton } from '@/components/ui/CtaButton';
 import { RadioChip } from '@/components/ui/RadioChip';
 import { SvgIcon } from '@/components/ui/SvgIcon';
 
-export type OfficialPostCategoryFilter = '전체' | '수강' | '학사' | '장학/금융' | '학생 지원' | '활동' | '시설';
+export type OfficialPostCategoryFilter =
+  | '전체'
+  | '수강'
+  | '학사'
+  | '장학/금융'
+  | '학생 지원'
+  | '활동'
+  | '시설';
 export type OfficialPostSortFilter = '최신순' | '마감순';
 
 type OfficialPostListControlsProps = {
   isFilterSheetOpen: boolean;
   selectedCategory: OfficialPostCategoryFilter;
   selectedSort: OfficialPostSortFilter;
+  showSearchInput?: boolean;
   onCategoryChange: (category: OfficialPostCategoryFilter) => void;
   onCloseSheet: () => void;
   onOpenFilterSheet: () => void;
   onResetCategory: () => void;
   onResetSort: () => void;
+  onSearchClick?: () => void;
   onSortChange: (sort: OfficialPostSortFilter) => void;
 };
 
-const categoryOptions: OfficialPostCategoryFilter[] = ['전체', '수강', '학사', '장학/금융', '학생 지원', '활동', '시설'];
+const categoryOptions: OfficialPostCategoryFilter[] = [
+  '전체',
+  '수강',
+  '학사',
+  '장학/금융',
+  '학생 지원',
+  '활동',
+  '시설',
+];
 const sortOptions: OfficialPostSortFilter[] = ['최신순', '마감순'];
 
 export function OfficialPostListControls({
   isFilterSheetOpen,
   selectedCategory,
   selectedSort,
+  showSearchInput = true,
   onCategoryChange,
   onCloseSheet,
   onOpenFilterSheet,
   onResetCategory,
   onResetSort,
+  onSearchClick,
   onSortChange,
 }: OfficialPostListControlsProps) {
   return (
     <>
       <section className="flex flex-col bg-white" aria-label="교내정보 필터와 정렬">
-        <div className="flex items-center justify-center p-4">
-          <div className="flex h-12 w-full items-center justify-between rounded-full bg-[#F5F7FA] p-3 text-[#BFC4C8]">
-            <span className="text-[16px] font-normal leading-[1.4]">키워드로 검색해보세요</span>
-            <SvgIcon size={24} viewBox="0 0 24 24" className="shrink-0 text-[#BFC4C8]">
-              <path
-                d="M10.8 18.1a7.3 7.3 0 1 1 0-14.6 7.3 7.3 0 0 1 0 14.6Zm5.2-2.1 4 4"
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-              />
-            </SvgIcon>
+        {showSearchInput ? (
+          <div className="flex items-center justify-center p-4">
+            <button
+              type="button"
+              className="flex h-12 w-full items-center justify-between rounded-full bg-[#F5F7FA] p-3 text-left text-[#BFC4C8]"
+              onClick={onSearchClick}
+            >
+              <span className="text-[16px] font-normal leading-[1.4]">키워드로 검색해보세요</span>
+              <SvgIcon size={24} viewBox="0 0 24 24" className="shrink-0 text-[#BFC4C8]">
+                <path
+                  d="M10.8 18.1a7.3 7.3 0 1 1 0-14.6 7.3 7.3 0 0 1 0 14.6Zm5.2-2.1 4 4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                />
+              </SvgIcon>
+            </button>
           </div>
-        </div>
+        ) : null}
 
         <div className="flex items-center px-4 py-2">
           <div className="flex shrink-0 items-center gap-3">
@@ -117,7 +142,11 @@ function SelectedFilterChip({
         .filter(Boolean)
         .join(' ')}
     >
-      <button type="button" className={isActive ? 'h-full pl-4 pr-1' : 'h-full px-4'} onClick={onClick}>
+      <button
+        type="button"
+        className={isActive ? 'h-full pl-4 pr-1' : 'h-full px-4'}
+        onClick={onClick}
+      >
         {label}
       </button>
       {onRemove ? (
@@ -128,7 +157,12 @@ function SelectedFilterChip({
           onClick={onRemove}
         >
           <SvgIcon size={16} viewBox="0 0 16 16">
-            <path d="M5.5 5.5 10.5 10.5M10.5 5.5 5.5 10.5" stroke="currentColor" strokeLinecap="round" strokeWidth="1.4" />
+            <path
+              d="M5.5 5.5 10.5 10.5M10.5 5.5 5.5 10.5"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeWidth="1.4"
+            />
           </SvgIcon>
         </button>
       ) : null}
