@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import type { OfficialPostListParams, OfficialPostListSort, OfficialPostTagCode } from '@/api';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { MobileGnb } from '@/components/ui/MobileGnb';
 import { useOfficialPostList } from '@/features/info/hooks/useOfficialPostList';
@@ -12,12 +13,34 @@ import {
 } from '@/features/official-posts/components/OfficialPostListControls';
 import { OfficialPostListItem } from '@/features/official-posts/components/OfficialPostListItem';
 
+const officialPostCategoryTagCodeMap = {
+  '전체': undefined,
+  '수강': 'COURSE',
+  '학사': 'ACADEMIC',
+  '장학/금융': 'SCHOLARSHIP',
+  '학생 지원': 'STUDENT_SUPPORT',
+  '활동': 'ACTIVITY',
+  '시설': 'FACILITY',
+} satisfies Record<OfficialPostCategoryFilter, OfficialPostTagCode | undefined>;
+
+const officialPostSortMap = {
+  '최신순': 'LATEST',
+  '마감순': 'DEADLINE',
+} satisfies Record<OfficialPostSortFilter, OfficialPostListSort>;
+
 export default function InfoPage() {
   const navigate = useNavigate();
-  const { data: officialPostList, isError, isLoading } = useOfficialPostList();
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<OfficialPostCategoryFilter>('전체');
   const [selectedSort, setSelectedSort] = useState<OfficialPostSortFilter>('최신순');
+  const officialPostListParams = useMemo<OfficialPostListParams>(
+    () => ({
+      sort: officialPostSortMap[selectedSort],
+      tagCode: officialPostCategoryTagCodeMap[selectedCategory],
+    }),
+    [selectedCategory, selectedSort],
+  );
+  const { data: officialPostList, isError, isLoading } = useOfficialPostList(officialPostListParams);
   const posts = officialPostList?.content ?? [];
 
   const handlePostClick = (postId: number) => {
