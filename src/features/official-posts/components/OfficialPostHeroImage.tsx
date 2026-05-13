@@ -17,6 +17,7 @@ type OfficialPostHeroImageProps = {
 const HERO_CLICK_DRAG_THRESHOLD = 8;
 const HERO_SWIPE_THRESHOLD = 48;
 const HERO_SNAP_DURATION_MS = 220;
+const HERO_DRAG_CLICK_SUPPRESSION_RESET_MS = 250;
 
 export function OfficialPostHeroImage({ imageUrls, title, onImageClick }: OfficialPostHeroImageProps) {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -25,12 +26,30 @@ export function OfficialPostHeroImage({ imageUrls, title, onImageClick }: Offici
   const [isSnapping, setIsSnapping] = useState(false);
   const dragStartX = useRef<number | null>(null);
   const didDragRef = useRef(false);
+  const didDragResetTimeoutRef = useRef<number | null>(null);
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const snapFrameRef = useRef<number | null>(null);
   const snapTimeoutRef = useRef<number | null>(null);
   const totalImageCount = imageUrls.length;
   const previousIndex = totalImageCount > 0 ? (activeIndex - 1 + totalImageCount) % totalImageCount : 0;
   const nextIndex = totalImageCount > 0 ? (activeIndex + 1) % totalImageCount : 0;
+
+  const clearDidDragResetTimer = useCallback(() => {
+    if (didDragResetTimeoutRef.current === null) {
+      return;
+    }
+
+    window.clearTimeout(didDragResetTimeoutRef.current);
+    didDragResetTimeoutRef.current = null;
+  }, []);
+
+  const scheduleDidDragReset = useCallback(() => {
+    clearDidDragResetTimer();
+    didDragResetTimeoutRef.current = window.setTimeout(() => {
+      didDragRef.current = false;
+      didDragResetTimeoutRef.current = null;
+    }, HERO_DRAG_CLICK_SUPPRESSION_RESET_MS);
+  }, [clearDidDragResetTimer]);
 
   useEffect(() => {
     setActiveIndex(0);
@@ -39,6 +58,7 @@ export function OfficialPostHeroImage({ imageUrls, title, onImageClick }: Offici
     setIsSnapping(false);
     dragStartX.current = null;
     didDragRef.current = false;
+    clearDidDragResetTimer();
 
     if (snapFrameRef.current !== null) {
       window.cancelAnimationFrame(snapFrameRef.current);
@@ -49,7 +69,13 @@ export function OfficialPostHeroImage({ imageUrls, title, onImageClick }: Offici
       window.clearTimeout(snapTimeoutRef.current);
       snapTimeoutRef.current = null;
     }
-  }, [imageUrls]);
+  }, [clearDidDragResetTimer, imageUrls]);
+
+  useEffect(() => {
+    return () => {
+      clearDidDragResetTimer();
+    };
+  }, [clearDidDragResetTimer]);
 
   const clearSnapUnlockTimer = useCallback(() => {
     if (snapTimeoutRef.current === null) {
@@ -126,7 +152,13 @@ export function OfficialPostHeroImage({ imageUrls, title, onImageClick }: Offici
 
     const dragDistance = event.clientX - dragStartX.current;
     const viewportWidth = viewportRef.current?.clientWidth ?? 0;
-    didDragRef.current = Math.abs(dragDistance) > HERO_CLICK_DRAG_THRESHOLD;
+    const didDrag = Math.abs(dragDistance) > HERO_CLICK_DRAG_THRESHOLD;
+    didDragRef.current = didDrag;
+    if (didDrag) {
+      scheduleDidDragReset();
+    } else {
+      clearDidDragResetTimer();
+    }
     dragStartX.current = null;
     setIsDragging(false);
 
@@ -147,24 +179,33 @@ export function OfficialPostHeroImage({ imageUrls, title, onImageClick }: Offici
     }
 
     snapToImage(previousIndex, -viewportWidth + dragDistance);
-  }, [nextIndex, previousIndex, snapBackToCurrentImage, snapToImage]);
+  }, [
+    clearDidDragResetTimer,
+    nextIndex,
+    previousIndex,
+    scheduleDidDragReset,
+    snapBackToCurrentImage,
+    snapToImage,
+  ]);
 
   const handleDragCancel = useCallback(() => {
     dragStartX.current = null;
     didDragRef.current = false;
+    clearDidDragResetTimer();
     setDragOffsetX(0);
     setIsDragging(false);
     setIsSnapping(false);
-  }, []);
+  }, [clearDidDragResetTimer]);
 
   const handleImageClick = useCallback(() => {
     if (didDragRef.current || totalImageCount === 0) {
       didDragRef.current = false;
+      clearDidDragResetTimer();
       return;
     }
 
     onImageClick?.(activeIndex);
-  }, [activeIndex, onImageClick, totalImageCount]);
+  }, [activeIndex, clearDidDragResetTimer, onImageClick, totalImageCount]);
 
   const handleTrackTransitionEnd = useCallback((event: TransitionEvent<HTMLDivElement>) => {
     if (event.propertyName !== 'transform') {
