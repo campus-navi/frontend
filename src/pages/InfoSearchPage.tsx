@@ -58,6 +58,7 @@ export default function InfoSearchPage() {
     isLoading,
   } = useOfficialPostList(officialPostListParams, {
     enabled: shouldShowResults,
+    placeholderData: 'keepSameQuery',
   });
   const posts = officialPostList?.content ?? [];
 
