@@ -14,7 +14,9 @@ import { OfficialPostTabs } from '@/features/official-posts/components/OfficialP
 import { OfficialPostTitleSection } from '@/features/official-posts/components/OfficialPostTitleSection';
 import { useOfficialPostDetail } from '@/features/info/hooks/useOfficialPostDetail';
 
-const LNB_SOLID_SCROLL_Y = 300;
+const DESIGN_LNB_SOLID_Y = 386;
+const LNB_OVERLAY_HEIGHT = 84;
+const LNB_SOLID_SCROLL_Y = DESIGN_LNB_SOLID_Y - LNB_OVERLAY_HEIGHT;
 
 function parsePostId(value: string | undefined) {
   const normalizedValue = value?.trim();
