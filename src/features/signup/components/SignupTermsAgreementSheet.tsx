@@ -191,7 +191,7 @@ export function SignupTermsAgreementSheet({
       </BottomSheet>
 
       {detailTerm ? (
-        <div className="fixed inset-0 z-[60] bg-white">
+        <div className="fixed inset-0 z-[80] bg-white">
           <div className="mx-auto flex h-[100svh] w-full max-w-[393px] flex-col bg-white">
             <header className="flex h-16 shrink-0 items-center justify-between gap-4 px-4 py-5">
               <h1 className="min-w-0 flex-1 truncate text-left text-[16px] font-medium leading-[1.4] text-[#292B2C]">

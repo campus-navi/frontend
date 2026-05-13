@@ -10,6 +10,7 @@ import {
 import { createPortal } from 'react-dom';
 
 import { CloseIcon } from '@/components/ui/HeaderIcons';
+import { useBodyScrollLock } from '@/components/ui/useBodyScrollLock';
 
 type OfficialPostImageViewerProps = {
   imageUrls: string[];
@@ -48,22 +49,7 @@ export function OfficialPostImageViewer({
     dragStartX.current = null;
   }, [initialIndex, totalImageCount]);
 
-  useEffect(() => {
-    if (totalImageCount === 0) {
-      return undefined;
-    }
-
-    const previousOverflow = document.body.style.overflow;
-    const previousTouchAction = document.body.style.touchAction;
-
-    document.body.style.overflow = 'hidden';
-    document.body.style.touchAction = 'none';
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.body.style.touchAction = previousTouchAction;
-    };
-  }, [totalImageCount]);
+  useBodyScrollLock(totalImageCount > 0, { touchAction: 'none' });
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {

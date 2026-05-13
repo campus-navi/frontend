@@ -1,5 +1,8 @@
 import type { ReactNode } from 'react';
-import { useEffect, useId } from 'react';
+import { useId } from 'react';
+
+import { DimmedOverlay } from '@/components/ui/DimmedOverlay';
+import { useBodyScrollLock } from '@/components/ui/useBodyScrollLock';
 
 type ModalFooterLayout = 'horizontal' | 'vertical';
 
@@ -16,26 +19,15 @@ export function Modal({ children, footer, footerLayout = 'horizontal', isOpen, t
   const generatedTitleId = useId();
   const resolvedTitleId = titleId ?? generatedTitleId;
 
-  useEffect(() => {
-    if (!isOpen) {
-      return undefined;
-    }
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [isOpen]);
+  useBodyScrollLock(isOpen);
 
   if (!isOpen) {
     return null;
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-5"
+    <DimmedOverlay
+      className="fixed inset-0 z-[70] flex items-center justify-center px-5"
       role="dialog"
       aria-modal="true"
       aria-labelledby={resolvedTitleId}
@@ -60,6 +52,6 @@ export function Modal({ children, footer, footerLayout = 'horizontal', isOpen, t
           </div>
         ) : null}
       </div>
-    </div>
+    </DimmedOverlay>
   );
 }
