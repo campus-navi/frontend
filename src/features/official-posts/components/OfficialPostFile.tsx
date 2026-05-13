@@ -1,32 +1,31 @@
 import { SvgIcon } from '@/components/ui/SvgIcon';
+import { CtaButton } from '@/components/ui/CtaButton';
 import { ToolTip } from '@/components/ui/ToolTip';
 
 type OfficialPostFileProps = {
+  completedLabel?: string;
   count?: number;
   fileName?: string;
   hasTooltip?: boolean;
   status?: 'unread' | 'completed';
   type: 'filedetail' | 'files';
+  onActionClick?: () => void;
 };
 
 export function OfficialPostFile({
+  completedLabel = '다운완료',
   count = 0,
   fileName = '첨부파일',
   hasTooltip = false,
   status = 'unread',
   type,
+  onActionClick,
 }: OfficialPostFileProps) {
   const isFilesType = type === 'files';
   const isCompleted = status === 'completed';
   const containerClassName = [
     'relative flex w-full flex-col items-start rounded-[8px]',
     isCompleted ? 'bg-[#F5F7FA]' : 'bg-[#FAFBFD]',
-  ].join(' ');
-  const buttonClassName = [
-    'flex shrink-0 items-center justify-center rounded-[8px] px-3 py-2.5 text-[14px] font-semibold leading-none tracking-[0.015em]',
-    isCompleted
-      ? 'border border-[#DCDFE2] bg-white text-[#292B2C]'
-      : 'bg-[#292B2C] text-white',
   ].join(' ');
 
   return (
@@ -55,12 +54,19 @@ export function OfficialPostFile({
           )}
         </div>
 
-        <button
+        <CtaButton
           type="button"
-          className={buttonClassName}
+          fullWidth={false}
+          size="sm"
+          variant={isCompleted ? 'tertiary' : 'secondary'}
+          className={[
+            'shrink-0 tracking-[0.015em]',
+            isCompleted ? 'border-[#DCDFE2] text-[#292B2C]' : 'bg-[#292B2C]',
+          ].join(' ')}
+          onClick={onActionClick}
         >
-          {isCompleted ? '다운완료' : '다운받기'}
-        </button>
+          {isCompleted ? completedLabel : '다운받기'}
+        </CtaButton>
       </div>
     </div>
   );
