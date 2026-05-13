@@ -37,6 +37,13 @@ export interface OfficialPostDetail extends ApiObjectData {
 }
 
 export type OfficialPostListSort = 'LATEST' | 'DEADLINE';
+export type OfficialPostTagCode =
+  | 'ACADEMIC'
+  | 'ACTIVITY'
+  | 'COURSE'
+  | 'FACILITY'
+  | 'SCHOLARSHIP'
+  | 'STUDENT_SUPPORT';
 
 export interface OfficialPostSummary extends ApiObjectData {
   endDate: string | null;
@@ -56,7 +63,7 @@ export interface OfficialPostListParams {
   cursor?: string;
   q?: string;
   sort?: OfficialPostListSort;
-  tagCode?: string;
+  tagCode?: OfficialPostTagCode;
 }
 
 interface OfficialPostAttachmentResponse extends ApiObjectData {

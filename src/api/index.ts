@@ -30,5 +30,6 @@ export type {
   OfficialPostListParams,
   OfficialPostListSort,
   OfficialPostSummary,
+  OfficialPostTagCode,
 } from '@/api/modules/officialPost';
 export { tokenStorage } from '@/shared/auth';
