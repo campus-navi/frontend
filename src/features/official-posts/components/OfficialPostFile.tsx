@@ -5,14 +5,32 @@ type OfficialPostFileProps = {
   count?: number;
   fileName?: string;
   hasTooltip?: boolean;
+  status?: 'unread' | 'completed';
   type: 'filedetail' | 'files';
 };
 
-export function OfficialPostFile({ count = 0, fileName = '첨부파일', hasTooltip = false, type }: OfficialPostFileProps) {
+export function OfficialPostFile({
+  count = 0,
+  fileName = '첨부파일',
+  hasTooltip = false,
+  status = 'unread',
+  type,
+}: OfficialPostFileProps) {
   const isFilesType = type === 'files';
+  const isCompleted = status === 'completed';
+  const containerClassName = [
+    'relative flex w-full flex-col items-start rounded-[8px]',
+    isCompleted ? 'bg-[#F5F7FA]' : 'bg-[#FAFBFD]',
+  ].join(' ');
+  const buttonClassName = [
+    'flex shrink-0 items-center justify-center rounded-[8px] px-3 py-2.5 text-[14px] font-semibold leading-none tracking-[0.015em]',
+    isCompleted
+      ? 'border border-[#DCDFE2] bg-white text-[#292B2C]'
+      : 'bg-[#292B2C] text-white',
+  ].join(' ');
 
   return (
-    <div className="relative flex w-full flex-col items-start rounded-[8px] bg-[#FAFBFD]">
+    <div className={containerClassName}>
       {hasTooltip ? (
         <div className="absolute right-0 top-[-34px] z-10 flex justify-end">
           <ToolTip className="h-7 rounded-[8px] px-3 py-1 text-[14px] font-normal leading-[1.4]" type="RightDown"
@@ -39,9 +57,9 @@ export function OfficialPostFile({ count = 0, fileName = '첨부파일', hasTool
 
         <button
           type="button"
-          className="flex shrink-0 items-center justify-center rounded-[8px] bg-[#292B2C] px-3 py-2.5 text-[14px] font-semibold leading-none tracking-[0.015em] text-white"
+          className={buttonClassName}
         >
-          다운받기
+          {isCompleted ? '다운완료' : '다운받기'}
         </button>
       </div>
     </div>
