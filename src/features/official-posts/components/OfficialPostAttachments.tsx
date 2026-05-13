@@ -7,9 +7,10 @@ import { OfficialPostFile } from '@/features/official-posts/components/OfficialP
 type OfficialPostAttachmentsProps = {
   attachments?: OfficialPostAttachment[];
   hasUnreadAttachments: boolean;
+  postId: number;
 };
 
-export function OfficialPostAttachments({ attachments, hasUnreadAttachments }: OfficialPostAttachmentsProps) {
+export function OfficialPostAttachments({ attachments, hasUnreadAttachments, postId }: OfficialPostAttachmentsProps) {
   const [isDownloadSheetOpen, setIsDownloadSheetOpen] = useState(false);
   const attachmentItems = attachments ?? [];
   const hasAttachments = attachmentItems.length > 0;
@@ -38,6 +39,7 @@ export function OfficialPostAttachments({ attachments, hasUnreadAttachments }: O
       <OfficialPostAttachmentDownloadSheet
         attachments={attachmentItems}
         isOpen={isDownloadSheetOpen}
+        postId={postId}
         onClose={() => setIsDownloadSheetOpen(false)}
       />
     </>

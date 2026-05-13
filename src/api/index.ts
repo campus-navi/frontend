@@ -25,6 +25,7 @@ export type { FeedCardPost, FeedCards } from '@/api/modules/feed';
 export type { MemberMe } from '@/api/modules/member';
 export type {
   OfficialPostAttachment,
+  OfficialPostAttachmentDownload,
   OfficialPostDetail,
   OfficialPostList,
   OfficialPostListParams,

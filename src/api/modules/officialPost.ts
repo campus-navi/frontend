@@ -9,6 +9,11 @@ export interface OfficialPostAttachment extends ApiObjectData {
   name: string;
 }
 
+export interface OfficialPostAttachmentDownload extends ApiObjectData {
+  downloadUrl: string;
+  expiresInSeconds: number;
+}
+
 export interface OfficialPostDetail extends ApiObjectData {
   applyMethodDetail: string | null;
   applyMethodType: string | null;
@@ -70,6 +75,11 @@ interface OfficialPostAttachmentResponse extends ApiObjectData {
   id?: number | string;
   isDownloaded?: boolean;
   name?: string;
+}
+
+interface OfficialPostAttachmentDownloadResponse extends ApiObjectData {
+  downloadUrl?: string;
+  expiresInSeconds?: number;
 }
 
 interface OfficialPostSummaryResponse extends ApiObjectData {
@@ -162,6 +172,21 @@ function normalizeAttachment(item: OfficialPostAttachmentResponse): OfficialPost
     id,
     isDownloaded,
     name,
+  };
+}
+
+function normalizeAttachmentDownload(
+  data: OfficialPostAttachmentDownloadResponse,
+): OfficialPostAttachmentDownload {
+  const { downloadUrl, expiresInSeconds } = data;
+
+  if (typeof downloadUrl !== 'string' || typeof expiresInSeconds !== 'number') {
+    throw createInvalidOfficialPostResponseError();
+  }
+
+  return {
+    downloadUrl,
+    expiresInSeconds,
   };
 }
 
@@ -285,6 +310,18 @@ export const officialPostApi = {
     return {
       ...response,
       data: normalizeOfficialPostDetail(response.data),
+    };
+  },
+  async getAttachmentDownloadUrl(postId: number, attachmentId: number | string) {
+    const encodedAttachmentId = encodeURIComponent(String(attachmentId));
+    const response = await request<OfficialPostAttachmentDownloadResponse>({
+      method: 'get',
+      url: `/official-posts/${postId}/attachments/${encodedAttachmentId}/download`,
+    });
+
+    return {
+      ...response,
+      data: normalizeAttachmentDownload(response.data),
     };
   },
 };

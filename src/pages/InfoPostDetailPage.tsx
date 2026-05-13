@@ -126,6 +126,7 @@ export default function InfoPostDetailPage() {
               <OfficialPostAttachments
                 attachments={post.attachments}
                 hasUnreadAttachments={post.hasUnreadAttachments}
+                postId={post.postId}
               />
               <OfficialPostTabs activeTab={activeTab} onTabChange={setActiveTab} />
               {activeTab === 'notice' ? (
