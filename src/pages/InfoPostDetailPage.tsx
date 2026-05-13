@@ -14,7 +14,7 @@ import { OfficialPostTabs } from '@/features/official-posts/components/OfficialP
 import { OfficialPostTitleSection } from '@/features/official-posts/components/OfficialPostTitleSection';
 import { useOfficialPostDetail } from '@/features/official-posts/hooks/useOfficialPostDetail';
 
-const DESIGN_LNB_SOLID_Y = 386;
+const DESIGN_LNB_SOLID_Y = 393;
 const LNB_OVERLAY_HEIGHT = 84;
 const LNB_SOLID_SCROLL_Y = DESIGN_LNB_SOLID_Y - LNB_OVERLAY_HEIGHT;
 
@@ -77,7 +77,7 @@ export default function InfoPostDetailPage() {
 
         {!isLoading && post ? (
           <>
-            <OfficialPostHeroImage imageUrl={post.imageUrls[0]} title={post.title} />
+            <OfficialPostHeroImage imageUrls={post.imageUrls} title={post.title} />
 
             <article className="flex flex-col bg-white pb-[112px]">
               <OfficialPostTitleSection post={post} />
