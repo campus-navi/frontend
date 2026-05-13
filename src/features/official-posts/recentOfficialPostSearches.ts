@@ -27,10 +27,14 @@ export function saveRecentOfficialPostSearches(searches: string[]) {
     return;
   }
 
-  window.localStorage.setItem(
-    RECENT_OFFICIAL_POST_SEARCHES_KEY,
-    JSON.stringify(searches.slice(0, MAX_RECENT_OFFICIAL_POST_SEARCHES)),
-  );
+  try {
+    window.localStorage.setItem(
+      RECENT_OFFICIAL_POST_SEARCHES_KEY,
+      JSON.stringify(searches.slice(0, MAX_RECENT_OFFICIAL_POST_SEARCHES)),
+    );
+  } catch {
+    return;
+  }
 }
 
 export function addRecentOfficialPostSearch(searchTerm: string) {
