@@ -1,13 +1,16 @@
 import type { ReactNode } from 'react';
-import { useEffect, useId } from 'react';
+import { useId } from 'react';
 
+import { DimmedOverlay } from '@/components/ui/DimmedOverlay';
 import { SvgIcon } from '@/components/ui/SvgIcon';
+import { useBodyScrollLock } from '@/components/ui/useBodyScrollLock';
 
 type BottomSheetType = 'accent' | 'center' | 'left';
 
 type BottomSheetProps = {
   children: ReactNode;
   footer?: ReactNode;
+  footerClassName?: string;
   isOpen: boolean;
   title: ReactNode;
   titleId?: string;
@@ -34,31 +37,29 @@ function BottomSheetCloseButton({ isVisible, onClose }: { isVisible: boolean; on
   );
 }
 
-export function BottomSheet({ children, footer, isOpen, title, titleId, type = 'accent', onClose }: BottomSheetProps) {
+export function BottomSheet({
+  children,
+  footer,
+  footerClassName = '',
+  isOpen,
+  title,
+  titleId,
+  type = 'accent',
+  onClose,
+}: BottomSheetProps) {
   const generatedTitleId = useId();
   const resolvedTitleId = titleId ?? generatedTitleId;
   const shouldShowCloseButton = type !== 'accent';
 
-  useEffect(() => {
-    if (!isOpen) {
-      return undefined;
-    }
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [isOpen]);
+  useBodyScrollLock(isOpen);
 
   if (!isOpen) {
     return null;
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex justify-center overflow-hidden bg-black/45 px-0"
+    <DimmedOverlay
+      className="fixed inset-0 z-[70] flex justify-center overflow-hidden px-0"
       role="dialog"
       aria-modal="true"
       aria-labelledby={resolvedTitleId}
@@ -103,12 +104,19 @@ export function BottomSheet({ children, footer, isOpen, title, titleId, type = '
           {children}
 
           {footer ? (
-            <div className="flex w-full flex-col items-center justify-center gap-2 px-4 pb-[max(40px,env(safe-area-inset-bottom))] pt-3">
+            <div
+              className={[
+                'flex w-full flex-col items-center justify-center gap-2 px-4 pb-[max(40px,env(safe-area-inset-bottom))] pt-3',
+                footerClassName,
+              ]
+                .filter(Boolean)
+                .join(' ')}
+            >
               {footer}
             </div>
           ) : null}
         </div>
       </div>
-    </div>
+    </DimmedOverlay>
   );
 }
