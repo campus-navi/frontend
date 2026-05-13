@@ -7,11 +7,12 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { OfficialPostAttachments } from '@/features/official-posts/components/OfficialPostAttachments';
 import { OfficialPostBottomFloating } from '@/features/official-posts/components/OfficialPostBottomFloating';
 import { OfficialPostContent } from '@/features/official-posts/components/OfficialPostContent';
+import { OfficialPostDepartmentInfo } from '@/features/official-posts/components/OfficialPostDepartmentInfo';
 import { OfficialPostDetails } from '@/features/official-posts/components/OfficialPostDetails';
 import { OfficialPostHeroImage } from '@/features/official-posts/components/OfficialPostHeroImage';
 import { OfficialPostImageViewer } from '@/features/official-posts/components/OfficialPostImageViewer';
 import { OfficialPostSummaryAI } from '@/features/official-posts/components/OfficialPostSummaryAI';
-import { OfficialPostTabs } from '@/features/official-posts/components/OfficialPostTabs';
+import { OfficialPostTabs, type OfficialPostTab } from '@/features/official-posts/components/OfficialPostTabs';
 import { OfficialPostTitleSection } from '@/features/official-posts/components/OfficialPostTitleSection';
 import { useOfficialPostDetail } from '@/features/official-posts/hooks/useOfficialPostDetail';
 
@@ -42,6 +43,7 @@ export default function InfoPostDetailPage() {
   const heroImageRef = useRef<HTMLDivElement | null>(null);
   const [heroImageHeight, setHeroImageHeight] = useState<number | null>(null);
   const [isLnbSolid, setIsLnbSolid] = useState(false);
+  const [activeTab, setActiveTab] = useState<OfficialPostTab>('notice');
   const [viewerInitialIndex, setViewerInitialIndex] = useState<number | null>(null);
   const errorMessage = getDetailErrorMessage(error, postId);
   const lnbSolidScrollY =
@@ -125,9 +127,15 @@ export default function InfoPostDetailPage() {
                 attachments={post.attachments}
                 hasUnreadAttachments={post.hasUnreadAttachments}
               />
-              <OfficialPostTabs />
-              <OfficialPostSummaryAI summary={post.summary} />
-              <OfficialPostContent post={post} />
+              <OfficialPostTabs activeTab={activeTab} onTabChange={setActiveTab} />
+              {activeTab === 'notice' ? (
+                <>
+                  <OfficialPostSummaryAI summary={post.summary} />
+                  <OfficialPostContent post={post} />
+                </>
+              ) : (
+                <OfficialPostDepartmentInfo post={post} />
+              )}
             </article>
 
             <OfficialPostBottomFloating endDate={post.endDate} isScrapped={post.isScrapped} />
