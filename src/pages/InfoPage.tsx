@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import type { OfficialPostListParams, OfficialPostListSort, OfficialPostTagCode } from '@/api';
+import type { OfficialPostListParams } from '@/api';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { MobileGnb } from '@/components/ui/MobileGnb';
 import { useOfficialPostList } from '@/features/official-posts/hooks/useOfficialPostList';
@@ -12,21 +12,10 @@ import {
   type OfficialPostSortFilter,
 } from '@/features/official-posts/components/OfficialPostListControls';
 import { OfficialPostListItem } from '@/features/official-posts/components/OfficialPostListItem';
-
-const officialPostCategoryTagCodeMap = {
-  '전체': undefined,
-  '수강': 'COURSE',
-  '학사': 'ACADEMIC',
-  '장학/금융': 'SCHOLARSHIP',
-  '학생 지원': 'STUDENT_SUPPORT',
-  '활동': 'ACTIVITY',
-  '시설': 'FACILITY',
-} satisfies Record<OfficialPostCategoryFilter, OfficialPostTagCode | undefined>;
-
-const officialPostSortMap = {
-  '최신순': 'LATEST',
-  '마감순': 'DEADLINE',
-} satisfies Record<OfficialPostSortFilter, OfficialPostListSort>;
+import {
+  officialPostCategoryTagCodeMap,
+  officialPostSortMap,
+} from '@/features/official-posts/officialPostFilters';
 
 export default function InfoPage() {
   const navigate = useNavigate();
@@ -40,7 +29,11 @@ export default function InfoPage() {
     }),
     [selectedCategory, selectedSort],
   );
-  const { data: officialPostList, isError, isLoading } = useOfficialPostList(officialPostListParams);
+  const {
+    data: officialPostList,
+    isError,
+    isLoading,
+  } = useOfficialPostList(officialPostListParams);
   const posts = officialPostList?.content ?? [];
 
   const handlePostClick = (postId: number) => {
@@ -50,7 +43,6 @@ export default function InfoPage() {
   return (
     <main className="min-h-[100svh] bg-white">
       <div className="mx-auto flex min-h-[100svh] w-full max-w-[393px] flex-col bg-white pb-[86px]">
-
         <OfficialPostListControls
           isFilterSheetOpen={isFilterSheetOpen}
           selectedCategory={selectedCategory}
@@ -60,13 +52,23 @@ export default function InfoPage() {
           onOpenFilterSheet={() => setIsFilterSheetOpen(true)}
           onResetCategory={() => setSelectedCategory('전체')}
           onResetSort={() => setSelectedSort('최신순')}
+          onSearchClick={() => navigate('/info/search')}
           onSortChange={setSelectedSort}
         />
 
         <section className="flex flex-1 flex-col px-4 py-4">
-          {isLoading ? <InfoPageMessage><LoadingSpinner ariaLabel="교내정보 목록을 불러오는 중" className="h-8 w-8 text-[#292B2C]" /></InfoPageMessage> : null}
+          {isLoading ? (
+            <InfoPageMessage>
+              <LoadingSpinner
+                ariaLabel="교내정보 목록을 불러오는 중"
+                className="h-8 w-8 text-[#292B2C]"
+              />
+            </InfoPageMessage>
+          ) : null}
           {isError ? <InfoPageMessage>교내정보 목록을 불러오지 못했어요.</InfoPageMessage> : null}
-          {!isLoading && !isError && posts.length === 0 ? <InfoPageMessage>표시할 교내정보 글이 없어요.</InfoPageMessage> : null}
+          {!isLoading && !isError && posts.length === 0 ? (
+            <InfoPageMessage>표시할 교내정보 글이 없어요.</InfoPageMessage>
+          ) : null}
           {!isLoading && !isError && posts.length > 0 ? (
             <ul className="flex flex-col gap-6">
               {posts.map((post) => (

@@ -4,6 +4,7 @@ import CardNewsDetailPage from '@/pages/CardNewsDetailPage';
 import HomePage from '@/pages/HomePage';
 import InfoPage from '@/pages/InfoPage';
 import InfoPostDetailPage from '@/pages/InfoPostDetailPage';
+import InfoSearchPage from '@/pages/InfoSearchPage';
 import NoticeInterestsCompletePage from '@/pages/NoticeInterestsCompletePage';
 import NoticeInterestsPage from '@/pages/NoticeInterestsPage';
 import OnboardingPage from '@/pages/OnboardingPage';
@@ -19,6 +20,7 @@ export default function App() {
       <Route path="/home" element={<HomePage />} />
       <Route path="/info" element={<InfoPage />} />
       <Route path="/info/posts/:postId" element={<InfoPostDetailPage />} />
+      <Route path="/info/search" element={<InfoSearchPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/notice-interests" element={<NoticeInterestsPage />} />
       <Route path="/notice-interests/complete" element={<NoticeInterestsCompletePage />} />
