@@ -49,6 +49,10 @@ export function OfficialPostImageViewer({
   }, [initialIndex, totalImageCount]);
 
   useEffect(() => {
+    if (totalImageCount === 0) {
+      return undefined;
+    }
+
     const previousOverflow = document.body.style.overflow;
     const previousTouchAction = document.body.style.touchAction;
 
@@ -59,7 +63,7 @@ export function OfficialPostImageViewer({
       document.body.style.overflow = previousOverflow;
       document.body.style.touchAction = previousTouchAction;
     };
-  }, []);
+  }, [totalImageCount]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
