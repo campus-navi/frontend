@@ -1,15 +1,16 @@
-import { useState } from 'react';
-
-type OfficialPostTab = 'notice' | 'department';
+export type OfficialPostTab = 'notice' | 'department';
 
 const tabs: { label: string; value: OfficialPostTab }[] = [
   { label: '공지사항', value: 'notice' },
-  { label: '관련 부서', value: 'department' },
+  { label: '관련부서', value: 'department' },
 ];
 
-export function OfficialPostTabs() {
-  const [activeTab, setActiveTab] = useState<OfficialPostTab>('notice');
+type OfficialPostTabsProps = {
+  activeTab: OfficialPostTab;
+  onTabChange: (tab: OfficialPostTab) => void;
+};
 
+export function OfficialPostTabs({ activeTab, onTabChange }: OfficialPostTabsProps) {
   return (
     <section className="bg-white" aria-label="공지 상세 탭">
       <div className="grid grid-cols-2">
@@ -29,7 +30,7 @@ export function OfficialPostTabs() {
                 .filter(Boolean)
                 .join(' ')}
               aria-pressed={isActive}
-              onClick={() => setActiveTab(tab.value)}
+              onClick={() => onTabChange(tab.value)}
             >
               {tab.label}
             </button>
