@@ -1,15 +1,23 @@
 import type { ReactNode } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import type { OfficialPostSummary } from '@/api';
-import { AppHeader } from '@/components/ui/AppHeader';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { MobileGnb } from '@/components/ui/MobileGnb';
 import { useOfficialPostList } from '@/features/info/hooks/useOfficialPostList';
+import {
+  OfficialPostListControls,
+  type OfficialPostCategoryFilter,
+  type OfficialPostSortFilter,
+} from '@/features/official-posts/components/OfficialPostListControls';
+import { OfficialPostListItem } from '@/features/official-posts/components/OfficialPostListItem';
 
 export default function InfoPage() {
   const navigate = useNavigate();
   const { data: officialPostList, isError, isLoading } = useOfficialPostList();
+  const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<OfficialPostCategoryFilter>('전체');
+  const [selectedSort, setSelectedSort] = useState<OfficialPostSortFilter>('최신순');
   const posts = officialPostList?.content ?? [];
 
   const handlePostClick = (postId: number) => {
@@ -19,16 +27,25 @@ export default function InfoPage() {
   return (
     <main className="min-h-[100svh] bg-white">
       <div className="mx-auto flex min-h-[100svh] w-full max-w-[393px] flex-col bg-white pb-[86px]">
-        <AppHeader title="교내정보" />
 
-        <section className="flex flex-1 flex-col px-5 py-6">
-          <h1 className="text-[24px] font-bold leading-[1.4] text-[#292B2C]">교내정보</h1>
+        <OfficialPostListControls
+          isFilterSheetOpen={isFilterSheetOpen}
+          selectedCategory={selectedCategory}
+          selectedSort={selectedSort}
+          onCategoryChange={setSelectedCategory}
+          onCloseSheet={() => setIsFilterSheetOpen(false)}
+          onOpenFilterSheet={() => setIsFilterSheetOpen(true)}
+          onResetCategory={() => setSelectedCategory('전체')}
+          onResetSort={() => setSelectedSort('최신순')}
+          onSortChange={setSelectedSort}
+        />
 
+        <section className="flex flex-1 flex-col px-4 py-4">
           {isLoading ? <InfoPageMessage><LoadingSpinner ariaLabel="교내정보 목록을 불러오는 중" className="h-8 w-8 text-[#292B2C]" /></InfoPageMessage> : null}
           {isError ? <InfoPageMessage>교내정보 목록을 불러오지 못했어요.</InfoPageMessage> : null}
           {!isLoading && !isError && posts.length === 0 ? <InfoPageMessage>표시할 교내정보 글이 없어요.</InfoPageMessage> : null}
           {!isLoading && !isError && posts.length > 0 ? (
-            <ul className="mt-6 flex flex-col divide-y divide-[#ECEEF0]">
+            <ul className="flex flex-col gap-6">
               {posts.map((post) => (
                 <li key={post.postId}>
                   <OfficialPostListItem post={post} onClick={() => handlePostClick(post.postId)} />
@@ -50,33 +67,4 @@ function InfoPageMessage({ children }: { children: ReactNode }) {
       {children}
     </div>
   );
-}
-
-function OfficialPostListItem({ onClick, post }: { onClick: () => void; post: OfficialPostSummary }) {
-  return (
-    <button
-      type="button"
-      className="flex w-full flex-col gap-2 py-4 text-left"
-      onClick={onClick}
-    >
-      <div className="flex items-center gap-2">
-        <span className="shrink-0 rounded-lg bg-[#F1F3F5] px-2 py-1 text-[12px] font-semibold leading-[1.4] text-[#565656]">
-          {post.tagName}
-        </span>
-        <span className="min-w-0 text-[13px] font-normal leading-[1.4] text-[#9D9D9D]">
-          {post.publishedAt}
-        </span>
-      </div>
-      <h2 className="line-clamp-2 text-[16px] font-semibold leading-[1.45] text-[#292B2C]">
-        {post.title}
-      </h2>
-      <p className="text-[13px] font-normal leading-[1.4] text-[#767676]">
-        마감일 {formatOptionalText(post.endDate)}
-      </p>
-    </button>
-  );
-}
-
-function formatOptionalText(value: string | null) {
-  return value?.trim() || '-';
 }
