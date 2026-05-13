@@ -2,6 +2,10 @@ import { useQuery } from '@tanstack/react-query';
 
 import { officialPostApi } from '@/api';
 
+export function getOfficialPostDetailQueryKey(postId: number | null) {
+  return ['info', 'officialPostDetail', postId] as const;
+}
+
 export function useOfficialPostDetail(postId: number | null) {
   return useQuery({
     enabled: postId !== null,
@@ -14,6 +18,6 @@ export function useOfficialPostDetail(postId: number | null) {
 
       return response.data;
     },
-    queryKey: ['info', 'officialPostDetail', postId],
+    queryKey: getOfficialPostDetailQueryKey(postId),
   });
 }

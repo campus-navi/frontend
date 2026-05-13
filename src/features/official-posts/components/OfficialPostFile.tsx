@@ -1,10 +1,14 @@
+import type { ReactNode } from 'react';
+
 import { SvgIcon } from '@/components/ui/SvgIcon';
 import { CtaButton } from '@/components/ui/CtaButton';
 import { ToolTip } from '@/components/ui/ToolTip';
 
 type OfficialPostFileProps = {
+  actionContent?: ReactNode;
   completedLabel?: string;
   count?: number;
+  disabled?: boolean;
   fileName?: string;
   hasTooltip?: boolean;
   status?: 'unread' | 'completed';
@@ -13,8 +17,10 @@ type OfficialPostFileProps = {
 };
 
 export function OfficialPostFile({
+  actionContent,
   completedLabel = '다운완료',
   count = 0,
+  disabled = false,
   fileName = '첨부파일',
   hasTooltip = false,
   status = 'unread',
@@ -60,12 +66,13 @@ export function OfficialPostFile({
           size="sm"
           variant={isCompleted ? 'tertiary' : 'secondary'}
           className={[
-            'shrink-0 tracking-[0.015em]',
+            'min-w-[62px] shrink-0 tracking-[0.015em]',
             isCompleted ? 'border-[#DCDFE2] text-[#292B2C]' : 'bg-[#292B2C]',
           ].join(' ')}
+          disabled={disabled}
           onClick={onActionClick}
         >
-          {isCompleted ? completedLabel : '다운받기'}
+          {actionContent ?? (isCompleted ? completedLabel : '다운받기')}
         </CtaButton>
       </div>
     </div>
