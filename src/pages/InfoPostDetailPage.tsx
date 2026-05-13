@@ -1,9 +1,22 @@
-import { useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { isApiError } from '@/api';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { OfficialPostAttachments } from '@/features/official-posts/components/OfficialPostAttachments';
+import { OfficialPostBottomFloating } from '@/features/official-posts/components/OfficialPostBottomFloating';
+import { OfficialPostContent } from '@/features/official-posts/components/OfficialPostContent';
+import { OfficialPostDetails } from '@/features/official-posts/components/OfficialPostDetails';
+import { OfficialPostHeroImage } from '@/features/official-posts/components/OfficialPostHeroImage';
+import { OfficialPostSummaryAI } from '@/features/official-posts/components/OfficialPostSummaryAI';
+import { OfficialPostTabs } from '@/features/official-posts/components/OfficialPostTabs';
+import { OfficialPostTitleSection } from '@/features/official-posts/components/OfficialPostTitleSection';
 import { useOfficialPostDetail } from '@/features/info/hooks/useOfficialPostDetail';
+
+const DESIGN_LNB_SOLID_Y = 386;
+const LNB_OVERLAY_HEIGHT = 84;
+const LNB_SOLID_SCROLL_Y = DESIGN_LNB_SOLID_Y - LNB_OVERLAY_HEIGHT;
 
 function parsePostId(value: string | undefined) {
   const normalizedValue = value?.trim();
@@ -18,6 +31,7 @@ function parsePostId(value: string | undefined) {
 }
 
 export default function InfoPostDetailPage() {
+  const navigate = useNavigate();
   const { postId: postIdParam } = useParams();
   const postId = parsePostId(postIdParam);
   const {
@@ -26,89 +40,59 @@ export default function InfoPostDetailPage() {
     isError,
     isLoading,
   } = useOfficialPostDetail(postId);
+  const [isLnbSolid, setIsLnbSolid] = useState(false);
   const errorMessage = getDetailErrorMessage(error, postId);
-  const safeSourceUrl = getSafeHttpUrl(post?.sourceUrl ?? null);
+
+  useEffect(() => {
+    const updateLnbState = () => {
+      setIsLnbSolid(window.scrollY >= LNB_SOLID_SCROLL_Y);
+    };
+
+    updateLnbState();
+    window.addEventListener('scroll', updateLnbState, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', updateLnbState);
+    };
+  }, []);
+
+  const headerClassName = [
+    'fixed left-1/2 top-0 z-50 w-full max-w-[393px] -translate-x-1/2 transition-colors duration-200',
+    isLnbSolid ? 'bg-white shadow-[0_1px_0_rgba(238,240,242,1)]' : 'bg-transparent',
+  ].join(' ');
 
   return (
     <main className="min-h-[100svh] bg-white">
-      <div className="mx-auto flex min-h-[100svh] w-full max-w-[393px] flex-col bg-white">
-        <AppHeader title="교내정보" />
+      <div className="relative mx-auto min-h-[100svh] w-full max-w-[393px] bg-white">
+        <AppHeader
+          className={headerClassName}
+          title={isLnbSolid ? '공지사항' : undefined}
+          variant="back"
+          onBack={() => navigate(-1)}
+        />
+
+        {isLoading ? <DetailLoading /> : null}
 
         {postId === null || isError ? <DetailMessage message={errorMessage} /> : null}
-        {isLoading ? <DetailLoading /> : null}
-        {post ? (
-          <article className="flex flex-1 flex-col gap-6 px-5 py-6">
-            <header className="flex flex-col gap-3">
-              <span className="w-fit rounded-lg bg-[#F1F3F5] px-2.5 py-1 text-[13px] font-semibold leading-[1.4] text-[#565656]">
-                {post.tagName}
-              </span>
-              <h1 className="text-[24px] font-bold leading-[1.35] text-[#292B2C]">
-                {post.title}
-              </h1>
-              <div className="flex flex-col gap-1 text-[13px] font-normal leading-[1.5] text-[#767676]">
-                <p>{post.publisher}</p>
-                <p>{post.publishedAt}</p>
-              </div>
-              <div className="flex gap-2 text-[13px] font-medium leading-[1.4] text-[#565656]">
-                <span>스크랩 {formatBoolean(post.isScrapped)}</span>
-                <span aria-hidden="true">/</span>
-                <span>알림 {formatBoolean(post.isNotificationOn)}</span>
-              </div>
-            </header>
 
-            <section className="flex flex-col gap-2 border-y border-[#ECEEF0] py-4">
-              <DetailRow label="시작" value={formatDateTime(post.startDate, post.startTime)} />
-              <DetailRow label="종료" value={formatDateTime(post.endDate, post.endTime)} />
-            </section>
+        {!isLoading && post ? (
+          <>
+            <OfficialPostHeroImage imageUrl={post.imageUrls[0]} title={post.title} />
 
-            <section className="flex flex-col gap-2">
-              <h2 className="text-[16px] font-semibold leading-[1.4] text-[#292B2C]">요약</h2>
-              <p className="whitespace-pre-line text-[15px] font-normal leading-[1.6] text-[#565656]">
-                {post.summary || '요약이 없어요.'}
-              </p>
-            </section>
+            <article className="flex flex-col bg-white pb-[112px]">
+              <OfficialPostTitleSection post={post} />
+              <OfficialPostDetails post={post} />
+              <OfficialPostAttachments
+                attachments={post.attachments}
+                hasUnreadAttachments={post.hasUnreadAttachments}
+              />
+              <OfficialPostTabs />
+              <OfficialPostSummaryAI summary={post.summary} />
+              <OfficialPostContent post={post} />
+            </article>
 
-            <section className="flex flex-col gap-2">
-              <h2 className="text-[16px] font-semibold leading-[1.4] text-[#292B2C]">본문</h2>
-              <p className="text-[15px] font-normal leading-[1.6] text-[#9D9D9D]">
-                본문 내용은 상세 UI 작업에서 표시할 예정입니다.
-              </p>
-            </section>
-
-            <section className="flex flex-col gap-2">
-              <h2 className="text-[16px] font-semibold leading-[1.4] text-[#292B2C]">원문</h2>
-              {safeSourceUrl ? (
-                <a
-                  className="break-all text-[15px] font-normal leading-[1.5] text-[#007AFF] underline"
-                  href={safeSourceUrl}
-                  rel="noreferrer noopener"
-                  target="_blank"
-                >
-                  {safeSourceUrl}
-                </a>
-              ) : (
-                <p className="text-[15px] font-normal leading-[1.5] text-[#9D9D9D]">유효한 원문 링크가 없어요.</p>
-              )}
-            </section>
-
-            <section className="flex flex-col gap-2 pb-8">
-              <h2 className="text-[16px] font-semibold leading-[1.4] text-[#292B2C]">첨부파일</h2>
-              {post.attachments.length > 0 ? (
-                <ul className="flex flex-col gap-2">
-                  {post.attachments.map((attachment) => (
-                    <li
-                      key={attachment.id}
-                      className="rounded-lg border border-[#ECEEF0] px-3 py-2 text-[14px] font-normal leading-[1.5] text-[#565656]"
-                    >
-                      {attachment.name}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-[15px] font-normal leading-[1.5] text-[#9D9D9D]">첨부파일이 없어요.</p>
-              )}
-            </section>
-          </article>
+            <OfficialPostBottomFloating endDate={post.endDate} isScrapped={post.isScrapped} />
+          </>
         ) : null}
       </div>
     </main>
@@ -117,49 +101,18 @@ export default function InfoPostDetailPage() {
 
 function DetailLoading() {
   return (
-    <section className="flex flex-1 items-center justify-center px-5 py-10">
-      <LoadingSpinner ariaLabel="교내정보 글을 불러오는 중" className="h-8 w-8 text-[#292B2C]" />
+    <section className="flex min-h-[100svh] items-center justify-center px-5 py-10">
+      <LoadingSpinner ariaLabel="공지사항 상세를 불러오는 중" className="h-8 w-8 text-[#292B2C]" />
     </section>
   );
 }
 
 function DetailMessage({ message }: { message: string }) {
   return (
-    <section className="flex flex-1 items-center justify-center px-5 py-10 text-center">
+    <section className="flex min-h-[100svh] items-center justify-center px-5 py-10 text-center">
       <p className="text-[16px] font-medium leading-[1.5] text-[#565656]">{message}</p>
     </section>
   );
-}
-
-function DetailRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-start gap-3 text-[14px] leading-[1.5]">
-      <span className="w-10 shrink-0 font-semibold text-[#292B2C]">{label}</span>
-      <span className="min-w-0 flex-1 font-normal text-[#565656]">{value}</span>
-    </div>
-  );
-}
-
-function formatDateTime(date: string | null, time: string | null) {
-  return [date, time].filter(Boolean).join(' ') || '-';
-}
-
-function formatBoolean(value: boolean) {
-  return value ? 'ON' : 'OFF';
-}
-
-function getSafeHttpUrl(value: string | null) {
-  if (!value) {
-    return null;
-  }
-
-  try {
-    const url = new URL(value);
-
-    return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : null;
-  } catch {
-    return null;
-  }
 }
 
 function getDetailErrorMessage(error: unknown, postId: number | null) {
@@ -167,12 +120,8 @@ function getDetailErrorMessage(error: unknown, postId: number | null) {
     return '교내정보 글을 찾을 수 없어요.';
   }
 
-  if (isApiError(error) && error.status === 404) {
-    return '교내정보 글을 찾을 수 없어요.';
-  }
-
   if (isApiError(error) && error.status === 425) {
-    return '아직 정보를 정리하는 중이에요. 잠시 후 다시 확인해주세요.';
+    return 'AI가 아직 공지 내용을 정리하는 중이에요. 잠시 후 다시 확인해주세요.';
   }
 
   return '교내정보 글을 불러오지 못했어요.';
