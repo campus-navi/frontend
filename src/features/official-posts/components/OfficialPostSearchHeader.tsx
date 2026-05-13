@@ -29,7 +29,7 @@ export function OfficialPostSearchHeader({
 
   return (
     <form
-      className="flex h-16 w-full items-center gap-2 px-4 py-2"
+      className="flex h-20 w-full items-center gap-2 px-4 py-4"
       role="search"
       onSubmit={handleSubmit}
     >
