@@ -49,7 +49,16 @@ export function OfficialPostBottomFloating({ endDate, isScrapped }: OfficialPost
 
 function getDeadlineText(endDate: string | null) {
   const dDay = getDDay(endDate);
-  return `마감까지 D-${dDay ?? 0}`;
+
+  if (dDay === null) {
+    return '마감기한 없음';
+  }
+
+  if (dDay < 0) {
+    return '마감 종료';
+  }
+
+  return `마감까지 D-${dDay}`;
 }
 
 function getDDay(endDate: string | null) {
