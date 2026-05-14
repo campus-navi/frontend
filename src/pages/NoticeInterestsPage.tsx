@@ -124,6 +124,10 @@ export default function NoticeInterestsPage() {
   const isCtaEnabled = hasMinimumInterests && !isSavePending;
 
   const toggleInterest = (interestId: number) => {
+    if (isSavePending) {
+      return;
+    }
+
     setSaveErrorMessage(null);
     setInterestIds((currentInterestIds) => {
       if (currentInterestIds.includes(interestId)) {
@@ -235,6 +239,7 @@ export default function NoticeInterestsPage() {
                   key={interest.interestId}
                   type="button"
                   aria-pressed={isSelected}
+                  disabled={isSavePending}
                   onClick={() => toggleInterest(interest.interestId)}
                   className="group flex min-w-0 flex-col items-center gap-3 text-center"
                 >
