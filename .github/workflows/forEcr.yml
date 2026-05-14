@@ -1,38 +1,32 @@
-name: Frontend Build and Push to ECR
+name: Deploy Frontend to S3 and CloudFront
 
 on:
   push:
     branches: ["main"]
-    paths:
-      - "src/**"
-      - "public/**"
-      - "package.json"
-      - "package-lock.json"
-      - "Dockerfile"
-      - ".dockerignore"
-      - "vite.config.*"
-      - "next.config.*"
-      - ".github/workflows/frontend-forEcr.yml"
 
 permissions:
   id-token: write
   contents: read
 
 jobs:
-  push-ecr:
+  deploy-frontend:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
+      - name: Set up Node
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Build
+        run: npm run build
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v5
@@ -40,25 +34,11 @@ jobs:
           role-to-assume: arn:aws:iam::154959837798:role/githubActionForEcrFE
           aws-region: ap-northeast-2
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
+      - name: Upload dist to S3
+        run: aws s3 sync dist/ s3://campus-navi-frontend --delete
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build, tag, and push image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          platforms: linux/amd64,linux/arm64
-          build-args: |
-            VITE_API_BASE_URL=https://campus-navi.com/api/v1
-          tags: |
-            ${{ steps.login-ecr.outputs.registry }}/campus-navi-frontend-server:${{ github.sha }}
-            ${{ steps.login-ecr.outputs.registry }}/campus-navi-frontend-server:latest
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id E38D9INL0OJAMI \
+            --paths "/*"
