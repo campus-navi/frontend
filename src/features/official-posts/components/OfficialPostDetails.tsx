@@ -1,13 +1,24 @@
 import type { OfficialPostDetail } from '@/api/modules/officialPost';
 import { SvgIcon } from '@/components/ui/SvgIcon';
-import { hasOfficialPostRequiredDocuments } from '@/features/official-posts/utils/officialPostApplication';
+import {
+  hasOfficialPostDateTime,
+  hasOfficialPostRequiredDocuments,
+  hasOfficialPostText,
+} from '@/features/official-posts/utils/officialPostApplication';
 
 type OfficialPostDetailsProps = {
   post: Pick<OfficialPostDetail, 'eligibility' | 'endDate' | 'endTime' | 'requiredDocuments' | 'startDate' | 'startTime'>;
 };
 
 export function OfficialPostDetails({ post }: OfficialPostDetailsProps) {
+  const applicationStart = hasOfficialPostDateTime(post.startDate, post.startTime)
+    ? formatDateTime(post.startDate, post.startTime)
+    : null;
+  const applicationEnd = hasOfficialPostDateTime(post.endDate, post.endTime)
+    ? formatDateTime(post.endDate, post.endTime)
+    : null;
   const requiredDocuments = hasOfficialPostRequiredDocuments(post.requiredDocuments) ? post.requiredDocuments : null;
+  const hasEligibility = hasOfficialPostText(post.eligibility);
 
   return (
     <section className="bg-white px-4 py-3" aria-labelledby="official-post-details-title">
@@ -15,10 +26,10 @@ export function OfficialPostDetails({ post }: OfficialPostDetailsProps) {
         상세 정보
       </h2>
       <dl className="flex flex-col gap-2">
-        <DetailRow label="신청일시" suffix="부터" value={formatDateTime(post.startDate, post.startTime)} />
-        <DetailRow label="신청마감" suffix="까지" value={formatDateTime(post.endDate, post.endTime)} />
+        {applicationStart ? <DetailRow label="신청일시" suffix="부터" value={applicationStart} /> : null}
+        {applicationEnd ? <DetailRow label="신청마감" suffix="까지" value={applicationEnd} /> : null}
         {requiredDocuments ? <DetailRow label="제출서류" value={requiredDocuments} /> : null}
-        <DetailRow isLink label="지원자격" value={post.eligibility ? '자세히 보기' : '-'} />
+        {hasEligibility ? <DetailRow isLink label="지원자격" value="자세히 보기" /> : null}
       </dl>
     </section>
   );
@@ -62,5 +73,5 @@ function DetailRow({
 }
 
 function formatDateTime(date: string | null, time: string | null) {
-  return [date, time].filter(Boolean).join(' ') || '-';
+  return [date, time].filter(hasOfficialPostText).join(' ');
 }

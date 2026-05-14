@@ -32,7 +32,7 @@ export function OfficialPostBottomFloating({
   startTime,
 }: OfficialPostBottomFloatingProps) {
   const [isApplyMethodSheetOpen, setIsApplyMethodSheetOpen] = useState(false);
-  const shouldShow = shouldShowOfficialPostBottomFloating(requiredDocuments);
+  const shouldShow = shouldShowOfficialPostBottomFloating({ endDate, requiredDocuments });
   const applicationStatus = getOfficialPostApplicationStatus({
     endDate,
     endTime,

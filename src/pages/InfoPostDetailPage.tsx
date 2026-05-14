@@ -50,7 +50,12 @@ export default function InfoPostDetailPage() {
   const [activeTab, setActiveTab] = useState<OfficialPostTab>('notice');
   const [viewerInitialIndex, setViewerInitialIndex] = useState<number | null>(null);
   const errorMessage = getDetailErrorMessage(error, postId);
-  const shouldShowBottomFloating = post ? shouldShowOfficialPostBottomFloating(post.requiredDocuments) : false;
+  const shouldShowBottomFloating = post
+    ? shouldShowOfficialPostBottomFloating({
+        endDate: post.endDate,
+        requiredDocuments: post.requiredDocuments,
+      })
+    : false;
   const shouldShowDetailsInfo = post
     ? shouldShowOfficialPostDetailsInfo({
         eligibility: post.eligibility,

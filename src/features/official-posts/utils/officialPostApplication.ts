@@ -18,8 +18,22 @@ export function hasOfficialPostDeadline(endDate: string | null | undefined, endT
   return hasText(endDate) || hasText(endTime);
 }
 
-export function shouldShowOfficialPostBottomFloating(requiredDocuments: string | null | undefined) {
-  return hasOfficialPostRequiredDocuments(requiredDocuments);
+export function hasOfficialPostDateTime(date: string | null | undefined, time: string | null | undefined) {
+  return hasText(date) || hasText(time);
+}
+
+export function hasOfficialPostText(value: string | null | undefined): value is string {
+  return hasText(value);
+}
+
+export function shouldShowOfficialPostBottomFloating({
+  endDate,
+  requiredDocuments,
+}: {
+  endDate: string | null | undefined;
+  requiredDocuments: string | null | undefined;
+}) {
+  return hasText(endDate) && hasOfficialPostRequiredDocuments(requiredDocuments);
 }
 
 export function shouldShowOfficialPostDetailsInfo({
@@ -38,8 +52,7 @@ export function shouldShowOfficialPostDetailsInfo({
   startTime: string | null | undefined;
 }) {
   return (
-    hasText(startDate) ||
-    hasText(startTime) ||
+    hasOfficialPostDateTime(startDate, startTime) ||
     hasOfficialPostDeadline(endDate, endTime) ||
     hasOfficialPostRequiredDocuments(requiredDocuments) ||
     hasText(eligibility)
