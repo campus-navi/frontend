@@ -44,11 +44,28 @@ export interface SignupPayload extends ApiObjectData {
   verifiedToken: string;
 }
 
+interface ReissueAccessTokenResponseData extends ApiObjectData {
+  accessToken?: string;
+}
+
 function storeAccessTokenFromHeaders(headers: Parameters<typeof extractAccessTokenFromHeaders>[0], errorMessage: string) {
   const accessToken = extractAccessTokenFromHeaders(headers);
 
   if (!accessToken) {
     throw new Error(errorMessage);
+  }
+
+  tokenStorage.setAccessToken(accessToken);
+}
+
+function storeReissuedAccessToken(
+  data: ReissueAccessTokenResponseData,
+  headers: Parameters<typeof extractAccessTokenFromHeaders>[0],
+) {
+  const accessToken = extractAccessTokenFromHeaders(headers) ?? (typeof data.accessToken === 'string' ? data.accessToken : null);
+
+  if (!accessToken) {
+    throw new Error('access token 재발급 응답에서 access token을 찾을 수 없습니다.');
   }
 
   tokenStorage.setAccessToken(accessToken);
@@ -122,7 +139,7 @@ export const authApi = {
       url: '/auth/signup',
     });
   },
-  reissueAccessToken<TData extends ApiObjectData = ApiObjectData>() {
+  reissueAccessToken<TData extends ReissueAccessTokenResponseData = ReissueAccessTokenResponseData>() {
     return apiClient.request<ApiResponse<TData>>({
       method: 'post',
       requiresAuth: false,
@@ -132,7 +149,7 @@ export const authApi = {
     } as ApiRequestConfig).then((response) => {
       const validatedResponse = validateApiResponse(response.status, response.data);
 
-      storeAccessTokenFromHeaders(response.headers, 'access token 재발급 응답에서 access token을 찾을 수 없습니다.');
+      storeReissuedAccessToken(validatedResponse.data, response.headers);
 
       return validatedResponse;
     });
