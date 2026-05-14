@@ -8,6 +8,10 @@ export interface MemberMe extends ApiObjectData {
   nickname: string;
 }
 
+export interface UpdateMemberInterestsRequest extends ApiObjectData {
+  interestIds: number[];
+}
+
 interface MemberMeResponse extends ApiObjectData {
   hasSetInterests?: boolean;
   nickname?: string;
@@ -39,5 +43,13 @@ export const memberApi = {
       ...response,
       data: normalizeMemberMe(response.data),
     };
+  },
+
+  async updateInterests(payload: UpdateMemberInterestsRequest) {
+    return request<string>({
+      data: payload,
+      method: 'put',
+      url: '/members/me/interests',
+    });
   },
 };
