@@ -137,9 +137,23 @@ function parseDate(date: string | null | undefined) {
     const year = Number(dateMatch[1]);
     const month = Number(dateMatch[2]);
     const day = Number(dateMatch[3]);
+
+    if (month < 1 || month > 12 || day < 1 || day > 31) {
+      return null;
+    }
+
     const parsedDate = new Date(year, month - 1, day);
 
-    return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
+    if (
+      Number.isNaN(parsedDate.getTime()) ||
+      parsedDate.getFullYear() !== year ||
+      parsedDate.getMonth() !== month - 1 ||
+      parsedDate.getDate() !== day
+    ) {
+      return null;
+    }
+
+    return parsedDate;
   }
 
   const parsedDate = new Date(normalizedDate);
