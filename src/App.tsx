@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 
+import { ProtectedRoute } from '@/components/routing/ProtectedRoute';
 import CardNewsDetailPage from '@/pages/CardNewsDetailPage';
 import HomePage from '@/pages/HomePage';
 import InfoPage from '@/pages/InfoPage';
@@ -16,14 +17,71 @@ export default function App() {
   return (
     <Routes>
       <Route index element={<OnboardingPage />} />
-      <Route path="/card-news/:postId" element={<CardNewsDetailPage />} />
-      <Route path="/home" element={<HomePage />} />
-      <Route path="/info" element={<InfoPage />} />
-      <Route path="/info/posts/:postId" element={<InfoPostDetailPage />} />
-      <Route path="/info/search" element={<InfoSearchPage />} />
+      <Route
+        path="/card-news/:postId"
+        element={
+          <ProtectedRoute>
+            <CardNewsDetailPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/home"
+        element={
+          <ProtectedRoute>
+            <HomePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/info"
+        element={
+          <ProtectedRoute>
+            <InfoPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/info/posts/:postId"
+        element={
+          <ProtectedRoute>
+            <InfoPostDetailPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/official-posts/:postId"
+        element={
+          <ProtectedRoute>
+            <InfoPostDetailPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/info/search"
+        element={
+          <ProtectedRoute>
+            <InfoSearchPage />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/notice-interests" element={<NoticeInterestsPage />} />
-      <Route path="/notice-interests/complete" element={<NoticeInterestsCompletePage />} />
+      <Route
+        path="/notice-interests"
+        element={
+          <ProtectedRoute>
+            <NoticeInterestsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/notice-interests/complete"
+        element={
+          <ProtectedRoute>
+            <NoticeInterestsCompletePage />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/signup/complete" element={<SignupCompletePage />} />
       <Route path="*" element={<Navigate replace to="/" />} />

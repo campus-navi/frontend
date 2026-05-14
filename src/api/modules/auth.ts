@@ -123,12 +123,18 @@ export const authApi = {
     });
   },
   reissueAccessToken<TData extends ApiObjectData = ApiObjectData>() {
-    return request<TData>({
+    return apiClient.request<ApiResponse<TData>>({
       method: 'post',
       requiresAuth: false,
       skipAuthRefresh: true,
       withCredentials: true,
       url: apiConfig.refreshPath,
+    } as ApiRequestConfig).then((response) => {
+      const validatedResponse = validateApiResponse(response.status, response.data);
+
+      storeAccessTokenFromHeaders(response.headers, 'access token 재발급 응답에서 access token을 찾을 수 없습니다.');
+
+      return validatedResponse;
     });
   },
 };
