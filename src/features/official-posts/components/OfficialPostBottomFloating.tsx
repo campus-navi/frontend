@@ -41,12 +41,7 @@ export function OfficialPostBottomFloating({
     startTime,
   });
   const isButtonDisabled = applicationStatus !== 'applicable';
-  const buttonText =
-    applicationStatus === 'before'
-      ? '신청기간이 아니에요'
-      : applicationStatus === 'closed'
-        ? '마감'
-        : getOfficialPostApplyMethodLabel(applyMethodType);
+  const buttonText = getOfficialPostApplyMethodLabel(applyMethodType);
   const deadlineText =
     applicationStatus === 'before' ? '신청기간이 아니에요.' : applicationStatus === 'closed' ? '마감' : getDeadlineText(endDate);
 
@@ -91,7 +86,7 @@ export function OfficialPostBottomFloating({
               {deadlineText}
             </p>
             <CtaButton
-              className="w-auto shrink-0 px-4"
+              className="w-auto shrink-0 whitespace-nowrap px-4"
               disabled={isButtonDisabled}
               fullWidth={false}
               variant="primary"
