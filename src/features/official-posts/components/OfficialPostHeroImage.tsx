@@ -19,8 +19,10 @@ const HERO_SWIPE_THRESHOLD = 48;
 const HERO_SNAP_DURATION_MS = 220;
 const HERO_DRAG_CLICK_SUPPRESSION_RESET_MS = 250;
 const OFFICIAL_POST_FALLBACK_IMAGE_URL = '/images/official-post-fallback.svg';
+const EMPTY_IMAGE_URLS: string[] = [];
 
-export function OfficialPostHeroImage({ imageUrls = [], title, onImageClick }: OfficialPostHeroImageProps) {
+export function OfficialPostHeroImage({ imageUrls, title, onImageClick }: OfficialPostHeroImageProps) {
+  const normalizedImageUrls = imageUrls ?? EMPTY_IMAGE_URLS;
   const [activeIndex, setActiveIndex] = useState(0);
   const [dragOffsetX, setDragOffsetX] = useState(0);
   const [failedImageIndexes, setFailedImageIndexes] = useState<Set<number>>(() => new Set());
@@ -33,11 +35,13 @@ export function OfficialPostHeroImage({ imageUrls = [], title, onImageClick }: O
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const snapFrameRef = useRef<number | null>(null);
   const snapTimeoutRef = useRef<number | null>(null);
-  const totalImageCount = imageUrls.length;
+  const totalImageCount = normalizedImageUrls.length;
   const previousIndex = totalImageCount > 0 ? (activeIndex - 1 + totalImageCount) % totalImageCount : 0;
   const nextIndex = totalImageCount > 0 ? (activeIndex + 1) % totalImageCount : 0;
   const isActiveImageUnavailable =
-    failedImageIndexes.has(activeIndex) || !imageUrls[activeIndex] || !loadedImageIndexes.has(activeIndex);
+    failedImageIndexes.has(activeIndex) ||
+    !normalizedImageUrls[activeIndex] ||
+    !loadedImageIndexes.has(activeIndex);
 
   const clearDidDragResetTimer = useCallback(() => {
     if (didDragResetTimeoutRef.current === null) {
@@ -76,7 +80,7 @@ export function OfficialPostHeroImage({ imageUrls = [], title, onImageClick }: O
       window.clearTimeout(snapTimeoutRef.current);
       snapTimeoutRef.current = null;
     }
-  }, [clearDidDragResetTimer, imageUrls]);
+  }, [clearDidDragResetTimer, normalizedImageUrls]);
 
   useEffect(() => {
     return () => {
@@ -276,7 +280,7 @@ export function OfficialPostHeroImage({ imageUrls = [], title, onImageClick }: O
           style={trackStyle}
         >
           <HeroImageSlide
-            imageUrl={imageUrls[previousIndex] ?? ''}
+            imageUrl={normalizedImageUrls[previousIndex] ?? ''}
             isFailed={failedImageIndexes.has(previousIndex)}
             isLoaded={loadedImageIndexes.has(previousIndex)}
             onImageError={() => handleSlideImageError(previousIndex)}
@@ -284,7 +288,7 @@ export function OfficialPostHeroImage({ imageUrls = [], title, onImageClick }: O
             title={title}
           />
           <HeroImageSlide
-            imageUrl={imageUrls[activeIndex] ?? ''}
+            imageUrl={normalizedImageUrls[activeIndex] ?? ''}
             isFailed={failedImageIndexes.has(activeIndex)}
             isLoaded={loadedImageIndexes.has(activeIndex)}
             onImageError={() => handleSlideImageError(activeIndex)}
@@ -292,7 +296,7 @@ export function OfficialPostHeroImage({ imageUrls = [], title, onImageClick }: O
             title={title}
           />
           <HeroImageSlide
-            imageUrl={imageUrls[nextIndex] ?? ''}
+            imageUrl={normalizedImageUrls[nextIndex] ?? ''}
             isFailed={failedImageIndexes.has(nextIndex)}
             isLoaded={loadedImageIndexes.has(nextIndex)}
             onImageError={() => handleSlideImageError(nextIndex)}
