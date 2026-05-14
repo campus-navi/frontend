@@ -15,6 +15,10 @@ import { OfficialPostSummaryAI } from '@/features/official-posts/components/Offi
 import { OfficialPostTabs, type OfficialPostTab } from '@/features/official-posts/components/OfficialPostTabs';
 import { OfficialPostTitleSection } from '@/features/official-posts/components/OfficialPostTitleSection';
 import { useOfficialPostDetail } from '@/features/official-posts/hooks/useOfficialPostDetail';
+import {
+  shouldShowOfficialPostBottomFloating,
+  shouldShowOfficialPostDetailsInfo,
+} from '@/features/official-posts/utils/officialPostApplication';
 
 const LNB_OVERLAY_HEIGHT = 84;
 
@@ -46,6 +50,22 @@ export default function InfoPostDetailPage() {
   const [activeTab, setActiveTab] = useState<OfficialPostTab>('notice');
   const [viewerInitialIndex, setViewerInitialIndex] = useState<number | null>(null);
   const errorMessage = getDetailErrorMessage(error, postId);
+  const shouldShowBottomFloating = post
+    ? shouldShowOfficialPostBottomFloating({
+        endDate: post.endDate,
+        requiredDocuments: post.requiredDocuments,
+      })
+    : false;
+  const shouldShowDetailsInfo = post
+    ? shouldShowOfficialPostDetailsInfo({
+        eligibility: post.eligibility,
+        endDate: post.endDate,
+        endTime: post.endTime,
+        requiredDocuments: post.requiredDocuments,
+        startDate: post.startDate,
+        startTime: post.startTime,
+      })
+    : false;
   const lnbSolidScrollY =
     heroImageHeight === null ? Number.POSITIVE_INFINITY : Math.max(heroImageHeight - LNB_OVERLAY_HEIGHT, 0);
 
@@ -120,9 +140,9 @@ export default function InfoPostDetailPage() {
               />
             </div>
 
-            <article className="flex flex-col bg-white pb-[112px]">
+            <article className={['flex flex-col bg-white', shouldShowBottomFloating ? 'pb-[112px]' : ''].filter(Boolean).join(' ')}>
               <OfficialPostTitleSection post={post} />
-              <OfficialPostDetails post={post} />
+              {shouldShowDetailsInfo ? <OfficialPostDetails post={post} /> : null}
               <OfficialPostAttachments
                 attachments={post.attachments}
                 hasUnreadAttachments={post.hasUnreadAttachments}
@@ -139,7 +159,16 @@ export default function InfoPostDetailPage() {
               )}
             </article>
 
-            <OfficialPostBottomFloating endDate={post.endDate} isScrapped={post.isScrapped} />
+            <OfficialPostBottomFloating
+              applyMethodType={post.applyMethodType}
+              endDate={post.endDate}
+              endTime={post.endTime}
+              isApplicable={post.isApplicable}
+              isScrapped={post.isScrapped}
+              requiredDocuments={post.requiredDocuments}
+              startDate={post.startDate}
+              startTime={post.startTime}
+            />
 
             {viewerInitialIndex !== null ? (
               <OfficialPostImageViewer
