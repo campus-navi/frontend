@@ -12,6 +12,9 @@ jobs:
   deploy-frontend:
     runs-on: ubuntu-latest
 
+    env:
+      VITE_API_BASE_URL: /api
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
