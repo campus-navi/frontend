@@ -1,10 +1,16 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 
+import { memberApi, normalizeApiError, type MemberMe } from '@/api';
+import { AlertModal } from '@/components/ui/AlertModal';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { CtaButton } from '@/components/ui/CtaButton';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { MEMBER_ME_QUERY_KEY } from '@/features/home/memberMeQueryKey';
+import { dismissNoticeInterestPrompt } from '@/features/home/noticeInterestPromptDismissState';
 
 type NoticeInterest = {
   interestId: number;
@@ -99,21 +105,26 @@ function StudentSupportIcon() {
 }
 
 const noticeInterests: NoticeInterest[] = [
-  { interestId: 0, label: '수강', icon: <CourseIcon /> },
-  { interestId: 1, label: '학사', icon: <AcademicIcon /> },
-  { interestId: 2, label: '활동', icon: <ActivityIcon /> },
-  { interestId: 3, label: '장학/금융', icon: <ScholarshipIcon /> },
-  { interestId: 4, label: '시설', icon: <FacilityIcon /> },
-  { interestId: 5, label: '학생 지원', icon: <StudentSupportIcon /> },
+  { interestId: 1, label: '수강', icon: <CourseIcon /> },
+  { interestId: 2, label: '학사', icon: <AcademicIcon /> },
+  { interestId: 3, label: '활동', icon: <ActivityIcon /> },
+  { interestId: 4, label: '장학/금융', icon: <ScholarshipIcon /> },
+  { interestId: 5, label: '시설', icon: <FacilityIcon /> },
+  { interestId: 6, label: '학생 지원', icon: <StudentSupportIcon /> },
 ];
 
 export default function NoticeInterestsPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [interestIds, setInterestIds] = useState<number[]>([]);
   const [isNotificationBottomSheetOpen, setIsNotificationBottomSheetOpen] = useState(false);
-  const isCtaEnabled = interestIds.length >= 3;
+  const [isSavePending, setIsSavePending] = useState(false);
+  const [saveErrorMessage, setSaveErrorMessage] = useState<string | null>(null);
+  const hasMinimumInterests = interestIds.length >= 3;
+  const isCtaEnabled = hasMinimumInterests && !isSavePending;
 
   const toggleInterest = (interestId: number) => {
+    setSaveErrorMessage(null);
     setInterestIds((currentInterestIds) => {
       if (currentInterestIds.includes(interestId)) {
         return currentInterestIds.filter((selectedInterestId) => selectedInterestId !== interestId);
@@ -123,12 +134,28 @@ export default function NoticeInterestsPage() {
     });
   };
 
-  const handleNext = () => {
-    if (!isCtaEnabled) {
+  const handleNext = async () => {
+    if (!hasMinimumInterests || isSavePending) {
       return;
     }
 
-    setIsNotificationBottomSheetOpen(true);
+    setIsSavePending(true);
+    setSaveErrorMessage(null);
+
+    try {
+      await memberApi.updateInterests({ interestIds });
+      queryClient.setQueryData<MemberMe | undefined>(MEMBER_ME_QUERY_KEY, (currentMemberMe) =>
+        currentMemberMe ? { ...currentMemberMe, hasSetInterests: true } : currentMemberMe,
+      );
+      void queryClient.invalidateQueries({ queryKey: MEMBER_ME_QUERY_KEY });
+      dismissNoticeInterestPrompt();
+      setIsNotificationBottomSheetOpen(true);
+    } catch (error) {
+      const normalizedError = normalizeApiError(error);
+      setSaveErrorMessage(normalizedError.message || '관심사 저장에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    } finally {
+      setIsSavePending(false);
+    }
   };
 
   const goToComplete = () => {
@@ -137,6 +164,13 @@ export default function NoticeInterestsPage() {
 
   return (
     <main className="min-h-[100svh] bg-white">
+      <AlertModal
+        isOpen={Boolean(saveErrorMessage)}
+        title="에러"
+        description={saveErrorMessage ?? ''}
+        isConfirmCta
+        onConfirm={() => setSaveErrorMessage(null)}
+      />
       <BottomSheet
         isOpen={isNotificationBottomSheetOpen}
         title="알림 권한"
@@ -233,9 +267,9 @@ export default function NoticeInterestsPage() {
             state={isCtaEnabled ? 'default' : 'disabled'}
             size="xlg"
             disabled={!isCtaEnabled}
-            onClick={handleNext}
+            onClick={() => void handleNext()}
           >
-            다음
+            {isSavePending ? <LoadingSpinner ariaLabel="관심사 저장 중" /> : '다음'}
           </CtaButton>
         </div>
       </div>
