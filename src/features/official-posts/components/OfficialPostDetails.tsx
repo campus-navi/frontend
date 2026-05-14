@@ -1,11 +1,14 @@
 import type { OfficialPostDetail } from '@/api/modules/officialPost';
 import { SvgIcon } from '@/components/ui/SvgIcon';
+import { hasOfficialPostRequiredDocuments } from '@/features/official-posts/utils/officialPostApplication';
 
 type OfficialPostDetailsProps = {
   post: Pick<OfficialPostDetail, 'eligibility' | 'endDate' | 'endTime' | 'requiredDocuments' | 'startDate' | 'startTime'>;
 };
 
 export function OfficialPostDetails({ post }: OfficialPostDetailsProps) {
+  const requiredDocuments = hasOfficialPostRequiredDocuments(post.requiredDocuments) ? post.requiredDocuments : null;
+
   return (
     <section className="bg-white px-4 py-3" aria-labelledby="official-post-details-title">
       <h2 id="official-post-details-title" className="sr-only">
@@ -14,7 +17,7 @@ export function OfficialPostDetails({ post }: OfficialPostDetailsProps) {
       <dl className="flex flex-col gap-2">
         <DetailRow label="신청일시" suffix="부터" value={formatDateTime(post.startDate, post.startTime)} />
         <DetailRow label="신청마감" suffix="까지" value={formatDateTime(post.endDate, post.endTime)} />
-        <DetailRow label="제출서류" value={post.requiredDocuments || '-'} />
+        {requiredDocuments ? <DetailRow label="제출서류" value={requiredDocuments} /> : null}
         <DetailRow isLink label="지원자격" value={post.eligibility ? '자세히 보기' : '-'} />
       </dl>
     </section>
