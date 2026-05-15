@@ -33,3 +33,15 @@ export const signupPasswordPolicy = {
   maxLength: 16,
   minLength: 8,
 } as const;
+
+export const signupValidationFeedbackClassNames = {
+  border: {
+    default: 'border-[#DCDFE2] focus-within:border-[#292B2C]',
+    error: 'border-[#FF5E47] focus-within:border-[#FF5E47]',
+  },
+  helperText: {
+    default: 'text-[#565656]',
+    error: 'text-[#FF5E47]',
+    success: 'text-[#5B82F5] opacity-80',
+  },
+} as const;

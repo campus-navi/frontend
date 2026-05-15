@@ -159,6 +159,7 @@ export function AccountStep({
           <div className="signup-slide-down mb-8">
             <SignupTextField
               inputRef={passwordConfirmInputRef}
+              layout="account"
               label="비밀번호 확인"
               type={isPasswordConfirmVisible ? 'text' : 'password'}
               value={passwordConfirm}
@@ -175,6 +176,7 @@ export function AccountStep({
           <div className="signup-slide-down mb-8">
             <SignupTextField
               inputRef={passwordInputRef}
+              layout="account"
               label="비밀번호"
               type={isPasswordVisible ? 'text' : 'password'}
               value={password}
@@ -188,6 +190,7 @@ export function AccountStep({
         ) : null}
 
         <SignupTextField
+          layout="account"
           label="아이디"
           value={username}
           placeholder="아이디를 작성해주세요."
