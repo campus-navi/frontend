@@ -1,5 +1,7 @@
 import type { HTMLInputAutoCompleteAttribute, HTMLInputTypeAttribute, ReactNode, Ref } from 'react';
 
+import { signupValidationFeedbackClassNames } from '@/features/signup/constants';
+
 type SignupTextFieldProps = {
   autoCapitalize?: string;
   autoComplete?: HTMLInputAutoCompleteAttribute;
@@ -8,6 +10,7 @@ type SignupTextFieldProps = {
   containerClassName?: string;
   inputClassName?: string;
   inputRef?: Ref<HTMLInputElement>;
+  layout?: 'default' | 'account';
   lang?: string;
   label: string;
   trailingActions?: ReactNode;
@@ -30,6 +33,7 @@ export function SignupTextField({
   inputMode,
   inputClassName,
   inputRef,
+  layout = 'default',
   lang,
   label,
   trailingActions,
@@ -43,15 +47,27 @@ export function SignupTextField({
   onChange,
   onFocus,
 }: SignupTextFieldProps) {
-  const helperToneClassName =
-    helperTone === 'success' ? 'text-[#3A7A44]' : helperTone === 'error' ? 'text-[#D34B4B]' : 'text-[#8D8D8D]';
+  const helperToneClassName = signupValidationFeedbackClassNames.helperText[helperTone];
+  const borderToneClassName =
+    helperTone === 'error'
+      ? signupValidationFeedbackClassNames.border.error
+      : signupValidationFeedbackClassNames.border.default;
+  const isAccountLayout = layout === 'account';
+  const labelClassName = isAccountLayout
+    ? 'text-[14px] font-medium leading-[140%] text-[#565656]'
+    : 'text-[15px] font-medium leading-none text-[#7E7E7E]';
+  const containerSpacingClassName = isAccountLayout ? 'border-b-2 pb-3 pt-6' : label ? 'mt-5 border-b' : 'border-b';
+  const inputBaseClassName = isAccountLayout
+    ? 'h-6 min-w-0 flex-1 border-0 bg-transparent px-0 text-[16px] font-medium leading-[140%] text-[#292B2C] placeholder:text-[#BFC4C8] focus:outline-none'
+    : 'h-12 min-w-0 flex-1 border-0 bg-transparent px-0 text-[17px] text-[#202020] placeholder:text-[#B9B9B9] focus:outline-none';
 
   return (
     <div>
-      {label ? <p className="text-[15px] font-medium leading-none text-[#7E7E7E]">{label}</p> : null}
+      {label ? <p className={labelClassName}>{label}</p> : null}
       <div
         className={[
-          label ? 'mt-5 border-b border-[#E1E1E1] focus-within:border-[#1F1F1F]' : 'border-b border-[#E1E1E1] focus-within:border-[#1F1F1F]',
+          containerSpacingClassName,
+          borderToneClassName,
           'flex items-center gap-2',
           containerClassName,
         ]
@@ -72,7 +88,7 @@ export function SignupTextField({
           onChange={(event) => onChange(event.target.value)}
           onFocus={onFocus}
           placeholder={placeholder}
-          className={['h-12 min-w-0 flex-1 border-0 bg-transparent px-0 text-[17px] text-[#202020] placeholder:text-[#B9B9B9] focus:outline-none', inputClassName]
+          className={[inputBaseClassName, inputClassName]
             .filter(Boolean)
             .join(' ')}
         />

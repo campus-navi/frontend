@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { CtaButton } from '@/components/ui/CtaButton';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { SignupTextField } from '@/features/signup/components/SignupTextField';
+import { signupValidationFeedbackClassNames } from '@/features/signup/constants';
 import type { EmailVerificationState } from '@/features/signup/types';
 
 type EmailVerificationStepProps = {
@@ -51,15 +52,27 @@ export function EmailVerificationStep({
   const [isEmailFocused, setIsEmailFocused] = useState(false);
   const [isVerificationCodeFocused, setIsVerificationCodeFocused] = useState(false);
   const isVerified = verification.verifiedToken.isVerified;
-  const hasEmailInput = Boolean(emailLocalPart.trim());
-  const emailLineBorderClassName = isEmailFocused || hasEmailInput ? 'border-[#707070]' : 'border-[#E8E8E8]';
-  const hasVerificationCodeInput = Boolean(verification.verify.code.trim());
-  const verificationCodeLineBorderClassName =
-    isVerificationCodeFocused || hasVerificationCodeInput ? 'border-[#707070]' : 'border-[#E8E8E8]';
+  const isEmailError = verification.send.errorReason === 'already_registered';
+  const isVerificationCodeError = Boolean(codeHelperMessage);
+  const emailLineBorderClassName = isEmailError
+    ? 'border-[#FF5E47]'
+    : isEmailFocused
+      ? 'border-[#292B2C]'
+      : 'border-[#DCDFE2]';
+  const verificationCodeLineBorderClassName = isVerificationCodeError
+    ? 'border-[#FF5E47]'
+    : isVerificationCodeFocused
+      ? 'border-[#292B2C]'
+      : 'border-[#DCDFE2]';
   const sendButtonState = isSendEnabled ? 'default' : isCodeSent ? 'ghosted' : 'disabled';
-  const labelClassName = 'text-[14px] font-medium leading-[140%] text-[#5C5C5C]';
-  const emailHelperClassName =
-    verification.send.errorReason === 'already_registered' ? 'text-[#D34B4B]' : 'text-[#5C5C5C]';
+  const labelClassName = 'text-[14px] font-medium leading-[140%] text-[#565656]';
+  const emailDomainBorderClassName = 'border-[#707376]';
+  const codeHelperClassName = isVerificationCodeError
+    ? signupValidationFeedbackClassNames.helperText.error
+    : signupValidationFeedbackClassNames.helperText.default;
+  const emailHelperClassName = isEmailError
+    ? signupValidationFeedbackClassNames.helperText.error
+    : signupValidationFeedbackClassNames.helperText.success;
   useEffect(() => {
     const focusTimer = window.setTimeout(() => {
       emailInputRef.current?.focus();
@@ -91,7 +104,7 @@ export function EmailVerificationStep({
       {isCodeSent ? (
         <div className="signup-slide-down mt-10 mb-8">
           <p className={labelClassName}>인증코드</p>
-          <div className={['mt-5 flex items-center gap-3 border-b-2 pb-3 transition-colors', verificationCodeLineBorderClassName].join(' ')}>
+          <div className={['flex items-center gap-3 border-b-2 pb-3 pt-6 transition-colors', verificationCodeLineBorderClassName].join(' ')}>
             <input
               ref={verificationCodeInputRef}
               type="text"
@@ -125,14 +138,14 @@ export function EmailVerificationStep({
             </CtaButton>
           </div>
           {codeHelperMessage ? (
-            <p className="mt-3 text-[12px] font-medium leading-[140%] text-[#5C5C5C]">{codeHelperMessage}</p>
+            <p className={['mt-3 text-[12px] font-medium leading-[140%]', codeHelperClassName].join(' ')}>{codeHelperMessage}</p>
           ) : null}
         </div>
       ) : null}
 
       <div className={isCodeSent ? 'mt-0' : 'mt-10'}>
         <p className={labelClassName}>학교 이메일</p>
-        <div className="mt-2 flex items-end gap-2">
+        <div className="flex items-end gap-2">
           <div className={['min-w-0 flex-1 border-b-2 transition-colors', emailLineBorderClassName].join(' ')}>
             <SignupTextField
               label=""
@@ -145,7 +158,7 @@ export function EmailVerificationStep({
               inputMode="email"
               inputClassName={[
                 'h-[62px] px-0 pb-4 pt-6 text-[16px] font-medium leading-[140%] text-[#333333]',
-                'placeholder:text-[16px] placeholder:font-medium placeholder:leading-[140%] placeholder:text-[#5C5C5C] placeholder:opacity-50',
+                'placeholder:text-[16px] placeholder:font-medium placeholder:leading-[140%] placeholder:text-[#BFC4C8] placeholder:opacity-100',
               ].join(' ')}
               inputRef={emailInputRef}
               lang="en"
@@ -158,7 +171,7 @@ export function EmailVerificationStep({
           <div
             className={[
               'flex h-[62px] w-[107px] shrink-0 items-start border-b-2 px-1 pb-4 pt-6 text-[16px] font-medium leading-[140%] tracking-[0.02em] text-[#707070] transition-colors',
-              emailLineBorderClassName,
+              emailDomainBorderClassName,
             ].join(' ')}
           >
             @{emailDomain}
