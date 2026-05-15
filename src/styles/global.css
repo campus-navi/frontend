@@ -63,7 +63,47 @@ body {
     }
   }
 
+  @keyframes onboarding-card-scroll-left {
+    0% {
+      transform: translateX(0);
+    }
+
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes onboarding-card-scroll-right {
+    0% {
+      transform: translateX(-50%);
+    }
+
+    100% {
+      transform: translateX(0);
+    }
+  }
+
   .signup-slide-down {
     animation: signup-slide-down 220ms ease-out;
+  }
+
+  .onboarding-card-track {
+    will-change: transform;
+  }
+
+  .onboarding-card-track-left {
+    animation: onboarding-card-scroll-left 22s linear infinite;
+  }
+
+  .onboarding-card-track-right {
+    animation: onboarding-card-scroll-right 24s linear infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .onboarding-card-track-left,
+    .onboarding-card-track-right {
+      animation: none;
+      transform: translateX(0);
+    }
   }
 }
