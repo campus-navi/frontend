@@ -80,11 +80,11 @@ export default function OnboardingPage() {
   const navigate = useNavigate();
 
   return (
-    <main className="h-[100svh] overflow-hidden bg-white">
-      <div className="mx-auto h-[100svh] w-full max-w-[393px] bg-white">
-        <section className="mx-auto flex h-full w-full max-w-[393px] flex-col justify-between bg-white px-4 pb-[max(20px,env(safe-area-inset-bottom))]">
+    <main className="min-h-[100svh] overflow-x-hidden bg-white">
+      <div className="mx-auto min-h-[100svh] w-full max-w-[393px] bg-white">
+        <section className="mx-auto flex min-h-[100svh] w-full max-w-[393px] flex-col justify-between bg-white px-4 pb-[max(20px,env(safe-area-inset-bottom))]">
           <div className="-mx-4">
-            <div className="flex h-[min(500px,58svh)] flex-col justify-end overflow-hidden bg-[#FAFBFD] pb-4 pt-[clamp(96px,16svh,135px)]">
+            <div className="flex h-[clamp(348px,50svh,500px)] flex-col justify-end overflow-hidden bg-[#FAFBFD] pb-4 pt-[clamp(24px,6svh,64px)]">
               <div className="space-y-4" aria-hidden="true">
                 {onboardingCards.map((cards, rowIndex) => {
                   const repeatedCards = [...cards, ...cards];
@@ -110,10 +110,9 @@ export default function OnboardingPage() {
                   );
                 })}
               </div>
-
             </div>
 
-            <h1 className="pt-[clamp(40px,6svh,49px)] text-center text-[28px] font-normal leading-[1.4] tracking-normal text-[#292B2C]">
+            <h1 className="pt-[clamp(28px,5svh,49px)] text-center text-[28px] font-normal leading-[1.4] tracking-normal text-[#292B2C]">
               <span className="block">우리 대학 정보를</span>
               <span className="block">
                 <strong className="font-bold">한곳에 </strong>다 모았어요.
@@ -121,7 +120,7 @@ export default function OnboardingPage() {
             </h1>
           </div>
 
-          <div className="w-full space-y-2 pt-[clamp(24px,6svh,58px)]">
+          <div className="w-full space-y-2 pt-[clamp(20px,4svh,40px)]">
             <CtaButton variant="primary" onClick={() => navigate('/login')}>
               로그인
             </CtaButton>
