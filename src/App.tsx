@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { ProtectedRoute } from '@/components/routing/ProtectedRoute';
+import { PublicOnlyRoute } from '@/components/routing/PublicOnlyRoute';
 import CardNewsDetailPage from '@/pages/CardNewsDetailPage';
 import HomePage from '@/pages/HomePage';
 import InfoPage from '@/pages/InfoPage';
@@ -16,7 +17,14 @@ import SignupPage from '@/pages/SignupPage';
 export default function App() {
   return (
     <Routes>
-      <Route index element={<OnboardingPage />} />
+      <Route
+        index
+        element={
+          <PublicOnlyRoute>
+            <OnboardingPage />
+          </PublicOnlyRoute>
+        }
+      />
       <Route
         path="/card-news/:postId"
         element={
@@ -65,7 +73,14 @@ export default function App() {
           </ProtectedRoute>
         }
       />
-      <Route path="/login" element={<LoginPage />} />
+      <Route
+        path="/login"
+        element={
+          <PublicOnlyRoute>
+            <LoginPage />
+          </PublicOnlyRoute>
+        }
+      />
       <Route
         path="/notice-interests"
         element={
@@ -82,7 +97,14 @@ export default function App() {
           </ProtectedRoute>
         }
       />
-      <Route path="/signup" element={<SignupPage />} />
+      <Route
+        path="/signup"
+        element={
+          <PublicOnlyRoute>
+            <SignupPage />
+          </PublicOnlyRoute>
+        }
+      />
       <Route path="/signup/complete" element={<SignupCompletePage />} />
       <Route path="*" element={<Navigate replace to="/" />} />
     </Routes>
