@@ -98,4 +98,12 @@ body {
   .onboarding-card-track-right {
     animation: onboarding-card-scroll-right 24s linear infinite;
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .onboarding-card-track-left,
+    .onboarding-card-track-right {
+      animation: none;
+      transform: translateX(0);
+    }
+  }
 }
