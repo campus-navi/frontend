@@ -164,6 +164,7 @@ export default function InfoPostDetailPage() {
             </article>
 
             <OfficialPostBottomFloating
+              applyMethodDetail={post.applyMethodDetail}
               applyMethodType={post.applyMethodType}
               endDate={post.endDate}
               endTime={post.endTime}
