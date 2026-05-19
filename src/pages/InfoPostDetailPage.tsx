@@ -9,6 +9,7 @@ import { OfficialPostBottomFloating } from '@/features/official-posts/components
 import { OfficialPostContent } from '@/features/official-posts/components/OfficialPostContent';
 import { OfficialPostDepartmentInfo } from '@/features/official-posts/components/OfficialPostDepartmentInfo';
 import { OfficialPostDetails } from '@/features/official-posts/components/OfficialPostDetails';
+import { OfficialPostEligibilityBottomSheet } from '@/features/official-posts/components/OfficialPostEligibilityBottomSheet';
 import { OfficialPostHeroImage } from '@/features/official-posts/components/OfficialPostHeroImage';
 import { OfficialPostImageViewer } from '@/features/official-posts/components/OfficialPostImageViewer';
 import { OfficialPostSummaryAI } from '@/features/official-posts/components/OfficialPostSummaryAI';
@@ -49,6 +50,7 @@ export default function InfoPostDetailPage() {
   const [isLnbSolid, setIsLnbSolid] = useState(false);
   const [activeTab, setActiveTab] = useState<OfficialPostTab>('notice');
   const [viewerInitialIndex, setViewerInitialIndex] = useState<number | null>(null);
+  const [isEligibilityBottomSheetOpen, setIsEligibilityBottomSheetOpen] = useState(false);
   const errorMessage = getDetailErrorMessage(error, postId);
   const shouldShowBottomFloating = post
     ? shouldShowOfficialPostBottomFloating({
@@ -100,7 +102,7 @@ export default function InfoPostDetailPage() {
 
   useEffect(() => {
     const updateLnbState = () => {
-      setIsLnbSolid(window.scrollY >= lnbSolidScrollY);
+      setIsLnbSolid(getCurrentPageScrollY() >= lnbSolidScrollY);
     };
 
     updateLnbState();
@@ -142,7 +144,9 @@ export default function InfoPostDetailPage() {
 
             <article className={['flex flex-col bg-white', shouldShowBottomFloating ? 'pb-[112px]' : ''].filter(Boolean).join(' ')}>
               <OfficialPostTitleSection post={post} />
-              {shouldShowDetailsInfo ? <OfficialPostDetails post={post} /> : null}
+              {shouldShowDetailsInfo ? (
+                <OfficialPostDetails post={post} onEligibilityClick={() => setIsEligibilityBottomSheetOpen(true)} />
+              ) : null}
               <OfficialPostAttachments
                 attachments={post.attachments}
                 hasUnreadAttachments={post.hasUnreadAttachments}
@@ -178,6 +182,12 @@ export default function InfoPostDetailPage() {
                 onClose={() => setViewerInitialIndex(null)}
               />
             ) : null}
+
+            <OfficialPostEligibilityBottomSheet
+              eligibility={post.eligibility}
+              isOpen={isEligibilityBottomSheetOpen}
+              onClose={() => setIsEligibilityBottomSheetOpen(false)}
+            />
           </>
         ) : null}
       </div>
@@ -211,4 +221,16 @@ function getDetailErrorMessage(error: unknown, postId: number | null) {
   }
 
   return '교내정보 글을 불러오지 못했어요.';
+}
+
+function getCurrentPageScrollY() {
+  if (document.body.style.position === 'fixed') {
+    const lockedScrollY = Number.parseFloat(document.body.style.top);
+
+    if (Number.isFinite(lockedScrollY)) {
+      return Math.abs(lockedScrollY);
+    }
+  }
+
+  return window.scrollY;
 }
