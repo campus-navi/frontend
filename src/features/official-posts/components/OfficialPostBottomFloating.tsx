@@ -1,8 +1,8 @@
 import { useState } from 'react';
 
-import { BottomSheet } from '@/components/ui/BottomSheet';
 import { CtaButton } from '@/components/ui/CtaButton';
 import { SvgIcon } from '@/components/ui/SvgIcon';
+import { OfficialPostApplyMethodBottomSheet } from '@/features/official-posts/components/OfficialPostApplyMethodBottomSheet';
 import {
   getOfficialPostApplicationStatus,
   getOfficialPostApplyMethodLabel,
@@ -11,6 +11,7 @@ import {
 } from '@/features/official-posts/utils/officialPostApplication';
 
 type OfficialPostBottomFloatingProps = {
+  applyMethodDetail: string | null;
   applyMethodType: string | null;
   endDate: string | null;
   endTime: string | null;
@@ -22,6 +23,7 @@ type OfficialPostBottomFloatingProps = {
 };
 
 export function OfficialPostBottomFloating({
+  applyMethodDetail,
   applyMethodType,
   endDate,
   endTime,
@@ -40,7 +42,14 @@ export function OfficialPostBottomFloating({
     startDate,
     startTime,
   });
-  const isButtonDisabled = applicationStatus !== 'applicable';
+  const isUnavailableApplyMethod = applyMethodType === 'OFFLINE' || applyMethodType === 'PORTAL';
+  const isApplyMethodButtonDisabled = applicationStatus !== 'applicable' || isUnavailableApplyMethod;
+  const applyMethodButtonVariant = applyMethodType === 'OTHER' || isUnavailableApplyMethod ? 'tertiary' : 'primary';
+  const applyMethodButtonState = isUnavailableApplyMethod
+    ? 'ghosted'
+    : applicationStatus === 'applicable'
+      ? 'default'
+      : 'disabled';
   const buttonText = getOfficialPostApplyMethodLabel(applyMethodType);
   const deadlineText =
     applicationStatus === 'before' ? '신청기간이 아니에요.' : applicationStatus === 'closed' ? '마감' : getDeadlineText(endDate);
@@ -87,9 +96,10 @@ export function OfficialPostBottomFloating({
             </p>
             <CtaButton
               className="w-auto shrink-0 whitespace-nowrap px-4"
-              disabled={isButtonDisabled}
+              disabled={isApplyMethodButtonDisabled}
               fullWidth={false}
-              variant="primary"
+              state={applyMethodButtonState}
+              variant={applyMethodButtonVariant}
               size="md"
               onClick={handleApplyClick}
             >
@@ -99,19 +109,11 @@ export function OfficialPostBottomFloating({
         </div>
       </div>
 
-      <BottomSheet
-        footer={
-          <CtaButton type="button" variant="primary" state="default" size="xlg" onClick={() => setIsApplyMethodSheetOpen(false)}>
-            확인
-          </CtaButton>
-        }
+      <OfficialPostApplyMethodBottomSheet
+        applyMethodDetail={applyMethodDetail}
         isOpen={isApplyMethodSheetOpen}
-        title="신청방법 확인"
-        type="left"
         onClose={() => setIsApplyMethodSheetOpen(false)}
-      >
-        <div className="min-h-10 w-full px-5" />
-      </BottomSheet>
+      />
     </>
   );
 }
