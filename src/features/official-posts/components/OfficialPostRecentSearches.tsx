@@ -15,10 +15,10 @@ export function OfficialPostRecentSearches({
 }: OfficialPostRecentSearchesProps) {
   return (
     <section
-      className="flex flex-col gap-4 rounded-b-2xl bg-white px-4 py-5"
+      className="flex h-full min-h-0 flex-col rounded-b-2xl bg-white"
       aria-labelledby="recent-official-post-searches-title"
     >
-      <div className="flex w-full items-center justify-between">
+      <div className="flex w-full shrink-0 items-center justify-between px-4 py-5">
         <h2
           id="recent-official-post-searches-title"
           className="text-[16px] font-semibold leading-[1.4] text-[#2C2C2E]"
@@ -37,7 +37,7 @@ export function OfficialPostRecentSearches({
       </div>
 
       {searches.length > 0 ? (
-        <ul className="flex w-full flex-col gap-1">
+        <ul className="flex min-h-0 w-full flex-1 flex-col gap-1 overflow-y-auto px-4 pb-5">
           {searches.map((searchTerm) => (
             <li key={searchTerm} className="flex w-full items-center justify-between py-2">
               <button
@@ -69,7 +69,7 @@ export function OfficialPostRecentSearches({
           ))}
         </ul>
       ) : (
-        <div className="flex items-center justify-center px-4 py-8 text-center text-[16px] font-medium leading-[1.4] text-[#5C5C5C] opacity-50">
+        <div className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto px-4 py-8 text-center text-[16px] font-medium leading-[1.4] text-[#5C5C5C] opacity-50">
           최근 검색한 키워드가 없어요
         </div>
       )}

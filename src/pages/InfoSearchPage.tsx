@@ -87,9 +87,14 @@ export default function InfoSearchPage() {
     navigate(`/info/posts/${postId}`);
   };
 
+  const pageClassName = shouldShowResults ? 'min-h-[100svh]' : 'h-[100dvh] overflow-hidden';
+  const contentClassName = shouldShowResults
+    ? 'min-h-[100svh]'
+    : 'h-full overflow-hidden';
+
   return (
-    <main className="min-h-[100svh] bg-white">
-      <div className="mx-auto flex min-h-[100svh] w-full max-w-[393px] flex-col bg-white">
+    <main className={`bg-white ${pageClassName}`}>
+      <div className={`mx-auto flex w-full max-w-[393px] flex-col bg-white ${contentClassName}`}>
         <OfficialPostSearchHeader
           inputValue={inputValue}
           onBack={() => navigate('/info')}
@@ -142,12 +147,14 @@ export default function InfoSearchPage() {
             </section>
           </>
         ) : (
-          <OfficialPostRecentSearches
-            searches={recentSearches}
-            onClearAll={() => setRecentSearches(clearRecentOfficialPostSearches())}
-            onRemove={(searchTerm) => setRecentSearches(removeRecentOfficialPostSearch(searchTerm))}
-            onSelect={runSearch}
-          />
+          <div className="min-h-0 flex-1">
+            <OfficialPostRecentSearches
+              searches={recentSearches}
+              onClearAll={() => setRecentSearches(clearRecentOfficialPostSearches())}
+              onRemove={(searchTerm) => setRecentSearches(removeRecentOfficialPostSearch(searchTerm))}
+              onSelect={runSearch}
+            />
+          </div>
         )}
       </div>
     </main>
