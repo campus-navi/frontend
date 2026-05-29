@@ -47,6 +47,7 @@ export default function InfoPage() {
           isFilterSheetOpen={isFilterSheetOpen}
           selectedCategory={selectedCategory}
           selectedSort={selectedSort}
+          isSearchInputSticky
           onCategoryChange={setSelectedCategory}
           onCloseSheet={() => setIsFilterSheetOpen(false)}
           onOpenFilterSheet={() => setIsFilterSheetOpen(true)}
