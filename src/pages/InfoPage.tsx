@@ -42,7 +42,7 @@ export default function InfoPage() {
 
   return (
     <main className="min-h-[100svh] bg-white">
-      <div className="mx-auto flex min-h-[100svh] w-full max-w-[393px] flex-col bg-white pb-[86px]">
+      <div className="mx-auto flex min-h-[100svh] w-full max-w-[393px] flex-col bg-white pb-[calc(54px+max(32px,env(safe-area-inset-bottom)))]">
         <OfficialPostListControls
           isFilterSheetOpen={isFilterSheetOpen}
           selectedCategory={selectedCategory}
