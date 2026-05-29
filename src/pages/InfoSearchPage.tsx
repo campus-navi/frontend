@@ -95,12 +95,14 @@ export default function InfoSearchPage() {
   return (
     <main className={`bg-white ${pageClassName}`}>
       <div className={`mx-auto flex w-full max-w-[393px] flex-col bg-white ${contentClassName}`}>
-        <OfficialPostSearchHeader
-          inputValue={inputValue}
-          onBack={() => navigate('/info')}
-          onInputChange={handleInputChange}
-          onSubmit={() => runSearch(inputValue)}
-        />
+        <div className="sticky top-0 z-20 bg-white">
+          <OfficialPostSearchHeader
+            inputValue={inputValue}
+            onBack={() => navigate('/info')}
+            onInputChange={handleInputChange}
+            onSubmit={() => runSearch(inputValue)}
+          />
+        </div>
 
         {shouldShowResults ? (
           <>
@@ -117,7 +119,7 @@ export default function InfoSearchPage() {
               onSortChange={setSelectedSort}
             />
 
-            <section className="flex flex-1 flex-col px-4 py-4">
+            <section className="flex flex-col px-4 py-4">
               {isLoading ? (
                 <InfoSearchPageMessage>
                   <LoadingSpinner
