@@ -21,6 +21,7 @@ type OfficialPostListControlsProps = {
   selectedCategory: OfficialPostCategoryFilter;
   selectedSort: OfficialPostSortFilter;
   showSearchInput?: boolean;
+  isSearchInputSticky?: boolean;
   onCategoryChange: (category: OfficialPostCategoryFilter) => void;
   onCloseSheet: () => void;
   onOpenFilterSheet: () => void;
@@ -46,6 +47,7 @@ export function OfficialPostListControls({
   selectedCategory,
   selectedSort,
   showSearchInput = true,
+  isSearchInputSticky = false,
   onCategoryChange,
   onCloseSheet,
   onOpenFilterSheet,
@@ -54,10 +56,17 @@ export function OfficialPostListControls({
   onSearchClick,
   onSortChange,
 }: OfficialPostListControlsProps) {
+  const searchSectionClassName = [
+    'bg-white',
+    isSearchInputSticky ? 'sticky top-0 z-20' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   return (
     <>
-      <section className="flex flex-col bg-white" aria-label="교내정보 필터와 정렬">
-        {showSearchInput ? (
+      {showSearchInput ? (
+        <section className={searchSectionClassName} aria-label="교내정보 검색">
           <div className="flex items-center justify-center p-4">
             <button
               type="button"
@@ -77,8 +86,10 @@ export function OfficialPostListControls({
               </SvgIcon>
             </button>
           </div>
-        ) : null}
+        </section>
+      ) : null}
 
+      <section className="flex flex-col bg-white" aria-label="교내정보 필터와 정렬">
         <div className="flex items-center px-4 py-2">
           <div className="flex shrink-0 items-center gap-3">
             <button
