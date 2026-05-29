@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
 
 import { SvgIcon } from '@/components/ui/SvgIcon';
@@ -17,46 +17,58 @@ const items: Array<{ id: MobileGnbItem; label: string; path?: string; icon: Reac
   { id: 'my', label: '마이페이지', icon: <MyIcon /> },
 ];
 
+const mobileGnbSafeAreaStyle = {
+  '--mobile-gnb-safe-area': 'max(32px, env(safe-area-inset-bottom))',
+} as CSSProperties;
+
 export function MobileGnb({ activeItem }: MobileGnbProps) {
   return (
-    <nav
-      className="fixed bottom-0 left-1/2 z-30 h-[86px] w-full max-w-[393px] -translate-x-1/2 border-t border-[#DCDFE2] bg-white px-1 pb-8 pt-2"
-      aria-label="주요 메뉴"
-    >
-      <ul className="grid h-full grid-cols-5">
-        {items.map((item) => {
-          const baseClassName =
-            'flex h-full w-full flex-col items-center justify-center gap-1 text-[14px] font-normal leading-[18px] tracking-[-0.02em] transition-colors';
+    <>
+      <div
+        className="pointer-events-none fixed bottom-[calc(var(--mobile-gnb-safe-area)*-1)] left-1/2 z-30 h-[calc(54px+var(--mobile-gnb-safe-area)+var(--mobile-gnb-safe-area))] w-full max-w-[393px] -translate-x-1/2 bg-white"
+        style={mobileGnbSafeAreaStyle}
+        aria-hidden="true"
+      />
+      <nav
+        className="fixed bottom-0 left-1/2 z-40 h-[calc(54px+var(--mobile-gnb-safe-area))] w-full max-w-[393px] -translate-x-1/2 border-t border-[#DCDFE2] bg-white px-1 pb-[var(--mobile-gnb-safe-area)] pt-2"
+        style={mobileGnbSafeAreaStyle}
+        aria-label="주요 메뉴"
+      >
+        <ul className="grid h-full grid-cols-5">
+          {items.map((item) => {
+            const baseClassName =
+              'flex h-full w-full flex-col items-center justify-center gap-1 text-[14px] font-normal leading-[18px] tracking-[-0.02em] transition-colors';
 
-          return (
-            <li key={item.id} className="min-w-0">
-              {item.path ? (
-                <NavLink
-                  to={item.path}
-                  className={({ isActive }) =>
-                    [baseClassName, isActive || item.id === activeItem ? 'text-[#292B2C]' : 'text-[#BFC4C8]']
-                      .filter(Boolean)
-                      .join(' ')
-                  }
-                >
-                  {item.icon}
-                  <span className="whitespace-nowrap">{item.label}</span>
-                </NavLink>
-              ) : (
-                <button
-                  type="button"
-                  className={[baseClassName, 'cursor-default text-[#BFC4C8]'].join(' ')}
-                  aria-disabled="true"
-                >
-                  {item.icon}
-                  <span className="whitespace-nowrap">{item.label}</span>
-                </button>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-    </nav>
+            return (
+              <li key={item.id} className="min-w-0">
+                {item.path ? (
+                  <NavLink
+                    to={item.path}
+                    className={({ isActive }) =>
+                      [baseClassName, isActive || item.id === activeItem ? 'text-[#292B2C]' : 'text-[#BFC4C8]']
+                        .filter(Boolean)
+                        .join(' ')
+                    }
+                  >
+                    {item.icon}
+                    <span className="whitespace-nowrap">{item.label}</span>
+                  </NavLink>
+                ) : (
+                  <button
+                    type="button"
+                    className={[baseClassName, 'cursor-default text-[#BFC4C8]'].join(' ')}
+                    aria-disabled="true"
+                  >
+                    {item.icon}
+                    <span className="whitespace-nowrap">{item.label}</span>
+                  </button>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+    </>
   );
 }
 
