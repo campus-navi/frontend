@@ -1,4 +1,5 @@
 import { MobileGnb } from '@/components/ui/MobileGnb';
+import { MyPageInterestGuideCard } from '@/features/mypage/components/MyPageInterestGuideCard';
 import { MyPageProfileSummary } from '@/features/mypage/components/MyPageProfileSummary';
 
 const profileSummary = {
@@ -14,6 +15,10 @@ export default function MyPage() {
           <h1 className="text-[24px] font-bold leading-[1.4] tracking-normal text-[#202020]">
             마이페이지
           </h1>
+
+          <div className="mt-6">
+            <MyPageInterestGuideCard />
+          </div>
 
           <div className="mt-20">
             <MyPageProfileSummary
