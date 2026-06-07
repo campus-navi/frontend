@@ -11,6 +11,7 @@ import { CtaButton } from '@/components/ui/CtaButton';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { MEMBER_ME_QUERY_KEY } from '@/features/home/memberMeQueryKey';
 import { dismissNoticeInterestPrompt } from '@/features/home/noticeInterestPromptDismissState';
+import { MY_PAGE_SUMMARY_QUERY_KEY } from '@/features/mypage/hooks/useMyPageSummary';
 
 type NoticeInterest = {
   interestId: number;
@@ -167,6 +168,7 @@ export default function NoticeInterestsPage() {
         currentMemberMe ? { ...currentMemberMe, hasSetInterests: true } : currentMemberMe,
       );
       void queryClient.invalidateQueries({ queryKey: MEMBER_ME_QUERY_KEY });
+      void queryClient.invalidateQueries({ queryKey: MY_PAGE_SUMMARY_QUERY_KEY });
       dismissNoticeInterestPrompt();
       setIsNotificationBottomSheetOpen(true);
     } catch (error) {
