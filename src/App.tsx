@@ -8,6 +8,7 @@ import InfoPage from '@/pages/InfoPage';
 import InfoPostDetailPage from '@/pages/InfoPostDetailPage';
 import InfoSearchPage from '@/pages/InfoSearchPage';
 import MyPage from '@/pages/MyPage';
+import MyPageScrapsPage from '@/pages/MyPageScrapsPage';
 import NoticeInterestsCompletePage from '@/pages/NoticeInterestsCompletePage';
 import NoticeInterestsPage from '@/pages/NoticeInterestsPage';
 import OnboardingPage from '@/pages/OnboardingPage';
@@ -79,6 +80,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <MyPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/mypage/scraps"
+        element={
+          <ProtectedRoute>
+            <MyPageScrapsPage />
           </ProtectedRoute>
         }
       />
