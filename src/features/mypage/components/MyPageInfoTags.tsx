@@ -1,15 +1,25 @@
 import { Tags } from '@/components/ui/Tags';
 
-const infoTags = [
-  '컴퓨터공학과',
-  '3학년',
-  '2022학번',
-  '장학',
-  '취업',
-  '동아리',
-] as const;
+type MyPageInfoTagsProps = {
+  admissionYear: number;
+  campus: string;
+  departments: string[];
+  grade: number;
+};
 
-export function MyPageInfoTags() {
+export function MyPageInfoTags({
+  admissionYear,
+  campus,
+  departments,
+  grade,
+}: MyPageInfoTagsProps) {
+  const infoTags = [
+    campus,
+    admissionYear > 0 ? `${admissionYear}학번` : '',
+    grade > 0 ? `${grade}학년` : '',
+    ...departments,
+  ].filter((tag) => tag.length > 0);
+
   return (
     <section aria-labelledby="mypage-info-tags-title">
       <h2 id="mypage-info-tags-title" className="sr-only">

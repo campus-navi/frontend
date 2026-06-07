@@ -7,14 +7,25 @@ import { MyPageInterestGuideCard } from '@/features/mypage/components/MyPageInte
 import { MyPageMenuList } from '@/features/mypage/components/MyPageMenuList';
 import { MyPageProfileSummary } from '@/features/mypage/components/MyPageProfileSummary';
 import { MyPageSummaryCards } from '@/features/mypage/components/MyPageSummaryCards';
+import { useMyPageSummary } from '@/features/mypage/hooks/useMyPageSummary';
 
-const profileSummary = {
+const fallbackMyPageSummary = {
+  admissionYear: 0,
+  campus: '',
+  departments: [],
   nickname: '캠퍼스네비',
   email: 'campusnavi@example.com',
+  grade: 0,
+  interestCount: 0,
+  remindCount: 0,
+  scrapCount: 0,
 };
 
 export default function MyPage() {
   const [isInterestGuideVisible, setIsInterestGuideVisible] = useState(true);
+  const { data: myPageSummary, isError, isLoading } = useMyPageSummary();
+  const summary = myPageSummary ?? fallbackMyPageSummary;
+  const shouldShowInterestGuide = myPageSummary?.interestCount === 0 && isInterestGuideVisible;
 
   return (
     <main className="min-h-[100svh] bg-white">
@@ -28,25 +39,45 @@ export default function MyPage() {
         <section className="flex flex-1 flex-col px-4 pb-10 pt-4">
           <h1 className="sr-only">마이페이지</h1>
 
-          {isInterestGuideVisible ? (
+          {isLoading ? (
+            <div className="mb-4 rounded-xl bg-[#F6F7F9] px-4 py-3 text-[14px] font-medium leading-[1.4] text-[#565656]">
+              마이페이지 정보를 불러오는 중이에요.
+            </div>
+          ) : null}
+
+          {isError ? (
+            <div className="mb-4 rounded-xl bg-[#FFF4F2] px-4 py-3 text-[14px] font-medium leading-[1.4] text-[#FF5E47]">
+              마이페이지 정보를 불러오지 못했어요.
+            </div>
+          ) : null}
+
+          {shouldShowInterestGuide ? (
             <div>
               <MyPageInterestGuideCard onClose={() => setIsInterestGuideVisible(false)} />
             </div>
           ) : null}
 
-          <div className={isInterestGuideVisible ? 'mt-6' : ''}>
-            <MyPageSummaryCards />
+          <div className={shouldShowInterestGuide || isLoading || isError ? 'mt-6' : ''}>
+            <MyPageSummaryCards
+              remindCount={summary.remindCount}
+              scrapCount={summary.scrapCount}
+            />
           </div>
 
           <div className="mt-4">
             <MyPageProfileSummary
-              nickname={profileSummary.nickname}
-              email={profileSummary.email}
+              nickname={summary.nickname}
+              email={summary.email}
             />
           </div>
 
           <div className="mt-6">
-            <MyPageInfoTags />
+            <MyPageInfoTags
+              admissionYear={summary.admissionYear}
+              campus={summary.campus}
+              departments={summary.departments}
+              grade={summary.grade}
+            />
           </div>
 
           <div className="mt-6">
