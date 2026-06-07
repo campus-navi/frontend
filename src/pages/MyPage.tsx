@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { MobileGnb } from '@/components/ui/MobileGnb';
+import { MyPageInfoTags } from '@/features/mypage/components/MyPageInfoTags';
 import { MyPageInterestGuideCard } from '@/features/mypage/components/MyPageInterestGuideCard';
 import { MyPageProfileSummary } from '@/features/mypage/components/MyPageProfileSummary';
 import { MyPageSummaryCards } from '@/features/mypage/components/MyPageSummaryCards';
@@ -36,6 +37,10 @@ export default function MyPage() {
               nickname={profileSummary.nickname}
               email={profileSummary.email}
             />
+          </div>
+
+          <div className="mt-6">
+            <MyPageInfoTags />
           </div>
         </section>
       </div>
