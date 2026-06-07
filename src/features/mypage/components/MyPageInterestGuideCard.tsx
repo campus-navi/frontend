@@ -7,7 +7,11 @@ const interestGuideCopy = {
   cta: '맞춤 카테고리 선택하기',
 };
 
-export function MyPageInterestGuideCard() {
+type MyPageInterestGuideCardProps = {
+  onClose: () => void;
+};
+
+export function MyPageInterestGuideCard({ onClose }: MyPageInterestGuideCardProps) {
   return (
     <section
       className="flex h-[72px] items-center gap-2 rounded-xl bg-white px-3 py-4"
@@ -25,18 +29,21 @@ export function MyPageInterestGuideCard() {
 
         <Link
           to="/notice-interests"
+          state={{ from: '/mypage' }}
           className="w-fit text-[16px] font-semibold leading-none tracking-[0.015em] text-[#292B2C]"
         >
           {interestGuideCopy.cta}
         </Link>
       </div>
 
-      <span
+      <button
+        type="button"
+        onClick={onClose}
         className="flex h-5 w-5 shrink-0 items-center justify-center text-[#565656]"
-        aria-hidden="true"
+        aria-label="맞춤 카테고리 안내 닫기"
       >
         <CloseIcon />
-      </span>
+      </button>
     </section>
   );
 }

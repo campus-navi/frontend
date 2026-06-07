@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { memberApi, normalizeApiError, type MemberMe } from '@/api';
 import { AlertModal } from '@/components/ui/AlertModal';
@@ -113,9 +113,24 @@ const noticeInterests: NoticeInterest[] = [
   { interestId: 6, label: '학생 지원', icon: <StudentSupportIcon /> },
 ];
 
+function getNoticeInterestsBackPath(state: unknown) {
+  if (
+    state &&
+    typeof state === 'object' &&
+    'from' in state &&
+    state.from === '/mypage'
+  ) {
+    return '/mypage';
+  }
+
+  return '/home';
+}
+
 export default function NoticeInterestsPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
+  const backPath = getNoticeInterestsBackPath(location.state);
   const [interestIds, setInterestIds] = useState<number[]>([]);
   const [isNotificationBottomSheetOpen, setIsNotificationBottomSheetOpen] = useState(false);
   const [isSavePending, setIsSavePending] = useState(false);
@@ -216,7 +231,7 @@ export default function NoticeInterestsPage() {
       </BottomSheet>
       <div className="mx-auto flex min-h-[100svh] w-full max-w-[393px] flex-col bg-white">
         <div>
-          <AppHeader title="맞춤 공지 설정" onBack={() => navigate('/home')} />
+          <AppHeader title="맞춤 공지 설정" onBack={() => navigate(backPath)} />
           <div className="h-[3px] w-full bg-[#D9D9D9]">
             <div className="h-full w-full bg-[#6C6C6C]" />
           </div>

@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import { MobileGnb } from '@/components/ui/MobileGnb';
 import { MyPageInterestGuideCard } from '@/features/mypage/components/MyPageInterestGuideCard';
 import { MyPageProfileSummary } from '@/features/mypage/components/MyPageProfileSummary';
@@ -8,6 +10,8 @@ const profileSummary = {
 };
 
 export default function MyPage() {
+  const [isInterestGuideVisible, setIsInterestGuideVisible] = useState(true);
+
   return (
     <main className="min-h-[100svh] bg-white">
       <div className="mx-auto flex min-h-[100svh] w-full max-w-[393px] flex-col bg-white pb-[calc(54px+max(32px,env(safe-area-inset-bottom)))]">
@@ -16,9 +20,11 @@ export default function MyPage() {
             마이페이지
           </h1>
 
-          <div className="mt-6">
-            <MyPageInterestGuideCard />
-          </div>
+          {isInterestGuideVisible ? (
+            <div className="mt-6">
+              <MyPageInterestGuideCard onClose={() => setIsInterestGuideVisible(false)} />
+            </div>
+          ) : null}
 
           <div className="mt-20">
             <MyPageProfileSummary
