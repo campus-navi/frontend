@@ -156,6 +156,8 @@ export default function MyPageScrapsPage() {
               ))}
             </div>
 
+            <div className="h-[127px] shrink-0" aria-hidden="true" />
+
             <div className="pointer-events-none fixed bottom-[59px] left-1/2 z-10 flex w-full max-w-[393px] -translate-x-1/2 justify-center px-4">
               <div
                 className="inline-flex h-[52px] items-center gap-1.5 rounded-full bg-[#292B2C] px-7 text-base font-semibold leading-none text-white"
