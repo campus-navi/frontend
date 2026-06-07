@@ -7,6 +7,7 @@ import HomePage from '@/pages/HomePage';
 import InfoPage from '@/pages/InfoPage';
 import InfoPostDetailPage from '@/pages/InfoPostDetailPage';
 import InfoSearchPage from '@/pages/InfoSearchPage';
+import MyPage from '@/pages/MyPage';
 import NoticeInterestsCompletePage from '@/pages/NoticeInterestsCompletePage';
 import NoticeInterestsPage from '@/pages/NoticeInterestsPage';
 import OnboardingPage from '@/pages/OnboardingPage';
@@ -70,6 +71,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <InfoSearchPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/mypage"
+        element={
+          <ProtectedRoute>
+            <MyPage />
           </ProtectedRoute>
         }
       />
