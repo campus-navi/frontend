@@ -18,13 +18,12 @@ export function MyPageProfileSummary({ nickname, email }: MyPageProfileSummaryPr
           >
             {nickname}
           </h2>
-          <button
-            type="button"
+          <span
             className="flex h-5 w-5 shrink-0 items-center justify-center text-[#565656]"
-            aria-label="닉네임 수정"
+            aria-hidden="true"
           >
             <EditIcon />
-          </button>
+          </span>
         </div>
 
         <p className="max-w-full truncate text-[12px] font-normal leading-[1.2] tracking-[-0.02em] text-[#4B5157]">
