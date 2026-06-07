@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { MobileGnb } from '@/components/ui/MobileGnb';
 import { MyPageInfoTags } from '@/features/mypage/components/MyPageInfoTags';
 import { MyPageInterestGuideCard } from '@/features/mypage/components/MyPageInterestGuideCard';
+import { MyPageMenuList } from '@/features/mypage/components/MyPageMenuList';
 import { MyPageProfileSummary } from '@/features/mypage/components/MyPageProfileSummary';
 import { MyPageSummaryCards } from '@/features/mypage/components/MyPageSummaryCards';
 
@@ -17,7 +18,7 @@ export default function MyPage() {
   return (
     <main className="min-h-[100svh] bg-white">
       <div className="mx-auto flex min-h-[100svh] w-full max-w-[393px] flex-col bg-white pb-[calc(54px+max(32px,env(safe-area-inset-bottom)))]">
-        <section className="flex flex-1 flex-col px-4 pt-[calc(40px+max(20px,env(safe-area-inset-top)))]">
+        <section className="flex flex-1 flex-col px-4 pb-10 pt-[calc(40px+max(20px,env(safe-area-inset-top)))]">
           <h1 className="text-[24px] font-bold leading-[1.4] tracking-normal text-[#202020]">
             마이페이지
           </h1>
@@ -41,6 +42,10 @@ export default function MyPage() {
 
           <div className="mt-6">
             <MyPageInfoTags />
+          </div>
+
+          <div className="mt-6">
+            <MyPageMenuList />
           </div>
         </section>
       </div>
