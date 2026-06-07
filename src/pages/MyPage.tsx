@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { AppHeader } from '@/components/ui/AppHeader';
 import { MobileGnb } from '@/components/ui/MobileGnb';
 import { MyPageInfoTags } from '@/features/mypage/components/MyPageInfoTags';
 import { MyPageInterestGuideCard } from '@/features/mypage/components/MyPageInterestGuideCard';
@@ -18,18 +19,22 @@ export default function MyPage() {
   return (
     <main className="min-h-[100svh] bg-white">
       <div className="mx-auto flex min-h-[100svh] w-full max-w-[393px] flex-col bg-white pb-[calc(54px+max(32px,env(safe-area-inset-bottom)))]">
-        <section className="flex flex-1 flex-col px-4 pb-10 pt-[calc(40px+max(20px,env(safe-area-inset-top)))]">
-          <h1 className="text-[24px] font-bold leading-[1.4] tracking-normal text-[#202020]">
-            마이페이지
-          </h1>
+        <AppHeader
+          variant="main"
+          className="fixed left-1/2 top-0 z-40 w-full max-w-[393px] -translate-x-1/2 bg-white"
+        />
+        <div className="h-[calc(60px+max(20px,env(safe-area-inset-top)))] shrink-0" aria-hidden="true" />
+
+        <section className="flex flex-1 flex-col px-4 pb-10 pt-4">
+          <h1 className="sr-only">마이페이지</h1>
 
           {isInterestGuideVisible ? (
-            <div className="mt-6">
+            <div>
               <MyPageInterestGuideCard onClose={() => setIsInterestGuideVisible(false)} />
             </div>
           ) : null}
 
-          <div className="mt-6">
+          <div className={isInterestGuideVisible ? 'mt-6' : ''}>
             <MyPageSummaryCards />
           </div>
 
