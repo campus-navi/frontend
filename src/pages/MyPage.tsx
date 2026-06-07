@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { MobileGnb } from '@/components/ui/MobileGnb';
 import { MyPageInterestGuideCard } from '@/features/mypage/components/MyPageInterestGuideCard';
 import { MyPageProfileSummary } from '@/features/mypage/components/MyPageProfileSummary';
+import { MyPageSummaryCards } from '@/features/mypage/components/MyPageSummaryCards';
 
 const profileSummary = {
   nickname: '캠퍼스네비',
@@ -26,7 +27,11 @@ export default function MyPage() {
             </div>
           ) : null}
 
-          <div className="mt-20">
+          <div className="mt-6">
+            <MyPageSummaryCards />
+          </div>
+
+          <div className="mt-4">
             <MyPageProfileSummary
               nickname={profileSummary.nickname}
               email={profileSummary.email}
