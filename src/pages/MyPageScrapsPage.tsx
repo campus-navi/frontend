@@ -8,7 +8,7 @@ export default function MyPageScrapsPage() {
   return (
     <main className="min-h-[100svh] bg-white">
       <div className="mx-auto flex min-h-[100svh] w-full max-w-[393px] flex-col bg-white pb-[max(32px,env(safe-area-inset-bottom))]">
-        <AppHeader title="스크랩 설정" onBack={() => navigate('/mypage')} />
+        <AppHeader title="스크랩 설정" onBack={() => navigate('/mypage', { replace: true })} />
 
         <section className="flex flex-1 flex-col px-4 pb-10 pt-6">
           <h1 className="text-[24px] font-bold leading-[1.4] tracking-normal text-[#202020]">
