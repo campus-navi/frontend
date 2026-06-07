@@ -1,10 +1,15 @@
+import { Link } from 'react-router-dom';
+
 import { SvgIcon } from '@/components/ui/SvgIcon';
 
 const applicationMenu = {
   label: '신청 정보 등록',
 };
 
-const settingMenus = ['스크랩 설정', '리마인드 설정'] as const;
+const settingMenus = [
+  { label: '스크랩 설정', to: '/mypage/scraps' },
+  { label: '리마인드 설정' },
+] as const;
 
 const postMenus = [
   { label: '최근 본 게시물' },
@@ -35,8 +40,8 @@ export function MyPageMenuList() {
       </div>
 
       <MenuCard>
-        {settingMenus.map((label) => (
-          <MenuRow key={label} label={label} />
+        {settingMenus.map((item) => (
+          <MenuRow key={item.label} label={item.label} to={'to' in item ? item.to : undefined} />
         ))}
       </MenuCard>
 
@@ -74,13 +79,27 @@ function MenuCard({ children }: { children: React.ReactNode }) {
   return <ul className="overflow-hidden rounded-xl bg-white">{children}</ul>;
 }
 
-function MenuRow({ label }: { label: string }) {
-  return (
-    <li className="flex h-11 items-center justify-between gap-3 px-4 text-[14px] font-normal leading-[1.4] tracking-normal text-[#292B2C]">
+function MenuRow({ label, to }: { label: string; to?: string }) {
+  const rowClassName =
+    'flex h-11 items-center justify-between gap-3 px-4 text-[14px] font-normal leading-[1.4] tracking-normal text-[#292B2C]';
+  const content = (
+    <>
       <span className="min-w-0 truncate">{label}</span>
       <span className="flex h-5 w-5 shrink-0 items-center justify-center text-[#202020]" aria-hidden="true">
         <ChevronIcon />
       </span>
+    </>
+  );
+
+  return (
+    <li>
+      {to ? (
+        <Link to={to} className={rowClassName}>
+          {content}
+        </Link>
+      ) : (
+        <div className={rowClassName}>{content}</div>
+      )}
     </li>
   );
 }
