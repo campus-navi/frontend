@@ -23,6 +23,7 @@ export type {
 } from '@/api/types';
 export type { FeedCardPost, FeedCards } from '@/api/modules/feed';
 export type { MemberMe, UpdateMemberInterestsRequest } from '@/api/modules/member';
+export type { MyPageSummary } from '@/api/modules/mypage';
 export type {
   OfficialPostAttachment,
   OfficialPostAttachmentDownload,

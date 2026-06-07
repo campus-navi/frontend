@@ -1,11 +1,75 @@
 import { request } from '@/api/client';
+import { COMMON_ERROR_CODES } from '@/api/constants/errorCodes';
+import { createApiError } from '@/api/errors';
 import type { ApiObjectData } from '@/api/types';
 
+export interface MyPageSummary extends ApiObjectData {
+  admissionYear: number;
+  campus: string;
+  departments: string[];
+  email: string;
+  grade: number;
+  interestCount: number;
+  nickname: string;
+  remindCount: number;
+  scrapCount: number;
+}
+
+interface MyPageSummaryResponse extends ApiObjectData {
+  admissionYear?: unknown;
+  campus?: unknown;
+  departments?: unknown;
+  email?: unknown;
+  grade?: unknown;
+  interestCount?: unknown;
+  nickname?: unknown;
+  remindCount?: unknown;
+  scrapCount?: unknown;
+}
+
+function normalizeMyPageSummary(data: MyPageSummaryResponse): MyPageSummary {
+  if (
+    typeof data.nickname !== 'string' ||
+    typeof data.email !== 'string' ||
+    typeof data.campus !== 'string' ||
+    typeof data.admissionYear !== 'number' ||
+    typeof data.grade !== 'number' ||
+    !Array.isArray(data.departments) ||
+    !data.departments.every((department) => typeof department === 'string') ||
+    typeof data.scrapCount !== 'number' ||
+    typeof data.remindCount !== 'number' ||
+    typeof data.interestCount !== 'number'
+  ) {
+    throw createApiError({
+      code: COMMON_ERROR_CODES.INVALID_RESPONSE,
+      message: '마이페이지 응답 형식이 올바르지 않습니다.',
+      status: 200,
+    });
+  }
+
+  return {
+    admissionYear: data.admissionYear,
+    campus: data.campus,
+    departments: data.departments,
+    email: data.email,
+    grade: data.grade,
+    interestCount: data.interestCount,
+    nickname: data.nickname,
+    remindCount: data.remindCount,
+    scrapCount: data.scrapCount,
+  };
+}
+
 export const mypageApi = {
-  getSummary<TData extends ApiObjectData = ApiObjectData>() {
-    return request<TData>({
+  async getSummary() {
+    const response = await request<MyPageSummaryResponse>({
       method: 'get',
       url: '/mypage',
     });
+
+    return {
+      ...response,
+      data: normalizeMyPageSummary(response.data),
+    };
   },
 };

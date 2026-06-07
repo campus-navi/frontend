@@ -1,9 +1,14 @@
-const summaryItems = [
-  { id: 'scrap', label: '스크랩', count: 3 },
-  { id: 'remind', label: '리마인드', count: 2 },
-] as const;
+type MyPageSummaryCardsProps = {
+  remindCount: number;
+  scrapCount: number;
+};
 
-export function MyPageSummaryCards() {
+export function MyPageSummaryCards({ remindCount, scrapCount }: MyPageSummaryCardsProps) {
+  const summaryItems = [
+    { id: 'scrap', label: '스크랩', count: scrapCount },
+    { id: 'remind', label: '리마인드', count: remindCount },
+  ] as const;
+
   return (
     <section className="flex items-center gap-10 pl-4" aria-label="스크랩 및 리마인드 요약">
       {summaryItems.map((item) => (
