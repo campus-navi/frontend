@@ -1,5 +1,5 @@
-import { useRef, type MouseEvent, type PointerEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useRef, type KeyboardEvent, type MouseEvent, type PointerEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { AppHeader } from '@/components/ui/AppHeader';
 import { SvgIcon } from '@/components/ui/SvgIcon';
@@ -12,6 +12,7 @@ export default function MyPageScrapsPage() {
   const recentScraps = scraps?.recentScraps ?? [];
   const folders = scraps?.folders ?? [];
   const recentScrapsRef = useRef<HTMLDivElement>(null);
+  const cleanupRecentScrapsDragListenersRef = useRef<(() => void) | null>(null);
   const dragStateRef = useRef({
     isDragging: false,
     hasDragged: false,
@@ -19,9 +20,21 @@ export default function MyPageScrapsPage() {
     scrollLeft: 0,
   });
 
+  const cleanupRecentScrapsDragListeners = () => {
+    cleanupRecentScrapsDragListenersRef.current?.();
+    cleanupRecentScrapsDragListenersRef.current = null;
+  };
+
+  const endRecentScrapsDrag = () => {
+    dragStateRef.current.isDragging = false;
+    cleanupRecentScrapsDragListeners();
+  };
+
+  useEffect(() => cleanupRecentScrapsDragListeners, []);
+
   const handleRecentScrapsPointerDown = (event: PointerEvent<HTMLDivElement>) => {
     const container = recentScrapsRef.current;
-    if (!container || event.pointerType === 'touch') {
+    if (!container) {
       return;
     }
 
@@ -31,7 +44,19 @@ export default function MyPageScrapsPage() {
       startX: event.clientX,
       scrollLeft: container.scrollLeft,
     };
-    container.setPointerCapture(event.pointerId);
+
+    cleanupRecentScrapsDragListeners();
+
+    const handleWindowPointerEnd = () => {
+      endRecentScrapsDrag();
+    };
+
+    window.addEventListener('pointerup', handleWindowPointerEnd);
+    window.addEventListener('pointercancel', handleWindowPointerEnd);
+    cleanupRecentScrapsDragListenersRef.current = () => {
+      window.removeEventListener('pointerup', handleWindowPointerEnd);
+      window.removeEventListener('pointercancel', handleWindowPointerEnd);
+    };
   };
 
   const handleRecentScrapsPointerMove = (event: PointerEvent<HTMLDivElement>) => {
@@ -47,16 +72,16 @@ export default function MyPageScrapsPage() {
     }
 
     dragState.hasDragged = true;
+    if (event.pointerType === 'touch') {
+      return;
+    }
+
     event.preventDefault();
     container.scrollLeft = dragState.scrollLeft - moveDistance;
   };
 
-  const handleRecentScrapsPointerUp = (event: PointerEvent<HTMLDivElement>) => {
-    const container = recentScrapsRef.current;
-    if (container?.hasPointerCapture(event.pointerId)) {
-      container.releasePointerCapture(event.pointerId);
-    }
-    dragStateRef.current.isDragging = false;
+  const handleRecentScrapsPointerUp = () => {
+    endRecentScrapsDrag();
   };
 
   const handleRecentScrapsClickCapture = (event: MouseEvent<HTMLDivElement>) => {
@@ -168,8 +193,25 @@ export default function MyPageScrapsPage() {
 }
 
 function RecentScrapCard({ scrap }: { scrap: MyPageRecentScrap }) {
+  const detailPath = `/info/posts/${scrap.postId}`;
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLAnchorElement>) => {
+    if (event.key !== ' ') {
+      return;
+    }
+
+    event.preventDefault();
+    event.currentTarget.click();
+  };
+
   return (
-    <article className="w-[316px] shrink-0 rounded-2xl bg-[#FAFBFD] p-4">
+    <Link
+      to={detailPath}
+      aria-label={`${scrap.title} 공지 상세 보기`}
+      className="block w-[316px] shrink-0 rounded-2xl bg-[#FAFBFD] p-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0BC798]"
+      draggable={false}
+      onKeyDown={handleKeyDown}
+    >
       <div className="flex flex-col gap-2">
         <div className="flex gap-1.5">
           <span className="rounded-lg bg-[#292B2C] px-2.5 py-1.5 text-sm font-medium leading-[1.4] text-white">
@@ -189,7 +231,7 @@ function RecentScrapCard({ scrap }: { scrap: MyPageRecentScrap }) {
           </p>
         </div>
       </div>
-    </article>
+    </Link>
   );
 }
 
