@@ -31,10 +31,6 @@ export default function MyPageScrapsPage() {
       startX: event.clientX,
       scrollLeft: container.scrollLeft,
     };
-
-    if (event.pointerType !== 'touch') {
-      container.setPointerCapture(event.pointerId);
-    }
   };
 
   const handleRecentScrapsPointerMove = (event: PointerEvent<HTMLDivElement>) => {
@@ -58,11 +54,7 @@ export default function MyPageScrapsPage() {
     container.scrollLeft = dragState.scrollLeft - moveDistance;
   };
 
-  const handleRecentScrapsPointerUp = (event: PointerEvent<HTMLDivElement>) => {
-    const container = recentScrapsRef.current;
-    if (container?.hasPointerCapture(event.pointerId)) {
-      container.releasePointerCapture(event.pointerId);
-    }
+  const handleRecentScrapsPointerUp = () => {
     dragStateRef.current.isDragging = false;
   };
 
@@ -191,6 +183,7 @@ function RecentScrapCard({ scrap }: { scrap: MyPageRecentScrap }) {
       to={detailPath}
       aria-label={`${scrap.title} 공지 상세 보기`}
       className="block w-[316px] shrink-0 rounded-2xl bg-[#FAFBFD] p-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0BC798]"
+      draggable={false}
       onKeyDown={handleKeyDown}
     >
       <div className="flex flex-col gap-2">
