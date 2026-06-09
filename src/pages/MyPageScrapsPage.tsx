@@ -1,4 +1,4 @@
-import { useRef, type KeyboardEvent, type MouseEvent, type PointerEvent } from 'react';
+import { useEffect, useRef, type KeyboardEvent, type MouseEvent, type PointerEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { AppHeader } from '@/components/ui/AppHeader';
@@ -12,12 +12,25 @@ export default function MyPageScrapsPage() {
   const recentScraps = scraps?.recentScraps ?? [];
   const folders = scraps?.folders ?? [];
   const recentScrapsRef = useRef<HTMLDivElement>(null);
+  const cleanupRecentScrapsDragListenersRef = useRef<(() => void) | null>(null);
   const dragStateRef = useRef({
     isDragging: false,
     hasDragged: false,
     startX: 0,
     scrollLeft: 0,
   });
+
+  const cleanupRecentScrapsDragListeners = () => {
+    cleanupRecentScrapsDragListenersRef.current?.();
+    cleanupRecentScrapsDragListenersRef.current = null;
+  };
+
+  const endRecentScrapsDrag = () => {
+    dragStateRef.current.isDragging = false;
+    cleanupRecentScrapsDragListeners();
+  };
+
+  useEffect(() => cleanupRecentScrapsDragListeners, []);
 
   const handleRecentScrapsPointerDown = (event: PointerEvent<HTMLDivElement>) => {
     const container = recentScrapsRef.current;
@@ -30,6 +43,19 @@ export default function MyPageScrapsPage() {
       hasDragged: false,
       startX: event.clientX,
       scrollLeft: container.scrollLeft,
+    };
+
+    cleanupRecentScrapsDragListeners();
+
+    const handleWindowPointerEnd = () => {
+      endRecentScrapsDrag();
+    };
+
+    window.addEventListener('pointerup', handleWindowPointerEnd);
+    window.addEventListener('pointercancel', handleWindowPointerEnd);
+    cleanupRecentScrapsDragListenersRef.current = () => {
+      window.removeEventListener('pointerup', handleWindowPointerEnd);
+      window.removeEventListener('pointercancel', handleWindowPointerEnd);
     };
   };
 
@@ -55,7 +81,7 @@ export default function MyPageScrapsPage() {
   };
 
   const handleRecentScrapsPointerUp = () => {
-    dragStateRef.current.isDragging = false;
+    endRecentScrapsDrag();
   };
 
   const handleRecentScrapsClickCapture = (event: MouseEvent<HTMLDivElement>) => {
