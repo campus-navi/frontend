@@ -1,5 +1,5 @@
-import { useRef, type MouseEvent, type PointerEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRef, type KeyboardEvent, type MouseEvent, type PointerEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { AppHeader } from '@/components/ui/AppHeader';
 import { SvgIcon } from '@/components/ui/SvgIcon';
@@ -21,7 +21,7 @@ export default function MyPageScrapsPage() {
 
   const handleRecentScrapsPointerDown = (event: PointerEvent<HTMLDivElement>) => {
     const container = recentScrapsRef.current;
-    if (!container || event.pointerType === 'touch') {
+    if (!container) {
       return;
     }
 
@@ -31,7 +31,10 @@ export default function MyPageScrapsPage() {
       startX: event.clientX,
       scrollLeft: container.scrollLeft,
     };
-    container.setPointerCapture(event.pointerId);
+
+    if (event.pointerType !== 'touch') {
+      container.setPointerCapture(event.pointerId);
+    }
   };
 
   const handleRecentScrapsPointerMove = (event: PointerEvent<HTMLDivElement>) => {
@@ -47,6 +50,10 @@ export default function MyPageScrapsPage() {
     }
 
     dragState.hasDragged = true;
+    if (event.pointerType === 'touch') {
+      return;
+    }
+
     event.preventDefault();
     container.scrollLeft = dragState.scrollLeft - moveDistance;
   };
@@ -168,8 +175,24 @@ export default function MyPageScrapsPage() {
 }
 
 function RecentScrapCard({ scrap }: { scrap: MyPageRecentScrap }) {
+  const detailPath = `/info/posts/${scrap.postId}`;
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLAnchorElement>) => {
+    if (event.key !== ' ') {
+      return;
+    }
+
+    event.preventDefault();
+    event.currentTarget.click();
+  };
+
   return (
-    <article className="w-[316px] shrink-0 rounded-2xl bg-[#FAFBFD] p-4">
+    <Link
+      to={detailPath}
+      aria-label={`${scrap.title} 공지 상세 보기`}
+      className="block w-[316px] shrink-0 rounded-2xl bg-[#FAFBFD] p-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0BC798]"
+      onKeyDown={handleKeyDown}
+    >
       <div className="flex flex-col gap-2">
         <div className="flex gap-1.5">
           <span className="rounded-lg bg-[#292B2C] px-2.5 py-1.5 text-sm font-medium leading-[1.4] text-white">
@@ -189,7 +212,7 @@ function RecentScrapCard({ scrap }: { scrap: MyPageRecentScrap }) {
           </p>
         </div>
       </div>
-    </article>
+    </Link>
   );
 }
 
