@@ -173,7 +173,7 @@ function RecentScrapCard({ scrap }: { scrap: MyPageRecentScrap }) {
       <div className="flex flex-col gap-2">
         <div className="flex gap-1.5">
           <span className="rounded-lg bg-[#292B2C] px-2.5 py-1.5 text-sm font-medium leading-[1.4] text-white">
-            {scrap.endDate}
+            {scrap.endDate ?? '마감일 없음'}
           </span>
           <span className="rounded-lg border border-[#DCDFE2] px-2.5 py-1.5 text-sm font-medium leading-[1.4] text-[#292B2C]">
             {scrap.tagName}

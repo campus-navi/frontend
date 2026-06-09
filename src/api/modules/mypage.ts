@@ -19,7 +19,7 @@ export interface MyPageRecentScrap extends ApiObjectData {
   postId: number;
   title: string;
   tagName: string;
-  endDate: string;
+  endDate: string | null;
   publishedAt: string;
 }
 
@@ -111,7 +111,7 @@ function isMyPageRecentScrapResponse(scrap: unknown): scrap is MyPageRecentScrap
     typeof recentScrap.postId === 'number' &&
     typeof recentScrap.title === 'string' &&
     typeof recentScrap.tagName === 'string' &&
-    typeof recentScrap.endDate === 'string' &&
+    (typeof recentScrap.endDate === 'string' || recentScrap.endDate === null) &&
     typeof recentScrap.publishedAt === 'string'
   );
 }
