@@ -1,6 +1,7 @@
 import type { ChangeEventHandler } from 'react';
 
 import { BottomSheet } from '@/components/ui/BottomSheet';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { SvgIcon } from '@/components/ui/SvgIcon';
 
 type ScrapFolderCreateBottomSheetProps = {
@@ -130,7 +131,7 @@ export function ScrapFolderCreateBottomSheet({
           disabled={isSubmitDisabled}
           onClick={onSubmit}
         >
-          {isPending ? '추가 중' : '추가'}
+          {isPending ? <LoadingSpinner ariaLabel="폴더 생성 중" className="h-5 w-5" /> : '추가'}
         </button>
       }
     >
