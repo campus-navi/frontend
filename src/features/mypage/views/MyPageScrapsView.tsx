@@ -3,6 +3,7 @@ import type { MouseEventHandler, PointerEventHandler, RefObject } from 'react';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { EmptyStateMessage } from '@/features/mypage/components/scraps/EmptyStateMessage';
 import { RecentScrapCard } from '@/features/mypage/components/scraps/RecentScrapCard';
+import { ScrapFolderCreateBottomSheet } from '@/features/mypage/components/scraps/ScrapFolderCreateBottomSheet';
 import { ScrapFolderRow } from '@/features/mypage/components/scraps/ScrapFolderRow';
 import { PlusIcon } from '@/features/mypage/components/scraps/ScrapIcons';
 import type { MyPageRecentScrapCardItem, MyPageScrapFolderListItem } from '@/features/mypage/types';
@@ -16,9 +17,22 @@ type RecentScrapsHandlers = {
 };
 
 type MyPageScrapsViewProps = {
+  createFolderDescription: string;
+  createFolderDescriptionMaxLength: number;
+  createFolderName: string;
+  createFolderNameMaxLength: number;
   folders: MyPageScrapFolderListItem[];
+  isCreateFolderSheetOpen: boolean;
+  isCreateFolderSubmitDisabled: boolean;
   onBack: () => void;
+  onChangeCreateFolderDescription: React.ChangeEventHandler<HTMLInputElement>;
+  onChangeCreateFolderName: React.ChangeEventHandler<HTMLInputElement>;
+  onClearCreateFolderDescription: () => void;
+  onClearCreateFolderName: () => void;
+  onCloseCreateFolderSheet: () => void;
   onFolderMoreClick: () => void;
+  onOpenCreateFolderSheet: () => void;
+  onSubmitCreateFolder: () => void;
   recentScraps: MyPageRecentScrapCardItem[];
   recentScrapsHandlers: RecentScrapsHandlers;
   recentScrapsRef: RefObject<HTMLDivElement>;
@@ -29,9 +43,22 @@ type MyPageScrapsViewProps = {
 };
 
 export function MyPageScrapsView({
+  createFolderDescription,
+  createFolderDescriptionMaxLength,
+  createFolderName,
+  createFolderNameMaxLength,
   folders,
+  isCreateFolderSheetOpen,
+  isCreateFolderSubmitDisabled,
   onBack,
+  onChangeCreateFolderDescription,
+  onChangeCreateFolderName,
+  onClearCreateFolderDescription,
+  onClearCreateFolderName,
+  onCloseCreateFolderSheet,
   onFolderMoreClick,
+  onOpenCreateFolderSheet,
+  onSubmitCreateFolder,
   recentScraps,
   recentScrapsHandlers,
   recentScrapsRef,
@@ -122,18 +149,35 @@ export function MyPageScrapsView({
 
             <div className="h-[127px] shrink-0" aria-hidden="true" />
 
-            <div className="pointer-events-none fixed bottom-[59px] left-1/2 z-10 flex w-full max-w-[393px] -translate-x-1/2 justify-center px-4">
-              <div
+            <div className="fixed bottom-[59px] left-1/2 z-10 flex w-full max-w-[393px] -translate-x-1/2 justify-center px-4">
+              <button
+                type="button"
                 className="inline-flex h-[52px] items-center gap-1.5 rounded-full bg-[#292B2C] px-7 text-base font-semibold leading-none text-white"
-                aria-hidden="true"
+                onClick={onOpenCreateFolderSheet}
+                aria-label="새 폴더 추가"
               >
                 <PlusIcon />
                 <span>새폴더 추가</span>
-              </div>
+              </button>
             </div>
           </section>
         </section>
       </div>
+
+      <ScrapFolderCreateBottomSheet
+        isOpen={isCreateFolderSheetOpen}
+        name={createFolderName}
+        nameMaxLength={createFolderNameMaxLength}
+        description={createFolderDescription}
+        descriptionMaxLength={createFolderDescriptionMaxLength}
+        isSubmitDisabled={isCreateFolderSubmitDisabled}
+        onChangeName={onChangeCreateFolderName}
+        onChangeDescription={onChangeCreateFolderDescription}
+        onClearName={onClearCreateFolderName}
+        onClearDescription={onClearCreateFolderDescription}
+        onClose={onCloseCreateFolderSheet}
+        onSubmit={onSubmitCreateFolder}
+      />
     </main>
   );
 }
