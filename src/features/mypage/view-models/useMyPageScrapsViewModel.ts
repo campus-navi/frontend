@@ -1,11 +1,16 @@
-import { useEffect, useRef, type MouseEventHandler, type PointerEventHandler } from 'react';
+import { useEffect, useRef, useState, type ChangeEventHandler, type MouseEventHandler, type PointerEventHandler } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useMyPageScraps } from '@/features/mypage/hooks/useMyPageScraps';
 import type { MyPageRecentScrapCardItem, MyPageScrapFolderListItem } from '@/features/mypage/types';
 
+const SCRAP_FOLDER_INPUT_MAX_LENGTH = 20;
+
 export function useMyPageScrapsViewModel() {
   const navigate = useNavigate();
+  const [isCreateFolderSheetOpen, setIsCreateFolderSheetOpen] = useState(false);
+  const [createFolderName, setCreateFolderName] = useState('');
+  const [createFolderDescription, setCreateFolderDescription] = useState('');
   const { data: scraps, isError, isLoading } = useMyPageScraps();
   const recentScraps = (scraps?.recentScraps ?? []).map<MyPageRecentScrapCardItem>((scrap) => ({
     detailPath: `/info/posts/${scrap.postId}`,
@@ -48,6 +53,40 @@ export function useMyPageScrapsViewModel() {
 
   const handleFolderMoreClick = () => {
     // Folder edit/delete actions will be connected in a later flow.
+  };
+
+  const resetCreateFolderInputs = () => {
+    setCreateFolderName('');
+    setCreateFolderDescription('');
+  };
+
+  const handleOpenCreateFolderSheet = () => {
+    setIsCreateFolderSheetOpen(true);
+  };
+
+  const handleCloseCreateFolderSheet = () => {
+    setIsCreateFolderSheetOpen(false);
+    resetCreateFolderInputs();
+  };
+
+  const handleCreateFolderNameChange: ChangeEventHandler<HTMLInputElement> = (event) => {
+    setCreateFolderName(event.target.value.slice(0, SCRAP_FOLDER_INPUT_MAX_LENGTH));
+  };
+
+  const handleCreateFolderDescriptionChange: ChangeEventHandler<HTMLInputElement> = (event) => {
+    setCreateFolderDescription(event.target.value.slice(0, SCRAP_FOLDER_INPUT_MAX_LENGTH));
+  };
+
+  const handleClearCreateFolderName = () => {
+    setCreateFolderName('');
+  };
+
+  const handleClearCreateFolderDescription = () => {
+    setCreateFolderDescription('');
+  };
+
+  const handleCreateFolderSubmit = () => {
+    handleCloseCreateFolderSheet();
   };
 
   const handleRecentScrapsPointerDown: PointerEventHandler<HTMLDivElement> = (event) => {
@@ -110,8 +149,21 @@ export function useMyPageScrapsViewModel() {
 
   return {
     folders,
-    onFolderMoreClick: handleFolderMoreClick,
+    createFolderDescription,
+    createFolderDescriptionMaxLength: SCRAP_FOLDER_INPUT_MAX_LENGTH,
+    createFolderName,
+    createFolderNameMaxLength: SCRAP_FOLDER_INPUT_MAX_LENGTH,
+    isCreateFolderSubmitDisabled: createFolderName.trim().length === 0,
+    isCreateFolderSheetOpen,
     onBack: handleBack,
+    onChangeCreateFolderDescription: handleCreateFolderDescriptionChange,
+    onChangeCreateFolderName: handleCreateFolderNameChange,
+    onClearCreateFolderDescription: handleClearCreateFolderDescription,
+    onClearCreateFolderName: handleClearCreateFolderName,
+    onCloseCreateFolderSheet: handleCloseCreateFolderSheet,
+    onFolderMoreClick: handleFolderMoreClick,
+    onOpenCreateFolderSheet: handleOpenCreateFolderSheet,
+    onSubmitCreateFolder: handleCreateFolderSubmit,
     recentScraps,
     recentScrapsHandlers: {
       onClickCapture: handleRecentScrapsClickCapture,
