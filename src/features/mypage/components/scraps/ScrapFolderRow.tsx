@@ -1,16 +1,28 @@
 import { Link } from 'react-router-dom';
 
+import { ScrapFolderMoreMenu } from '@/features/mypage/components/scraps/ScrapFolderMoreMenu';
 import { MoreIcon } from '@/features/mypage/components/scraps/ScrapIcons';
 import type { MyPageScrapFolderListItem } from '@/features/mypage/types';
 
 type ScrapFolderRowProps = {
   folder: MyPageScrapFolderListItem;
-  onMoreClick: () => void;
+  isMoreMenuOpen: boolean;
+  onDeleteFolder: () => void;
+  onEditFolder: () => void;
+  onMoreClick: (folder: MyPageScrapFolderListItem) => void;
+  onMoreMenuClose: () => void;
 };
 
-export function ScrapFolderRow({ folder, onMoreClick }: ScrapFolderRowProps) {
+export function ScrapFolderRow({
+  folder,
+  isMoreMenuOpen,
+  onDeleteFolder,
+  onEditFolder,
+  onMoreClick,
+  onMoreMenuClose,
+}: ScrapFolderRowProps) {
   return (
-    <article className="flex h-[72px] items-center justify-between">
+    <article className="relative flex h-[72px] items-center justify-between">
       <Link
         to={folder.detailPath}
         className="flex min-w-0 flex-1 items-center self-stretch py-3 pl-4"
@@ -33,14 +45,25 @@ export function ScrapFolderRow({ folder, onMoreClick }: ScrapFolderRowProps) {
 
       <button
         type="button"
-        className="ml-4 flex h-full w-12 shrink-0 items-center justify-center pr-4 text-[#292B2C]"
-        onClick={onMoreClick}
+        className="relative z-10 ml-4 flex h-full w-12 shrink-0 items-center justify-center pr-4 text-[#292B2C]"
+        onClick={() => onMoreClick(folder)}
+        aria-expanded={isMoreMenuOpen}
+        aria-haspopup="menu"
         aria-label={`${folder.name} 폴더 더보기`}
       >
         <span className="flex h-4 w-4 items-center justify-center" aria-hidden="true">
           <MoreIcon />
         </span>
       </button>
+
+      {isMoreMenuOpen ? (
+        <ScrapFolderMoreMenu
+          folderName={folder.name}
+          onClose={onMoreMenuClose}
+          onEdit={onEditFolder}
+          onDelete={onDeleteFolder}
+        />
+      ) : null}
     </article>
   );
 }
