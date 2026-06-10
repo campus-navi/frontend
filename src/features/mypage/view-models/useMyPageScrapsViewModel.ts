@@ -1,9 +1,8 @@
 import { useEffect, useRef, type MouseEventHandler, type PointerEventHandler } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import type { MyPageScrapFolder } from '@/api';
 import { useMyPageScraps } from '@/features/mypage/hooks/useMyPageScraps';
-import type { MyPageRecentScrapCardItem } from '@/features/mypage/types';
+import type { MyPageRecentScrapCardItem, MyPageScrapFolderListItem } from '@/features/mypage/types';
 
 export function useMyPageScrapsViewModel() {
   const navigate = useNavigate();
@@ -15,7 +14,13 @@ export function useMyPageScrapsViewModel() {
     tagName: scrap.tagName,
     title: scrap.title,
   }));
-  const folders: MyPageScrapFolder[] = scraps?.folders ?? [];
+  const folders = (scraps?.folders ?? []).map<MyPageScrapFolderListItem>((folder) => ({
+    description: folder.description,
+    detailPath: `/mypage/scraps/folders/${folder.folderId}`,
+    folderId: folder.folderId,
+    name: folder.name,
+    scrapCount: folder.scrapCount,
+  }));
   const recentScrapsRef = useRef<HTMLDivElement>(null);
   const cleanupRecentScrapsDragListenersRef = useRef<(() => void) | null>(null);
   const dragStateRef = useRef({
@@ -39,6 +44,10 @@ export function useMyPageScrapsViewModel() {
 
   const handleBack = () => {
     navigate('/mypage', { replace: true });
+  };
+
+  const handleFolderMoreClick = () => {
+    // Folder edit/delete actions will be connected in a later flow.
   };
 
   const handleRecentScrapsPointerDown: PointerEventHandler<HTMLDivElement> = (event) => {
@@ -101,6 +110,7 @@ export function useMyPageScrapsViewModel() {
 
   return {
     folders,
+    onFolderMoreClick: handleFolderMoreClick,
     onBack: handleBack,
     recentScraps,
     recentScrapsHandlers: {

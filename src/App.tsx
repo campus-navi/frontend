@@ -8,6 +8,7 @@ import InfoPage from '@/pages/InfoPage';
 import InfoPostDetailPage from '@/pages/InfoPostDetailPage';
 import InfoSearchPage from '@/pages/InfoSearchPage';
 import MyPage from '@/pages/MyPage';
+import MyPageScrapFolderPage from '@/pages/MyPageScrapFolderPage';
 import MyPageScrapsPage from '@/pages/MyPageScrapsPage';
 import NoticeInterestsCompletePage from '@/pages/NoticeInterestsCompletePage';
 import NoticeInterestsPage from '@/pages/NoticeInterestsPage';
@@ -88,6 +89,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <MyPageScrapsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/mypage/scraps/folders/:folderId"
+        element={
+          <ProtectedRoute>
+            <MyPageScrapFolderPage />
           </ProtectedRoute>
         }
       />
