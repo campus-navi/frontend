@@ -35,7 +35,7 @@ export interface MyPageFolderScrap extends ApiObjectData {
   postId: number;
   title: string;
   tagName: string;
-  endDate: string;
+  endDate: string | null;
   publishedAt: string;
   isActive: boolean;
 }
@@ -194,7 +194,7 @@ function isMyPageFolderScrapResponse(scrap: unknown): scrap is MyPageFolderScrap
     typeof folderScrap.postId === 'number' &&
     typeof folderScrap.title === 'string' &&
     typeof folderScrap.tagName === 'string' &&
-    typeof folderScrap.endDate === 'string' &&
+    (typeof folderScrap.endDate === 'string' || folderScrap.endDate === null) &&
     typeof folderScrap.publishedAt === 'string' &&
     typeof folderScrap.isActive === 'boolean'
   );

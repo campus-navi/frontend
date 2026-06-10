@@ -16,7 +16,7 @@ export type MyPageScrapFolderListItem = {
 
 export type MyPageFolderScrapListItem = {
   detailPath: string | null;
-  endDate: string;
+  endDate: string | null;
   isActive: boolean;
   postId: number;
   publishedAt: string;
