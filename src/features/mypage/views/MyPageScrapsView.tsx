@@ -1,12 +1,11 @@
 import type { MouseEventHandler, PointerEventHandler, RefObject } from 'react';
 
-import type { MyPageScrapFolder } from '@/api';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { EmptyStateMessage } from '@/features/mypage/components/scraps/EmptyStateMessage';
 import { RecentScrapCard } from '@/features/mypage/components/scraps/RecentScrapCard';
 import { ScrapFolderRow } from '@/features/mypage/components/scraps/ScrapFolderRow';
 import { PlusIcon } from '@/features/mypage/components/scraps/ScrapIcons';
-import type { MyPageRecentScrapCardItem } from '@/features/mypage/types';
+import type { MyPageRecentScrapCardItem, MyPageScrapFolderListItem } from '@/features/mypage/types';
 
 type RecentScrapsHandlers = {
   onClickCapture: MouseEventHandler<HTMLDivElement>;
@@ -17,8 +16,9 @@ type RecentScrapsHandlers = {
 };
 
 type MyPageScrapsViewProps = {
-  folders: MyPageScrapFolder[];
+  folders: MyPageScrapFolderListItem[];
   onBack: () => void;
+  onFolderMoreClick: () => void;
   recentScraps: MyPageRecentScrapCardItem[];
   recentScrapsHandlers: RecentScrapsHandlers;
   recentScrapsRef: RefObject<HTMLDivElement>;
@@ -31,6 +31,7 @@ type MyPageScrapsViewProps = {
 export function MyPageScrapsView({
   folders,
   onBack,
+  onFolderMoreClick,
   recentScraps,
   recentScrapsHandlers,
   recentScrapsRef,
@@ -109,7 +110,7 @@ export function MyPageScrapsView({
 
             <div className="mt-3 flex flex-col">
               {folders.map((folder) => (
-                <ScrapFolderRow key={folder.folderId} folder={folder} />
+                <ScrapFolderRow key={folder.folderId} folder={folder} onMoreClick={onFolderMoreClick} />
               ))}
 
               {shouldShowFoldersEmptyState ? (
