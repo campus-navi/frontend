@@ -45,6 +45,11 @@ export interface MyPageScraps extends ApiObjectData {
   folders: MyPageScrapFolder[];
 }
 
+export interface CreateScrapFolderRequest extends ApiObjectData {
+  name: string;
+  description?: string;
+}
+
 interface MyPageSummaryResponse extends ApiObjectData {
   admissionYear?: unknown;
   campus?: unknown;
@@ -255,5 +260,13 @@ export const mypageApi = {
       ...response,
       data: normalizeMyPageFolderScraps(response.data),
     };
+  },
+
+  async createScrapFolder(createRequest: CreateScrapFolderRequest) {
+    return request<null>({
+      data: createRequest,
+      method: 'post',
+      url: '/scrap-folders',
+    });
   },
 };

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type ChangeEventHandler, type MouseEventHandler, type PointerEventHandler } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { isApiError } from '@/api';
+import { useCreateScrapFolder } from '@/features/mypage/hooks/useCreateScrapFolder';
 import { useMyPageScraps } from '@/features/mypage/hooks/useMyPageScraps';
 import type { MyPageRecentScrapCardItem, MyPageScrapFolderListItem } from '@/features/mypage/types';
 
@@ -11,6 +13,7 @@ export function useMyPageScrapsViewModel() {
   const [isCreateFolderSheetOpen, setIsCreateFolderSheetOpen] = useState(false);
   const [createFolderName, setCreateFolderName] = useState('');
   const [createFolderDescription, setCreateFolderDescription] = useState('');
+  const createScrapFolderMutation = useCreateScrapFolder();
   const { data: scraps, isError, isLoading } = useMyPageScraps();
   const recentScraps = (scraps?.recentScraps ?? []).map<MyPageRecentScrapCardItem>((scrap) => ({
     detailPath: `/info/posts/${scrap.postId}`,
@@ -61,33 +64,74 @@ export function useMyPageScrapsViewModel() {
   };
 
   const handleOpenCreateFolderSheet = () => {
+    createScrapFolderMutation.reset();
     setIsCreateFolderSheetOpen(true);
   };
 
   const handleCloseCreateFolderSheet = () => {
     setIsCreateFolderSheetOpen(false);
+    createScrapFolderMutation.reset();
     resetCreateFolderInputs();
   };
 
   const handleCreateFolderNameChange: ChangeEventHandler<HTMLInputElement> = (event) => {
+    createScrapFolderMutation.reset();
     setCreateFolderName(event.target.value.slice(0, SCRAP_FOLDER_INPUT_MAX_LENGTH));
   };
 
   const handleCreateFolderDescriptionChange: ChangeEventHandler<HTMLInputElement> = (event) => {
+    createScrapFolderMutation.reset();
     setCreateFolderDescription(event.target.value.slice(0, SCRAP_FOLDER_INPUT_MAX_LENGTH));
   };
 
   const handleClearCreateFolderName = () => {
+    createScrapFolderMutation.reset();
     setCreateFolderName('');
   };
 
   const handleClearCreateFolderDescription = () => {
+    createScrapFolderMutation.reset();
     setCreateFolderDescription('');
   };
 
   const handleCreateFolderSubmit = () => {
-    handleCloseCreateFolderSheet();
+    const trimmedName = createFolderName.trim();
+    const trimmedDescription = createFolderDescription.trim();
+
+    if (!trimmedName || createScrapFolderMutation.isPending) {
+      return;
+    }
+
+    createScrapFolderMutation.mutate(
+      {
+        ...(trimmedDescription ? { description: trimmedDescription } : {}),
+        name: trimmedName,
+      },
+      {
+        onSuccess: () => {
+          handleCloseCreateFolderSheet();
+        },
+      },
+    );
   };
+
+  const createFolderErrorMessage = (() => {
+    const error = createScrapFolderMutation.error;
+
+    if (!error) {
+      return null;
+    }
+
+    if (isApiError(error) && error.status === 409) {
+      return '이미 같은 이름의 폴더가 있습니다.';
+    }
+
+    if (isApiError(error) && error.status === 400) {
+      return '폴더를 더 이상 만들 수 없습니다.';
+    }
+
+    return '폴더를 생성하지 못했습니다.';
+  })();
 
   const handleRecentScrapsPointerDown: PointerEventHandler<HTMLDivElement> = (event) => {
     const container = recentScrapsRef.current;
@@ -151,10 +195,12 @@ export function useMyPageScrapsViewModel() {
     folders,
     createFolderDescription,
     createFolderDescriptionMaxLength: SCRAP_FOLDER_INPUT_MAX_LENGTH,
+    createFolderErrorMessage,
     createFolderName,
     createFolderNameMaxLength: SCRAP_FOLDER_INPUT_MAX_LENGTH,
-    isCreateFolderSubmitDisabled: createFolderName.trim().length === 0,
+    isCreateFolderPending: createScrapFolderMutation.isPending,
     isCreateFolderSheetOpen,
+    isCreateFolderSubmitDisabled: createFolderName.trim().length === 0 || createScrapFolderMutation.isPending,
     onBack: handleBack,
     onChangeCreateFolderDescription: handleCreateFolderDescriptionChange,
     onChangeCreateFolderName: handleCreateFolderNameChange,
