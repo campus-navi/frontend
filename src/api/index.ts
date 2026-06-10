@@ -24,6 +24,7 @@ export type {
 export type { FeedCardPost, FeedCards } from '@/api/modules/feed';
 export type { MemberMe, UpdateMemberInterestsRequest } from '@/api/modules/member';
 export type {
+  CreateScrapFolderRequest,
   MyPageFolderScrap,
   MyPageRecentScrap,
   MyPageScrapFolder,

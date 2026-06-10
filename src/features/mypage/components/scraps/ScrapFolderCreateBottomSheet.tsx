@@ -6,7 +6,9 @@ import { SvgIcon } from '@/components/ui/SvgIcon';
 type ScrapFolderCreateBottomSheetProps = {
   description: string;
   descriptionMaxLength: number;
+  errorMessage: string | null;
   isOpen: boolean;
+  isPending: boolean;
   isSubmitDisabled: boolean;
   name: string;
   nameMaxLength: number;
@@ -20,6 +22,7 @@ type ScrapFolderCreateBottomSheetProps = {
 
 type ScrapFolderCreateFieldProps = {
   clearAriaLabel: string;
+  disabled: boolean;
   label: string;
   maxLength: number;
   onChange: ChangeEventHandler<HTMLInputElement>;
@@ -46,6 +49,7 @@ function ScrapFolderCreateClearIcon() {
 
 function ScrapFolderCreateField({
   clearAriaLabel,
+  disabled,
   label,
   maxLength,
   onChange,
@@ -67,14 +71,16 @@ function ScrapFolderCreateField({
           type="text"
           value={value}
           onChange={onChange}
+          disabled={disabled}
           maxLength={maxLength}
           placeholder={placeholder}
-          className="min-w-0 flex-1 bg-transparent text-base font-normal leading-[1.4] text-[#292B2C] outline-none placeholder:text-[#BFC4C8]"
+          className="min-w-0 flex-1 bg-transparent text-base font-normal leading-[1.4] text-[#292B2C] outline-none placeholder:text-[#BFC4C8] disabled:text-[#8A9299]"
         />
         {value ? (
           <button
             type="button"
             className="ml-2 flex h-8 w-8 shrink-0 items-center justify-center text-[#BFC4C8]"
+            disabled={disabled}
             onMouseDown={(event) => event.preventDefault()}
             onClick={onClear}
             aria-label={clearAriaLabel}
@@ -94,7 +100,9 @@ function ScrapFolderCreateField({
 export function ScrapFolderCreateBottomSheet({
   description,
   descriptionMaxLength,
+  errorMessage,
   isOpen,
+  isPending,
   isSubmitDisabled,
   name,
   nameMaxLength,
@@ -122,12 +130,13 @@ export function ScrapFolderCreateBottomSheet({
           disabled={isSubmitDisabled}
           onClick={onSubmit}
         >
-          추가
+          {isPending ? '추가 중' : '추가'}
         </button>
       }
     >
       <div className="flex h-[284px] w-full flex-col gap-5 px-4">
         <ScrapFolderCreateField
+          disabled={isPending}
           label="새 폴더명"
           required
           value={name}
@@ -138,6 +147,7 @@ export function ScrapFolderCreateBottomSheet({
           clearAriaLabel="폴더명 입력 지우기"
         />
         <ScrapFolderCreateField
+          disabled={isPending}
           label="설명"
           value={description}
           maxLength={descriptionMaxLength}
@@ -146,6 +156,11 @@ export function ScrapFolderCreateBottomSheet({
           onClear={onClearDescription}
           clearAriaLabel="설명 입력 지우기"
         />
+        {errorMessage ? (
+          <p className="-mt-2 text-sm font-medium leading-[1.4] text-[#FF5E47]" role="alert">
+            {errorMessage}
+          </p>
+        ) : null}
       </div>
     </BottomSheet>
   );

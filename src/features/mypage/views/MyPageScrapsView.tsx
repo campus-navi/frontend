@@ -19,8 +19,10 @@ type RecentScrapsHandlers = {
 type MyPageScrapsViewProps = {
   createFolderDescription: string;
   createFolderDescriptionMaxLength: number;
+  createFolderErrorMessage: string | null;
   createFolderName: string;
   createFolderNameMaxLength: number;
+  isCreateFolderPending: boolean;
   folders: MyPageScrapFolderListItem[];
   isCreateFolderSheetOpen: boolean;
   isCreateFolderSubmitDisabled: boolean;
@@ -45,9 +47,11 @@ type MyPageScrapsViewProps = {
 export function MyPageScrapsView({
   createFolderDescription,
   createFolderDescriptionMaxLength,
+  createFolderErrorMessage,
   createFolderName,
   createFolderNameMaxLength,
   folders,
+  isCreateFolderPending,
   isCreateFolderSheetOpen,
   isCreateFolderSubmitDisabled,
   onBack,
@@ -170,6 +174,8 @@ export function MyPageScrapsView({
         nameMaxLength={createFolderNameMaxLength}
         description={createFolderDescription}
         descriptionMaxLength={createFolderDescriptionMaxLength}
+        errorMessage={createFolderErrorMessage}
+        isPending={isCreateFolderPending}
         isSubmitDisabled={isCreateFolderSubmitDisabled}
         onChangeName={onChangeCreateFolderName}
         onChangeDescription={onChangeCreateFolderDescription}
