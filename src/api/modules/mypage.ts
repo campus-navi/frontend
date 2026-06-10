@@ -30,6 +30,16 @@ export interface MyPageScrapFolder extends ApiObjectData {
   scrapCount: number;
 }
 
+export interface MyPageFolderScrap extends ApiObjectData {
+  scrapId: number;
+  postId: number;
+  title: string;
+  tagName: string;
+  endDate: string | null;
+  publishedAt: string;
+  isActive: boolean;
+}
+
 export interface MyPageScraps extends ApiObjectData {
   recentScraps: MyPageRecentScrap[];
   folders: MyPageScrapFolder[];
@@ -65,6 +75,16 @@ interface MyPageScrapFolderResponse extends ApiObjectData {
 interface MyPageScrapsResponse extends ApiObjectData {
   recentScraps?: unknown;
   folders?: unknown;
+}
+
+interface MyPageFolderScrapResponse extends ApiObjectData {
+  scrapId?: unknown;
+  postId?: unknown;
+  title?: unknown;
+  tagName?: unknown;
+  endDate?: unknown;
+  publishedAt?: unknown;
+  isActive?: unknown;
 }
 
 function normalizeMyPageSummary(data: MyPageSummaryResponse): MyPageSummary {
@@ -162,6 +182,44 @@ function normalizeMyPageScraps(data: MyPageScrapsResponse): MyPageScraps {
   };
 }
 
+function isMyPageFolderScrapResponse(scrap: unknown): scrap is MyPageFolderScrap {
+  if (!scrap || typeof scrap !== 'object') {
+    return false;
+  }
+
+  const folderScrap = scrap as MyPageFolderScrapResponse;
+
+  return (
+    typeof folderScrap.scrapId === 'number' &&
+    typeof folderScrap.postId === 'number' &&
+    typeof folderScrap.title === 'string' &&
+    typeof folderScrap.tagName === 'string' &&
+    (typeof folderScrap.endDate === 'string' || folderScrap.endDate === null) &&
+    typeof folderScrap.publishedAt === 'string' &&
+    typeof folderScrap.isActive === 'boolean'
+  );
+}
+
+function normalizeMyPageFolderScraps(data: unknown): MyPageFolderScrap[] {
+  if (!Array.isArray(data) || !data.every(isMyPageFolderScrapResponse)) {
+    throw createApiError({
+      code: COMMON_ERROR_CODES.INVALID_RESPONSE,
+      message: '스크랩 폴더 목록 응답 형식이 올바르지 않습니다.',
+      status: 200,
+    });
+  }
+
+  return data.map((scrap) => ({
+    scrapId: scrap.scrapId,
+    postId: scrap.postId,
+    title: scrap.title,
+    tagName: scrap.tagName,
+    endDate: scrap.endDate,
+    publishedAt: scrap.publishedAt,
+    isActive: scrap.isActive,
+  }));
+}
+
 export const mypageApi = {
   async getSummary() {
     const response = await request<MyPageSummaryResponse>({
@@ -184,6 +242,18 @@ export const mypageApi = {
     return {
       ...response,
       data: normalizeMyPageScraps(response.data),
+    };
+  },
+
+  async getFolderScraps(folderId: number) {
+    const response = await request<MyPageFolderScrap[]>({
+      method: 'get',
+      url: `/scrap-folders/${folderId}/scraps`,
+    });
+
+    return {
+      ...response,
+      data: normalizeMyPageFolderScraps(response.data),
     };
   },
 };
