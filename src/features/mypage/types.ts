@@ -13,3 +13,14 @@ export type MyPageScrapFolderListItem = {
   name: string;
   scrapCount: number;
 };
+
+export type MyPageFolderScrapListItem = {
+  detailPath: string | null;
+  endDate: string;
+  isActive: boolean;
+  postId: number;
+  publishedAt: string;
+  scrapId: number;
+  tagName: string;
+  title: string;
+};
