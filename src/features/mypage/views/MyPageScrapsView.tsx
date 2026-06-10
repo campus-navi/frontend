@@ -26,13 +26,17 @@ type MyPageScrapsViewProps = {
   folders: MyPageScrapFolderListItem[];
   isCreateFolderSheetOpen: boolean;
   isCreateFolderSubmitDisabled: boolean;
+  isFolderMoreMenuOpen: boolean;
   onBack: () => void;
   onChangeCreateFolderDescription: React.ChangeEventHandler<HTMLInputElement>;
   onChangeCreateFolderName: React.ChangeEventHandler<HTMLInputElement>;
   onClearCreateFolderDescription: () => void;
   onClearCreateFolderName: () => void;
   onCloseCreateFolderSheet: () => void;
-  onFolderMoreClick: () => void;
+  onCloseFolderMoreMenu: () => void;
+  onDeleteFolder: () => void;
+  onEditFolder: () => void;
+  onFolderMoreClick: (folder: MyPageScrapFolderListItem) => void;
   onOpenCreateFolderSheet: () => void;
   onSubmitCreateFolder: () => void;
   recentScraps: MyPageRecentScrapCardItem[];
@@ -42,6 +46,7 @@ type MyPageScrapsViewProps = {
   shouldShowFoldersEmptyState: boolean;
   shouldShowLoadingMessage: boolean;
   shouldShowRecentScrapsEmptyState: boolean;
+  selectedMoreMenuFolder: MyPageScrapFolderListItem | null;
 };
 
 export function MyPageScrapsView({
@@ -54,12 +59,16 @@ export function MyPageScrapsView({
   isCreateFolderPending,
   isCreateFolderSheetOpen,
   isCreateFolderSubmitDisabled,
+  isFolderMoreMenuOpen,
   onBack,
   onChangeCreateFolderDescription,
   onChangeCreateFolderName,
   onClearCreateFolderDescription,
   onClearCreateFolderName,
   onCloseCreateFolderSheet,
+  onCloseFolderMoreMenu,
+  onDeleteFolder,
+  onEditFolder,
   onFolderMoreClick,
   onOpenCreateFolderSheet,
   onSubmitCreateFolder,
@@ -70,6 +79,7 @@ export function MyPageScrapsView({
   shouldShowFoldersEmptyState,
   shouldShowLoadingMessage,
   shouldShowRecentScrapsEmptyState,
+  selectedMoreMenuFolder,
 }: MyPageScrapsViewProps) {
   return (
     <main className="min-h-[100svh] bg-white">
@@ -141,7 +151,15 @@ export function MyPageScrapsView({
 
             <div className="mt-3 flex flex-col">
               {folders.map((folder) => (
-                <ScrapFolderRow key={folder.folderId} folder={folder} onMoreClick={onFolderMoreClick} />
+                <ScrapFolderRow
+                  key={folder.folderId}
+                  folder={folder}
+                  isMoreMenuOpen={isFolderMoreMenuOpen && selectedMoreMenuFolder?.folderId === folder.folderId}
+                  onMoreClick={onFolderMoreClick}
+                  onMoreMenuClose={onCloseFolderMoreMenu}
+                  onEditFolder={onEditFolder}
+                  onDeleteFolder={onDeleteFolder}
+                />
               ))}
 
               {shouldShowFoldersEmptyState ? (

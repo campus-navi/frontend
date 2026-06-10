@@ -13,6 +13,7 @@ export function useMyPageScrapsViewModel() {
   const [isCreateFolderSheetOpen, setIsCreateFolderSheetOpen] = useState(false);
   const [createFolderName, setCreateFolderName] = useState('');
   const [createFolderDescription, setCreateFolderDescription] = useState('');
+  const [selectedMoreMenuFolder, setSelectedMoreMenuFolder] = useState<MyPageScrapFolderListItem | null>(null);
   const createScrapFolderMutation = useCreateScrapFolder();
   const { data: scraps, isError, isLoading } = useMyPageScraps();
   const recentScraps = (scraps?.recentScraps ?? []).map<MyPageRecentScrapCardItem>((scrap) => ({
@@ -54,8 +55,22 @@ export function useMyPageScrapsViewModel() {
     navigate('/mypage', { replace: true });
   };
 
-  const handleFolderMoreClick = () => {
-    // Folder edit/delete actions will be connected in a later flow.
+  const handleOpenFolderMoreMenu = (folder: MyPageScrapFolderListItem) => {
+    setSelectedMoreMenuFolder(folder);
+  };
+
+  const handleCloseFolderMoreMenu = () => {
+    setSelectedMoreMenuFolder(null);
+  };
+
+  const handleEditFolder = () => {
+    // Folder edit flow will be connected in a later issue.
+    handleCloseFolderMoreMenu();
+  };
+
+  const handleDeleteFolder = () => {
+    // Folder delete flow will be connected in a later issue.
+    handleCloseFolderMoreMenu();
   };
 
   const resetCreateFolderInputs = () => {
@@ -209,13 +224,17 @@ export function useMyPageScrapsViewModel() {
     isCreateFolderPending: createScrapFolderMutation.isPending,
     isCreateFolderSheetOpen,
     isCreateFolderSubmitDisabled: createFolderName.trim().length === 0 || createScrapFolderMutation.isPending,
+    isFolderMoreMenuOpen: selectedMoreMenuFolder !== null,
     onBack: handleBack,
     onChangeCreateFolderDescription: handleCreateFolderDescriptionChange,
     onChangeCreateFolderName: handleCreateFolderNameChange,
     onClearCreateFolderDescription: handleClearCreateFolderDescription,
     onClearCreateFolderName: handleClearCreateFolderName,
     onCloseCreateFolderSheet: handleCloseCreateFolderSheet,
-    onFolderMoreClick: handleFolderMoreClick,
+    onCloseFolderMoreMenu: handleCloseFolderMoreMenu,
+    onDeleteFolder: handleDeleteFolder,
+    onEditFolder: handleEditFolder,
+    onFolderMoreClick: handleOpenFolderMoreMenu,
     onOpenCreateFolderSheet: handleOpenCreateFolderSheet,
     onSubmitCreateFolder: handleCreateFolderSubmit,
     recentScraps,
@@ -231,5 +250,6 @@ export function useMyPageScrapsViewModel() {
     shouldShowFoldersEmptyState: !isLoading && !isError && folders.length === 0,
     shouldShowLoadingMessage: isLoading,
     shouldShowRecentScrapsEmptyState: !isLoading && !isError && recentScraps.length === 0,
+    selectedMoreMenuFolder,
   };
 }
