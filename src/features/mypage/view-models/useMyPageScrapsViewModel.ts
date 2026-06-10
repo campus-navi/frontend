@@ -68,10 +68,18 @@ export function useMyPageScrapsViewModel() {
     setIsCreateFolderSheetOpen(true);
   };
 
-  const handleCloseCreateFolderSheet = () => {
+  const closeCreateFolderSheet = () => {
     setIsCreateFolderSheetOpen(false);
     createScrapFolderMutation.reset();
     resetCreateFolderInputs();
+  };
+
+  const handleCloseCreateFolderSheet = () => {
+    if (createScrapFolderMutation.isPending) {
+      return;
+    }
+
+    closeCreateFolderSheet();
   };
 
   const handleCreateFolderNameChange: ChangeEventHandler<HTMLInputElement> = (event) => {
@@ -109,7 +117,7 @@ export function useMyPageScrapsViewModel() {
       },
       {
         onSuccess: () => {
-          handleCloseCreateFolderSheet();
+          closeCreateFolderSheet();
         },
       },
     );
