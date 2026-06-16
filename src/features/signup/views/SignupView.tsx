@@ -14,7 +14,7 @@ import type { SignupStep } from '@/features/signup/types';
 type SignupFlow = ReturnType<typeof useSignupFlow>;
 type EmailVerificationErrorModal = ReturnType<typeof getEmailVerificationErrorModal>;
 
-type SignupViewProps = {
+export type SignupViewProps = {
   modal: {
     emailVerificationErrorModal: EmailVerificationErrorModal;
     isEmailVerificationSuccessModalOpen: boolean;
