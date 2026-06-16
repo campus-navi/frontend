@@ -75,7 +75,7 @@ export function useSignupFlow() {
     passwordValidation.isPasswordMatched;
 
   useEffect(() => {
-    if (state.step !== 5) {
+    if (state.step !== 6) {
       setAccountInputPhase('username');
       return;
     }
@@ -102,9 +102,9 @@ export function useSignupFlow() {
         ? isPasswordStepReady
         : isPasswordConfirmStepReady;
   const isCurrentStepValid =
-    state.step === 5
+    state.step === 6
       ? isAccountStepCtaEnabled
-      : state.step === 6
+      : state.step === 7
         ? nicknameValidation.validation.isValid && nicknameValidation.isAvailable
       : isSignupStepValid(state.step, state.form, state.emailVerification);
   const progressValue = (Math.min(state.step, totalSignupSteps - 1) + 1) / totalSignupSteps;
@@ -133,7 +133,7 @@ export function useSignupFlow() {
       returnToEmailVerificationStep: storeActions.returnToEmailVerificationStep,
       returnToUniversityStep: storeActions.returnToUniversityStep,
       nextStep: () => {
-        if (state.step === 5) {
+        if (state.step === 6) {
           if (accountInputPhase === 'username') {
             if (isUsernameStepReady) {
               setAccountInputPhase('password');
@@ -167,6 +167,8 @@ export function useSignupFlow() {
       clearDepartmentQuery: storeActions.clearDepartmentQuery,
       selectAdmissionYear: storeActions.selectAdmissionYear,
       selectGrade: storeActions.selectGrade,
+      updateName: storeActions.updateName,
+      updateStudentNumber: storeActions.updateStudentNumber,
       updateUsername: storeActions.updateUsername,
       updatePassword: storeActions.updatePassword,
       updatePasswordConfirm: storeActions.updatePasswordConfirm,

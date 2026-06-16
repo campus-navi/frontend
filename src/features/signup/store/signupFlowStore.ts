@@ -44,9 +44,11 @@ type SignupFlowStore = SignupState & {
     startEmailVerificationVerify: () => EmailVerificationRequestContext;
     updateDepartmentQuery: (value: string) => void;
     updateEmailLocalPart: (value: string) => void;
+    updateName: (value: string) => void;
     updateNickname: (value: string) => void;
     updatePassword: (value: string) => void;
     updatePasswordConfirm: (value: string) => void;
+    updateStudentNumber: (value: string) => void;
     updateUniversityQuery: (value: string) => void;
     updateUsername: (value: string) => void;
     updateVerificationCode: (value: string) => void;
@@ -106,10 +108,12 @@ const initialFormState: SignupForm = {
   departmentId: null,
   emailLocalPart: '',
   grade: null,
+  name: '',
   nickname: '',
   password: '',
   passwordConfirm: '',
   selectedUniversity: null,
+  studentNumber: '',
   username: '',
 };
 
@@ -127,9 +131,11 @@ const resetEmailVerificationDependentFields = (form: SignupForm): SignupForm => 
   departmentId: null,
   emailLocalPart: '',
   grade: null,
+  name: '',
   nickname: '',
   password: '',
   passwordConfirm: '',
+  studentNumber: '',
   username: '',
 });
 
@@ -202,7 +208,7 @@ export const useSignupFlowStore = create<SignupFlowStore>((set, get) => ({
       })),
     nextStep: () =>
       set((state) => ({
-        step: Math.min(6, state.step + 1) as SignupStep,
+        step: Math.min(7, state.step + 1) as SignupStep,
       })),
     previousStep: () =>
       set((state) => ({
@@ -354,6 +360,10 @@ export const useSignupFlowStore = create<SignupFlowStore>((set, get) => ({
           emailLocalPart: value.replace(/[^a-zA-Z0-9._-]/g, ''),
         },
       })),
+    updateName: (value) =>
+      set((state) => ({
+        form: { ...state.form, name: value },
+      })),
     updateNickname: (value) =>
       set((state) => ({
         form: { ...state.form, nickname: value },
@@ -372,6 +382,10 @@ export const useSignupFlowStore = create<SignupFlowStore>((set, get) => ({
     updatePasswordConfirm: (value) =>
       set((state) => ({
         form: { ...state.form, passwordConfirm: value },
+      })),
+    updateStudentNumber: (value) =>
+      set((state) => ({
+        form: { ...state.form, studentNumber: value },
       })),
     updateUniversityQuery: (value) =>
       set((state) => ({

@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 
-export const totalSignupSteps = 7;
+export const totalSignupSteps = 8;
 
-export type SignupStep = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+export type SignupStep = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
 export type UsernameAvailabilityStatus = 'idle' | 'checking' | 'available' | 'duplicate' | 'error';
 export type NicknameAvailabilityStatus = 'idle' | 'checking' | 'available' | 'duplicate' | 'error';
@@ -21,6 +21,8 @@ export type SignupForm = {
   departmentId: number | null;
   admissionYear: number;
   grade: SignupGrade | null;
+  name: string;
+  studentNumber: string;
   username: string;
   password: string;
   passwordConfirm: string;
@@ -31,6 +33,8 @@ export type SignupPayload = {
   departmentId: number;
   admissionYear: number;
   grade: SignupGrade;
+  name: string;
+  studentNumber: string;
   username: string;
   password: string;
   nickname: string;

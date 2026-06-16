@@ -20,6 +20,7 @@ import { DepartmentStep } from '@/features/signup/steps/DepartmentStep';
 import { EmailVerificationStep } from '@/features/signup/steps/EmailVerificationStep';
 import { GradeStep } from '@/features/signup/steps/GradeStep';
 import { NicknameStep } from '@/features/signup/steps/NicknameStep';
+import { PersonalInfoStep } from '@/features/signup/steps/PersonalInfoStep';
 import { UniversityStep } from '@/features/signup/steps/UniversityStep';
 import { AccountStep } from '@/features/signup/steps/AccountStep';
 
@@ -49,6 +50,7 @@ function getKeyboardInset() {
 }
 
 const requiredSignupTermIds: SignupTermId[] = ['privacy', 'age', 'externalApi'];
+const keyboardCtaSteps: readonly number[] = [5, 6];
 
 function useKeyboardCtaState() {
   const [keyboardInset, setKeyboardInset] = useState(0);
@@ -139,7 +141,7 @@ export default function SignupPage() {
   const isUniversityServerError =
     isApiError(universitySearchError) && universitySearchError.status === 500;
   const emailVerificationErrorModal = getEmailVerificationErrorModal(state.emailVerification);
-  const isKeyboardCtaStep = state.step === 5 && keyboardCta.isSupported;
+  const isKeyboardCtaStep = keyboardCtaSteps.includes(state.step) && keyboardCta.isSupported;
   const isKeyboardOpen = isKeyboardCtaStep && keyboardCta.isKeyboardOpen;
   const ctaContainerSpacingClassName = isKeyboardOpen
     ? 'px-0 pb-0 pt-0'
@@ -411,6 +413,15 @@ export default function SignupPage() {
             ) : null}
 
             {state.step === 5 ? (
+              <PersonalInfoStep
+                name={state.form.name}
+                studentNumber={state.form.studentNumber}
+                onNameChange={actions.updateName}
+                onStudentNumberChange={actions.updateStudentNumber}
+              />
+            ) : null}
+
+            {state.step === 6 ? (
               <AccountStep
                 helperText={usernameAvailability.helperText}
                 helperTone={usernameAvailability.helperTone}
@@ -430,7 +441,7 @@ export default function SignupPage() {
               />
             ) : null}
 
-            {state.step === 6 ? (
+            {state.step === 7 ? (
               <NicknameStep
                 nickname={state.form.nickname}
                 helperText={nicknameValidation.helperText}
@@ -477,9 +488,9 @@ export default function SignupPage() {
             <div className="mt-auto pt-8">
               <CtaButton
                 disabled={isPrimaryCtaDisabled}
-                onClick={state.step === 6 ? openTermsAgreementSheet : actions.nextStep}
+                onClick={state.step === 7 ? openTermsAgreementSheet : actions.nextStep}
               >
-                {state.step === 6 ? (
+                {state.step === 7 ? (
                   signupSubmit.isPending ? (
                     <LoadingSpinner ariaLabel="회원가입 중" />
                   ) : (
