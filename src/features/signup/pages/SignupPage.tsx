@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { isApiError } from '@/api';
@@ -7,7 +7,7 @@ import { SignupHeader } from '@/features/signup/components/SignupHeader';
 import { SignupModalLayer } from '@/features/signup/components/SignupModalLayer';
 import { SignupStepRenderer } from '@/features/signup/components/SignupStepRenderer';
 import { SignupTermsAgreementSheet } from '@/features/signup/components/SignupTermsAgreementSheet';
-import { getEmailVerificationErrorModal } from '@/features/signup/emailVerification';
+import { useSignupEmailVerificationModal } from '@/features/signup/hooks/useSignupEmailVerificationModal';
 import { useKeyboardCtaState } from '@/features/signup/hooks/useKeyboardCtaState';
 import { useSignupFlow } from '@/features/signup/hooks/useSignupFlow';
 import { useSignupSubmit } from '@/features/signup/hooks/useSignupSubmit';
@@ -19,8 +19,6 @@ const keyboardCtaSteps: readonly number[] = [SIGNUP_STEP.PERSONAL_INFO, SIGNUP_S
 
 export function SignupPage() {
   const navigate = useNavigate();
-  const [isEmailVerificationSuccessModalOpen, setIsEmailVerificationSuccessModalOpen] =
-    useState(false);
   const keyboardCta = useKeyboardCtaState();
   const signupFlow = useSignupFlow();
   const {
@@ -34,10 +32,8 @@ export function SignupPage() {
   const universitySearchError = universitySearch.isError ? universitySearch.error : null;
   const isUniversityServerError =
     isApiError(universitySearchError) && universitySearchError.status === 500;
-  const emailVerificationErrorModal = getEmailVerificationErrorModal(state.emailVerification);
   const isKeyboardCtaStep = keyboardCtaSteps.includes(state.step) && keyboardCta.isSupported;
   const isKeyboardOpen = isKeyboardCtaStep && keyboardCta.isKeyboardOpen;
-  const wasEmailVerifiedRef = useRef(state.emailVerification.verifiedToken.isVerified);
   const signupSubmit = useSignupSubmit({
     emailDomain,
     emailVerification: state.emailVerification,
@@ -45,49 +41,20 @@ export function SignupPage() {
     onResetFlow: actions.resetFlow,
     onReturnToEmailVerificationStep: actions.returnToEmailVerificationStep,
   });
+  const emailVerificationModal = useSignupEmailVerificationModal({
+    emailVerification: state.emailVerification,
+    step: state.step,
+    onClearSendError: actions.clearEmailVerificationSendError,
+    onClearVerifyError: actions.clearEmailVerificationVerifyError,
+    onNavigateHome: () => navigate('/'),
+    onNextStep: actions.nextStep,
+  });
   const isPrimaryCtaDisabled = !isCurrentStepValid || signupSubmit.isPending;
   const termsAgreement = useSignupTermsAgreement({
     canOpen: isCurrentStepValid,
     isSubmitting: signupSubmit.isPending,
     onSubmit: () => void signupSubmit.submit(),
   });
-
-  useEffect(() => {
-    const isVerified = state.emailVerification.verifiedToken.isVerified;
-
-    if (state.step === SIGNUP_STEP.EMAIL_VERIFICATION && !wasEmailVerifiedRef.current && isVerified) {
-      setIsEmailVerificationSuccessModalOpen(true);
-    }
-
-    wasEmailVerifiedRef.current = isVerified;
-  }, [state.emailVerification.verifiedToken.isVerified, state.step]);
-
-  const handleEmailVerificationErrorConfirm = () => {
-    if (!emailVerificationErrorModal) {
-      return;
-    }
-
-    if (
-      emailVerificationErrorModal.scope === 'send' &&
-      state.emailVerification.send.errorReason === 'ip_blocked'
-    ) {
-      actions.clearEmailVerificationSendError();
-      navigate('/');
-      return;
-    }
-
-    if (emailVerificationErrorModal.scope === 'send') {
-      actions.clearEmailVerificationSendError();
-      return;
-    }
-
-    actions.clearEmailVerificationVerifyError();
-  };
-
-  const handleEmailVerificationSuccessConfirm = () => {
-    setIsEmailVerificationSuccessModalOpen(false);
-    actions.nextStep();
-  };
 
   useEffect(() => {
     return () => {
@@ -126,12 +93,12 @@ export function SignupPage() {
   return (
     <main className="h-[100svh] overflow-hidden bg-white">
       <SignupModalLayer
-        emailVerificationErrorModal={emailVerificationErrorModal}
-        isEmailVerificationSuccessModalOpen={isEmailVerificationSuccessModalOpen}
+        emailVerificationErrorModal={emailVerificationModal.emailVerificationErrorModal}
+        isEmailVerificationSuccessModalOpen={emailVerificationModal.isEmailVerificationSuccessModalOpen}
         isUniversityServerError={isUniversityServerError}
         signupSubmitModal={signupSubmit.modal}
-        onEmailVerificationErrorConfirm={handleEmailVerificationErrorConfirm}
-        onEmailVerificationSuccessConfirm={handleEmailVerificationSuccessConfirm}
+        onEmailVerificationErrorConfirm={emailVerificationModal.confirmEmailVerificationError}
+        onEmailVerificationSuccessConfirm={emailVerificationModal.confirmEmailVerificationSuccess}
         onSignupSubmitModalConfirm={signupSubmit.closeModal}
         onUniversityServerErrorConfirm={() => navigate('/')}
       />
