@@ -136,7 +136,7 @@ export function isSignupStepValid(step: SignupStep, form: SignupForm, emailVerif
 }
 
 export function isSignupStudentNumberValid(studentNumber: string) {
-  return /^\d+$/.test(studentNumber.trim());
+  return /^\d{6,10}$/.test(studentNumber.trim());
 }
 
 export function validateSignupUsername(username: string): UsernameValidationResult {

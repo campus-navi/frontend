@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { ClearIcon } from '@/features/signup/components/SignupIcons';
 import { SignupTextField } from '@/features/signup/components/SignupTextField';
@@ -17,20 +17,57 @@ export function PersonalInfoStep({
   onNameChange,
   onStudentNumberChange,
 }: PersonalInfoStepProps) {
-  const isStudentNumberInvalid = Boolean(studentNumber.trim()) && !isSignupStudentNumberValid(studentNumber);
+  const [isNameFocused, setIsNameFocused] = useState(false);
+  const [isNameTouched, setIsNameTouched] = useState(false);
+  const [isStudentNumberFocused, setIsStudentNumberFocused] = useState(false);
+  const [isStudentNumberTouched, setIsStudentNumberTouched] = useState(false);
+  const trimmedName = name.trim();
+  const trimmedStudentNumber = studentNumber.trim();
+  const isNameInvalid = (isNameTouched || Boolean(name)) && !trimmedName;
+  const nameHelperText = isNameInvalid
+    ? '이름을 입력해주세요.'
+    : isNameFocused && !trimmedName
+      ? '실명 기준으로 입력해주세요.'
+      : undefined;
+  const isStudentNumberEmpty = isStudentNumberTouched && !trimmedStudentNumber;
+  const isStudentNumberLengthInvalid = Boolean(trimmedStudentNumber) && !isSignupStudentNumberValid(studentNumber);
+  const studentNumberHelperText = isStudentNumberEmpty
+    ? '학번을 입력해주세요.'
+    : isStudentNumberLengthInvalid
+      ? '학번은 6~10자리 숫자로 입력해주세요.'
+      : isStudentNumberFocused && !trimmedStudentNumber
+        ? '학교에서 사용하는 학번을 입력해주세요.'
+        : undefined;
+  const handleNameChange = (value: string) => {
+    setIsNameTouched(true);
+    onNameChange(value);
+  };
+  const handleNameClear = useCallback(() => {
+    setIsNameTouched(true);
+    onNameChange('');
+  }, [onNameChange]);
+  const handleStudentNumberChange = (value: string) => {
+    setIsStudentNumberTouched(true);
+    const nextStudentNumber = value.replace(/\D/g, '').slice(0, 10);
+    onStudentNumberChange(nextStudentNumber);
+  };
+  const handleStudentNumberClear = useCallback(() => {
+    setIsStudentNumberTouched(true);
+    onStudentNumberChange('');
+  }, [onStudentNumberChange]);
   const nameActions = useMemo(
     () =>
       name ? (
         <button
           type="button"
           aria-label="이름 지우기"
-          onClick={() => onNameChange('')}
+          onClick={handleNameClear}
           className="text-[#B3B3B3] transition-colors hover:text-[#7A7A7A]"
         >
           <ClearIcon />
         </button>
       ) : null,
-    [name, onNameChange],
+    [handleNameClear, name],
   );
   const studentNumberActions = useMemo(
     () =>
@@ -38,13 +75,13 @@ export function PersonalInfoStep({
         <button
           type="button"
           aria-label="학번 지우기"
-          onClick={() => onStudentNumberChange('')}
+          onClick={handleStudentNumberClear}
           className="text-[#B3B3B3] transition-colors hover:text-[#7A7A7A]"
         >
           <ClearIcon />
         </button>
       ) : null,
-    [onStudentNumberChange, studentNumber],
+    [handleStudentNumberClear, studentNumber],
   );
 
   return (
@@ -59,18 +96,30 @@ export function PersonalInfoStep({
           label="이름"
           value={name}
           placeholder="이름을 입력해주세요"
+          helperText={nameHelperText}
+          helperTone={isNameInvalid ? 'error' : 'default'}
           trailingActions={nameActions}
-          onChange={onNameChange}
+          onBlur={() => {
+            setIsNameFocused(false);
+            setIsNameTouched(true);
+          }}
+          onChange={handleNameChange}
+          onFocus={() => setIsNameFocused(true)}
         />
         <SignupTextField
           inputMode="numeric"
           label="학번"
           value={studentNumber}
           placeholder="학번을 입력해주세요"
-          helperText={isStudentNumberInvalid ? '학번은 숫자만 입력해주세요.' : undefined}
-          helperTone={isStudentNumberInvalid ? 'error' : 'default'}
+          helperText={studentNumberHelperText}
+          helperTone={isStudentNumberEmpty || isStudentNumberLengthInvalid ? 'error' : 'default'}
           trailingActions={studentNumberActions}
-          onChange={onStudentNumberChange}
+          onBlur={() => {
+            setIsStudentNumberFocused(false);
+            setIsStudentNumberTouched(true);
+          }}
+          onChange={handleStudentNumberChange}
+          onFocus={() => setIsStudentNumberFocused(true)}
         />
       </div>
     </div>
