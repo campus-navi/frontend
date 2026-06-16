@@ -24,9 +24,10 @@ import { NicknameStep } from '@/features/signup/steps/NicknameStep';
 import { PersonalInfoStep } from '@/features/signup/steps/PersonalInfoStep';
 import { UniversityStep } from '@/features/signup/steps/UniversityStep';
 import { AccountStep } from '@/features/signup/steps/AccountStep';
+import { SIGNUP_STEP } from '@/features/signup/types';
 
 const requiredSignupTermIds: SignupTermId[] = ['privacy', 'age', 'externalApi'];
-const keyboardCtaSteps: readonly number[] = [5, 6];
+const keyboardCtaSteps: readonly number[] = [SIGNUP_STEP.PERSONAL_INFO, SIGNUP_STEP.ACCOUNT];
 
 export function SignupPage() {
   const navigate = useNavigate();
@@ -84,7 +85,7 @@ export function SignupPage() {
   useEffect(() => {
     const isVerified = state.emailVerification.verifiedToken.isVerified;
 
-    if (state.step === 1 && !wasEmailVerifiedRef.current && isVerified) {
+    if (state.step === SIGNUP_STEP.EMAIL_VERIFICATION && !wasEmailVerifiedRef.current && isVerified) {
       setIsEmailVerificationSuccessModalOpen(true);
     }
 
@@ -173,17 +174,17 @@ export function SignupPage() {
       return;
     }
 
-    if (state.step === 0) {
+    if (state.step === SIGNUP_STEP.UNIVERSITY) {
       navigate(-1);
       return;
     }
 
-    if (state.step === 2) {
+    if (state.step === SIGNUP_STEP.DEPARTMENT) {
       actions.returnToEmailVerificationStep();
       return;
     }
 
-    if (state.step === 1) {
+    if (state.step === SIGNUP_STEP.EMAIL_VERIFICATION) {
       actions.returnToUniversityStep();
       return;
     }
@@ -259,7 +260,7 @@ export function SignupPage() {
           ].join(' ')}
         >
           <div className="min-h-0 flex-1 overflow-hidden">
-            {state.step === 0 ? (
+            {state.step === SIGNUP_STEP.UNIVERSITY ? (
               <UniversityStep
                 isLoading={universitySearch.isLoading}
                 isResultsVisible={isUniversitySearchVisible}
@@ -278,7 +279,7 @@ export function SignupPage() {
               />
             ) : null}
 
-            {state.step === 1 ? (
+            {state.step === SIGNUP_STEP.EMAIL_VERIFICATION ? (
               <EmailVerificationStep
                 emailLocalPart={state.form.emailLocalPart}
                 emailDomain={emailDomain}
@@ -301,7 +302,7 @@ export function SignupPage() {
               />
             ) : null}
 
-            {state.step === 2 ? (
+            {state.step === SIGNUP_STEP.DEPARTMENT ? (
               <DepartmentStep
                 errorMessage={departmentSearch.isError ? departmentSearch.error.message : undefined}
                 isLoading={departmentSearch.isLoading}
@@ -318,7 +319,7 @@ export function SignupPage() {
               />
             ) : null}
 
-            {state.step === 3 ? (
+            {state.step === SIGNUP_STEP.ADMISSION_YEAR ? (
               <AdmissionYearStep
                 selectedYear={state.form.admissionYear}
                 years={admissionYears}
@@ -326,11 +327,11 @@ export function SignupPage() {
               />
             ) : null}
 
-            {state.step === 4 ? (
+            {state.step === SIGNUP_STEP.GRADE ? (
               <GradeStep selectedGrade={state.form.grade} onSelect={actions.selectGrade} />
             ) : null}
 
-            {state.step === 5 ? (
+            {state.step === SIGNUP_STEP.PERSONAL_INFO ? (
               <PersonalInfoStep
                 name={state.form.name}
                 studentNumber={state.form.studentNumber}
@@ -339,7 +340,7 @@ export function SignupPage() {
               />
             ) : null}
 
-            {state.step === 6 ? (
+            {state.step === SIGNUP_STEP.ACCOUNT ? (
               <AccountStep
                 helperText={usernameAvailability.helperText}
                 helperTone={usernameAvailability.helperTone}
@@ -359,7 +360,7 @@ export function SignupPage() {
               />
             ) : null}
 
-            {state.step === 7 ? (
+            {state.step === SIGNUP_STEP.NICKNAME ? (
               <NicknameStep
                 nickname={state.form.nickname}
                 helperText={nicknameValidation.helperText}
@@ -402,13 +403,13 @@ export function SignupPage() {
                 다음
               </CtaButton>
             </div>
-          ) : state.step !== 1 ? (
+          ) : state.step !== SIGNUP_STEP.EMAIL_VERIFICATION ? (
             <div className="mt-auto pt-8">
               <CtaButton
                 disabled={isPrimaryCtaDisabled}
-                onClick={state.step === 7 ? openTermsAgreementSheet : actions.nextStep}
+                onClick={state.step === SIGNUP_STEP.NICKNAME ? openTermsAgreementSheet : actions.nextStep}
               >
-                {state.step === 7 ? (
+                {state.step === SIGNUP_STEP.NICKNAME ? (
                   signupSubmit.isPending ? (
                     <LoadingSpinner ariaLabel="회원가입 중" />
                   ) : (

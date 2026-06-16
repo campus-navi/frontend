@@ -9,7 +9,7 @@ import { useDebouncedValue } from '@/features/signup/hooks/useDebouncedValue';
 import { useUsernameAvailability } from '@/features/signup/hooks/useUsernameAvailability';
 import { useUniversitySearch } from '@/features/signup/hooks/useUniversitySearch';
 import { useSignupFlowStore } from '@/features/signup/store/signupFlowStore';
-import { totalSignupSteps } from '@/features/signup/types';
+import { LAST_SIGNUP_STEP, SIGNUP_STEP, totalSignupSteps } from '@/features/signup/types';
 import {
   getSuggestions,
   isSignupStepValid,
@@ -75,7 +75,7 @@ export function useSignupFlow() {
     passwordValidation.isPasswordMatched;
 
   useEffect(() => {
-    if (state.step !== 6) {
+    if (state.step !== SIGNUP_STEP.ACCOUNT) {
       setAccountInputPhase('username');
       return;
     }
@@ -102,12 +102,12 @@ export function useSignupFlow() {
         ? isPasswordStepReady
         : isPasswordConfirmStepReady;
   const isCurrentStepValid =
-    state.step === 6
+    state.step === SIGNUP_STEP.ACCOUNT
       ? isAccountStepCtaEnabled
-      : state.step === 7
+      : state.step === SIGNUP_STEP.NICKNAME
         ? nicknameValidation.validation.isValid && nicknameValidation.isAvailable
       : isSignupStepValid(state.step, state.form, state.emailVerification);
-  const progressValue = (Math.min(state.step, totalSignupSteps - 1) + 1) / totalSignupSteps;
+  const progressValue = (Math.min(state.step, LAST_SIGNUP_STEP) + 1) / totalSignupSteps;
 
   return {
     state,
@@ -133,7 +133,7 @@ export function useSignupFlow() {
       returnToEmailVerificationStep: storeActions.returnToEmailVerificationStep,
       returnToUniversityStep: storeActions.returnToUniversityStep,
       nextStep: () => {
-        if (state.step === 6) {
+        if (state.step === SIGNUP_STEP.ACCOUNT) {
           if (accountInputPhase === 'username') {
             if (isUsernameStepReady) {
               setAccountInputPhase('password');

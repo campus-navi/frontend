@@ -1,8 +1,20 @@
 import type { ReactNode } from 'react';
 
-export const totalSignupSteps = 8;
+export const SIGNUP_STEP = {
+  UNIVERSITY: 0,
+  EMAIL_VERIFICATION: 1,
+  DEPARTMENT: 2,
+  ADMISSION_YEAR: 3,
+  GRADE: 4,
+  PERSONAL_INFO: 5,
+  ACCOUNT: 6,
+  NICKNAME: 7,
+} as const;
 
-export type SignupStep = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
+export const LAST_SIGNUP_STEP = SIGNUP_STEP.NICKNAME;
+export const totalSignupSteps = LAST_SIGNUP_STEP + 1;
+
+export type SignupStep = (typeof SIGNUP_STEP)[keyof typeof SIGNUP_STEP];
 export type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
 export type UsernameAvailabilityStatus = 'idle' | 'checking' | 'available' | 'duplicate' | 'error';
 export type NicknameAvailabilityStatus = 'idle' | 'checking' | 'available' | 'duplicate' | 'error';

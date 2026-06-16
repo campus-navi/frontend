@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
 import { defaultAdmissionYear } from '@/features/signup/constants';
+import { LAST_SIGNUP_STEP, SIGNUP_STEP } from '@/features/signup/types';
 import type {
   EmailVerificationState,
   EmailVerificationSendErrorReason,
@@ -149,7 +150,7 @@ const createInitialSignupState = (): SignupState => ({
   departmentQuery: '',
   emailVerification: resetEmailVerificationState(),
   form: initialFormState,
-  step: 0,
+  step: SIGNUP_STEP.UNIVERSITY,
   universityQuery: '',
 });
 
@@ -208,11 +209,11 @@ export const useSignupFlowStore = create<SignupFlowStore>((set, get) => ({
       })),
     nextStep: () =>
       set((state) => ({
-        step: Math.min(7, state.step + 1) as SignupStep,
+        step: Math.min(LAST_SIGNUP_STEP, state.step + 1) as SignupStep,
       })),
     previousStep: () =>
       set((state) => ({
-        step: Math.max(0, state.step - 1) as SignupStep,
+        step: Math.max(SIGNUP_STEP.UNIVERSITY, state.step - 1) as SignupStep,
         form: state.form,
       })),
     returnToEmailVerificationStep: () =>
@@ -224,7 +225,7 @@ export const useSignupFlowStore = create<SignupFlowStore>((set, get) => ({
         departmentQuery: '',
         emailVerification: resetEmailVerificationState(),
         form: resetEmailVerificationDependentFields(state.form),
-        step: 1,
+        step: SIGNUP_STEP.EMAIL_VERIFICATION,
       })),
     returnToUniversityStep: () =>
       set((state) => ({
@@ -235,7 +236,7 @@ export const useSignupFlowStore = create<SignupFlowStore>((set, get) => ({
         departmentQuery: '',
         emailVerification: resetEmailVerificationState(),
         form: resetEmailVerificationDependentFields(state.form),
-        step: 0,
+        step: SIGNUP_STEP.UNIVERSITY,
       })),
     resetFlow: () =>
       set((state) => ({

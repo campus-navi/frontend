@@ -1,4 +1,5 @@
 import { signupNicknamePolicy, signupPasswordPolicy, signupUsernamePolicy } from '@/features/signup/constants';
+import { SIGNUP_STEP } from '@/features/signup/types';
 import type {
   EmailVerificationState,
   NicknameValidationResult,
@@ -123,14 +124,14 @@ export function getSuggestions<TItem>(items: readonly TItem[], query: string, ge
 }
 
 export function isSignupStepValid(step: SignupStep, form: SignupForm, emailVerification?: EmailVerificationState) {
-  if (step === 0) return Boolean(form.selectedUniversity);
-  if (step === 1) return Boolean(emailVerification?.verifiedToken.isVerified);
-  if (step === 2) return form.departmentId !== null;
-  if (step === 3) return Boolean(form.admissionYear);
-  if (step === 4) return form.grade !== null;
-  if (step === 5) return Boolean(form.name.trim()) && isSignupStudentNumberValid(form.studentNumber);
-  if (step === 6) return validateSignupUsername(form.username).isValid && validateSignupPassword(form.password).isValid;
-  if (step === 7) return validateSignupNickname(form.nickname).isValid;
+  if (step === SIGNUP_STEP.UNIVERSITY) return Boolean(form.selectedUniversity);
+  if (step === SIGNUP_STEP.EMAIL_VERIFICATION) return Boolean(emailVerification?.verifiedToken.isVerified);
+  if (step === SIGNUP_STEP.DEPARTMENT) return form.departmentId !== null;
+  if (step === SIGNUP_STEP.ADMISSION_YEAR) return Boolean(form.admissionYear);
+  if (step === SIGNUP_STEP.GRADE) return form.grade !== null;
+  if (step === SIGNUP_STEP.PERSONAL_INFO) return Boolean(form.name.trim()) && isSignupStudentNumberValid(form.studentNumber);
+  if (step === SIGNUP_STEP.ACCOUNT) return validateSignupUsername(form.username).isValid && validateSignupPassword(form.password).isValid;
+  if (step === SIGNUP_STEP.NICKNAME) return validateSignupNickname(form.nickname).isValid;
 
   return true;
 }
