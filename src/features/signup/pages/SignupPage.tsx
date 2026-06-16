@@ -8,26 +8,21 @@ import { CtaButton } from '@/components/ui/CtaButton';
 import { SignupCtaSection } from '@/features/signup/components/SignupCtaSection';
 import { SignupHeader } from '@/features/signup/components/SignupHeader';
 import { SignupStepRenderer } from '@/features/signup/components/SignupStepRenderer';
-import {
-  SignupTermsAgreementSheet,
-  type SignupTermId,
-} from '@/features/signup/components/SignupTermsAgreementSheet';
+import { SignupTermsAgreementSheet } from '@/features/signup/components/SignupTermsAgreementSheet';
 import { getEmailVerificationErrorModal } from '@/features/signup/emailVerification';
 import { useKeyboardCtaState } from '@/features/signup/hooks/useKeyboardCtaState';
 import { useSignupFlow } from '@/features/signup/hooks/useSignupFlow';
 import { useSignupSubmit } from '@/features/signup/hooks/useSignupSubmit';
+import { useSignupTermsAgreement } from '@/features/signup/hooks/useSignupTermsAgreement';
 import { useSignupFlowStore } from '@/features/signup/store/signupFlowStore';
 import { SIGNUP_STEP } from '@/features/signup/types';
 
-const requiredSignupTermIds: SignupTermId[] = ['privacy', 'age', 'externalApi'];
 const keyboardCtaSteps: readonly number[] = [SIGNUP_STEP.PERSONAL_INFO, SIGNUP_STEP.ACCOUNT];
 
 export function SignupPage() {
   const navigate = useNavigate();
   const [isEmailVerificationSuccessModalOpen, setIsEmailVerificationSuccessModalOpen] =
     useState(false);
-  const [isTermsAgreementSheetOpen, setIsTermsAgreementSheetOpen] = useState(false);
-  const [agreedSignupTermIds, setAgreedSignupTermIds] = useState<SignupTermId[]>([]);
   const keyboardCta = useKeyboardCtaState();
   const signupFlow = useSignupFlow();
   const {
@@ -53,9 +48,11 @@ export function SignupPage() {
     onReturnToEmailVerificationStep: actions.returnToEmailVerificationStep,
   });
   const isPrimaryCtaDisabled = !isCurrentStepValid || signupSubmit.isPending;
-  const isAllRequiredTermsAgreed = requiredSignupTermIds.every((termId) =>
-    agreedSignupTermIds.includes(termId),
-  );
+  const termsAgreement = useSignupTermsAgreement({
+    canOpen: isCurrentStepValid,
+    isSubmitting: signupSubmit.isPending,
+    onSubmit: () => void signupSubmit.submit(),
+  });
 
   useEffect(() => {
     const isVerified = state.emailVerification.verifiedToken.isVerified;
@@ -94,45 +91,6 @@ export function SignupPage() {
     actions.nextStep();
   };
 
-  const openTermsAgreementSheet = () => {
-    if (!isCurrentStepValid || signupSubmit.isPending) {
-      return;
-    }
-
-    setIsTermsAgreementSheetOpen(true);
-  };
-
-  const closeTermsAgreementSheet = () => {
-    if (signupSubmit.isPending) {
-      return;
-    }
-
-    setIsTermsAgreementSheetOpen(false);
-  };
-
-  const toggleSignupTerm = (termId: SignupTermId) => {
-    setAgreedSignupTermIds((currentTermIds) => {
-      if (currentTermIds.includes(termId)) {
-        return currentTermIds.filter((currentTermId) => currentTermId !== termId);
-      }
-
-      return [...currentTermIds, termId];
-    });
-  };
-
-  const toggleAllSignupTerms = () => {
-    setAgreedSignupTermIds(isAllRequiredTermsAgreed ? [] : requiredSignupTermIds);
-  };
-
-  const handleTermsAgreementSubmit = () => {
-    if (!isAllRequiredTermsAgreed || signupSubmit.isPending) {
-      return;
-    }
-
-    setIsTermsAgreementSheetOpen(false);
-    void signupSubmit.submit();
-  };
-
   useEffect(() => {
     return () => {
       useSignupFlowStore.getState().actions.resetFlow();
@@ -140,8 +98,8 @@ export function SignupPage() {
   }, []);
 
   const handleBack = () => {
-    if (isTermsAgreementSheetOpen) {
-      closeTermsAgreementSheet();
+    if (termsAgreement.isOpen) {
+      termsAgreement.close();
       return;
     }
 
@@ -215,13 +173,13 @@ export function SignupPage() {
         onConfirm={signupSubmit.closeModal}
       />
       <SignupTermsAgreementSheet
-        agreedTermIds={agreedSignupTermIds}
-        isOpen={isTermsAgreementSheetOpen}
+        agreedTermIds={termsAgreement.agreedTermIds}
+        isOpen={termsAgreement.isOpen}
         isSubmitting={signupSubmit.isPending}
-        onClose={closeTermsAgreementSheet}
-        onSubmit={handleTermsAgreementSubmit}
-        onToggleAll={toggleAllSignupTerms}
-        onToggleTerm={toggleSignupTerm}
+        onClose={termsAgreement.close}
+        onSubmit={termsAgreement.submit}
+        onToggleAll={termsAgreement.toggleAll}
+        onToggleTerm={termsAgreement.toggleTerm}
       />
 
       <div className="mx-auto flex h-[100svh] w-full max-w-[393px] flex-col overflow-hidden bg-white">
@@ -246,7 +204,7 @@ export function SignupPage() {
             keyboardInset={keyboardCta.keyboardInset}
             step={state.step}
             onNext={actions.nextStep}
-            onOpenTermsAgreement={openTermsAgreementSheet}
+            onOpenTermsAgreement={termsAgreement.open}
           />
         </section>
       </div>
