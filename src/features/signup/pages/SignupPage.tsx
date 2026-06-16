@@ -63,31 +63,43 @@ export function SignupPage() {
 
   return (
     <SignupView
-      agreedTermIds={termsAgreement.agreedTermIds}
-      emailVerificationErrorModal={emailVerificationModal.emailVerificationErrorModal}
-      isEmailVerificationSuccessModalOpen={emailVerificationModal.isEmailVerificationSuccessModalOpen}
-      isKeyboardCtaStep={isKeyboardCtaStep}
-      isKeyboardOpen={isKeyboardOpen}
-      isPrimaryCtaDisabled={isPrimaryCtaDisabled}
-      isSubmitting={signupSubmit.isPending}
-      isTermsAgreementOpen={termsAgreement.isOpen}
-      isUniversityServerError={isUniversityServerError}
-      keyboardInset={keyboardCta.keyboardInset}
-      progressValue={progressValue}
-      signupFlow={signupFlow}
-      signupSubmitModal={signupSubmit.modal}
-      step={state.step}
-      onBack={signupNavigation.handleBack}
-      onEmailVerificationErrorConfirm={emailVerificationModal.confirmEmailVerificationError}
-      onEmailVerificationSuccessConfirm={emailVerificationModal.confirmEmailVerificationSuccess}
-      onNext={actions.nextStep}
-      onOpenTermsAgreement={termsAgreement.open}
-      onSignupSubmitModalConfirm={signupSubmit.closeModal}
-      onTermsAgreementClose={termsAgreement.close}
-      onTermsAgreementSubmit={termsAgreement.submit}
-      onTermsAgreementToggleAll={termsAgreement.toggleAll}
-      onTermsAgreementToggleTerm={termsAgreement.toggleTerm}
-      onUniversityServerErrorConfirm={() => navigate('/')}
+      modal={{
+        emailVerificationErrorModal: emailVerificationModal.emailVerificationErrorModal,
+        isEmailVerificationSuccessModalOpen: emailVerificationModal.isEmailVerificationSuccessModalOpen,
+        isUniversityServerError,
+        signupSubmitModal: signupSubmit.modal,
+        onEmailVerificationErrorConfirm: emailVerificationModal.confirmEmailVerificationError,
+        onEmailVerificationSuccessConfirm: emailVerificationModal.confirmEmailVerificationSuccess,
+        onSignupSubmitModalConfirm: signupSubmit.closeModal,
+        onUniversityServerErrorConfirm: () => navigate('/'),
+      }}
+      termsAgreement={{
+        agreedTermIds: termsAgreement.agreedTermIds,
+        isOpen: termsAgreement.isOpen,
+        isSubmitting: signupSubmit.isPending,
+        onClose: termsAgreement.close,
+        onSubmit: termsAgreement.submit,
+        onToggleAll: termsAgreement.toggleAll,
+        onToggleTerm: termsAgreement.toggleTerm,
+      }}
+      header={{
+        progressValue,
+        onBack: signupNavigation.handleBack,
+      }}
+      content={{
+        signupFlow,
+        isUniversityServerError,
+      }}
+      cta={{
+        isKeyboardCtaStep,
+        isKeyboardOpen,
+        isPrimaryCtaDisabled,
+        isSubmitting: signupSubmit.isPending,
+        keyboardInset: keyboardCta.keyboardInset,
+        step: state.step,
+        onNext: actions.nextStep,
+        onOpenTermsAgreement: termsAgreement.open,
+      }}
     />
   );
 }

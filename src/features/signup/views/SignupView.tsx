@@ -15,105 +15,100 @@ type SignupFlow = ReturnType<typeof useSignupFlow>;
 type EmailVerificationErrorModal = ReturnType<typeof getEmailVerificationErrorModal>;
 
 type SignupViewProps = {
-  agreedTermIds: SignupTermId[];
-  emailVerificationErrorModal: EmailVerificationErrorModal;
-  isEmailVerificationSuccessModalOpen: boolean;
-  isKeyboardCtaStep: boolean;
-  isKeyboardOpen: boolean;
-  isPrimaryCtaDisabled: boolean;
-  isSubmitting: boolean;
-  isTermsAgreementOpen: boolean;
-  isUniversityServerError: boolean;
-  keyboardInset: number;
-  progressValue: number;
-  signupFlow: SignupFlow;
-  signupSubmitModal: SignupSubmitErrorAction | null;
-  step: SignupStep;
-  onBack: () => void;
-  onEmailVerificationErrorConfirm: () => void;
-  onEmailVerificationSuccessConfirm: () => void;
-  onNext: () => void;
-  onOpenTermsAgreement: () => void;
-  onSignupSubmitModalConfirm: () => void;
-  onTermsAgreementClose: () => void;
-  onTermsAgreementSubmit: () => void;
-  onTermsAgreementToggleAll: () => void;
-  onTermsAgreementToggleTerm: (termId: SignupTermId) => void;
-  onUniversityServerErrorConfirm: () => void;
+  modal: {
+    emailVerificationErrorModal: EmailVerificationErrorModal;
+    isEmailVerificationSuccessModalOpen: boolean;
+    isUniversityServerError: boolean;
+    signupSubmitModal: SignupSubmitErrorAction | null;
+    onEmailVerificationErrorConfirm: () => void;
+    onEmailVerificationSuccessConfirm: () => void;
+    onSignupSubmitModalConfirm: () => void;
+    onUniversityServerErrorConfirm: () => void;
+  };
+  termsAgreement: {
+    agreedTermIds: SignupTermId[];
+    isOpen: boolean;
+    isSubmitting: boolean;
+    onClose: () => void;
+    onSubmit: () => void;
+    onToggleAll: () => void;
+    onToggleTerm: (termId: SignupTermId) => void;
+  };
+  header: {
+    progressValue: number;
+    onBack: () => void;
+  };
+  content: {
+    signupFlow: SignupFlow;
+    isUniversityServerError: boolean;
+  };
+  cta: {
+    isKeyboardCtaStep: boolean;
+    isKeyboardOpen: boolean;
+    isPrimaryCtaDisabled: boolean;
+    isSubmitting: boolean;
+    keyboardInset: number;
+    step: SignupStep;
+    onNext: () => void;
+    onOpenTermsAgreement: () => void;
+  };
 };
 
 export function SignupView({
-  agreedTermIds,
-  emailVerificationErrorModal,
-  isEmailVerificationSuccessModalOpen,
-  isKeyboardCtaStep,
-  isKeyboardOpen,
-  isPrimaryCtaDisabled,
-  isSubmitting,
-  isTermsAgreementOpen,
-  isUniversityServerError,
-  keyboardInset,
-  progressValue,
-  signupFlow,
-  signupSubmitModal,
-  step,
-  onBack,
-  onEmailVerificationErrorConfirm,
-  onEmailVerificationSuccessConfirm,
-  onNext,
-  onOpenTermsAgreement,
-  onSignupSubmitModalConfirm,
-  onTermsAgreementClose,
-  onTermsAgreementSubmit,
-  onTermsAgreementToggleAll,
-  onTermsAgreementToggleTerm,
-  onUniversityServerErrorConfirm,
+  modal,
+  termsAgreement,
+  header,
+  content,
+  cta,
 }: SignupViewProps) {
   return (
     <main className="h-[100svh] overflow-hidden bg-white">
       <SignupModalLayer
-        emailVerificationErrorModal={emailVerificationErrorModal}
-        isEmailVerificationSuccessModalOpen={isEmailVerificationSuccessModalOpen}
-        isUniversityServerError={isUniversityServerError}
-        signupSubmitModal={signupSubmitModal}
-        onEmailVerificationErrorConfirm={onEmailVerificationErrorConfirm}
-        onEmailVerificationSuccessConfirm={onEmailVerificationSuccessConfirm}
-        onSignupSubmitModalConfirm={onSignupSubmitModalConfirm}
-        onUniversityServerErrorConfirm={onUniversityServerErrorConfirm}
+        emailVerificationErrorModal={modal.emailVerificationErrorModal}
+        isEmailVerificationSuccessModalOpen={modal.isEmailVerificationSuccessModalOpen}
+        isUniversityServerError={modal.isUniversityServerError}
+        signupSubmitModal={modal.signupSubmitModal}
+        onEmailVerificationErrorConfirm={modal.onEmailVerificationErrorConfirm}
+        onEmailVerificationSuccessConfirm={modal.onEmailVerificationSuccessConfirm}
+        onSignupSubmitModalConfirm={modal.onSignupSubmitModalConfirm}
+        onUniversityServerErrorConfirm={modal.onUniversityServerErrorConfirm}
       />
       <SignupTermsAgreementSheet
-        agreedTermIds={agreedTermIds}
-        isOpen={isTermsAgreementOpen}
-        isSubmitting={isSubmitting}
-        onClose={onTermsAgreementClose}
-        onSubmit={onTermsAgreementSubmit}
-        onToggleAll={onTermsAgreementToggleAll}
-        onToggleTerm={onTermsAgreementToggleTerm}
+        agreedTermIds={termsAgreement.agreedTermIds}
+        isOpen={termsAgreement.isOpen}
+        isSubmitting={termsAgreement.isSubmitting}
+        onClose={termsAgreement.onClose}
+        onSubmit={termsAgreement.onSubmit}
+        onToggleAll={termsAgreement.onToggleAll}
+        onToggleTerm={termsAgreement.onToggleTerm}
       />
 
       <div className="mx-auto flex h-[100svh] w-full max-w-[393px] flex-col overflow-hidden bg-white">
-        <SignupHeader progressValue={progressValue} onBack={onBack} />
+        <SignupHeader progressValue={header.progressValue} onBack={header.onBack} />
 
         <section
           className={[
             'relative flex min-h-0 flex-1 flex-col overflow-hidden px-5',
-            isKeyboardCtaStep ? '' : 'pb-[max(24px,env(safe-area-inset-bottom))]',
+            cta.isKeyboardCtaStep ? '' : 'pb-[max(24px,env(safe-area-inset-bottom))]',
             'pt-12',
           ].join(' ')}
         >
           <div className="min-h-0 flex-1 overflow-hidden">
-            <SignupStepRenderer flow={signupFlow} isUniversityServerError={isUniversityServerError} />
+            <SignupStepRenderer
+              flow={content.signupFlow}
+              isUniversityServerError={content.isUniversityServerError}
+            />
           </div>
 
           <SignupCtaSection
-            isKeyboardCtaStep={isKeyboardCtaStep}
-            isKeyboardOpen={isKeyboardOpen}
-            isPrimaryCtaDisabled={isPrimaryCtaDisabled}
-            isSubmitting={isSubmitting}
-            keyboardInset={keyboardInset}
-            step={step}
-            onNext={onNext}
-            onOpenTermsAgreement={onOpenTermsAgreement}
+            isKeyboardCtaStep={cta.isKeyboardCtaStep}
+            isKeyboardOpen={cta.isKeyboardOpen}
+            isPrimaryCtaDisabled={cta.isPrimaryCtaDisabled}
+            isSubmitting={cta.isSubmitting}
+            keyboardInset={cta.keyboardInset}
+            step={cta.step}
+            onNext={cta.onNext}
+            onOpenTermsAgreement={cta.onOpenTermsAgreement}
           />
         </section>
       </div>
