@@ -50,6 +50,7 @@ function getKeyboardInset() {
 }
 
 const requiredSignupTermIds: SignupTermId[] = ['privacy', 'age', 'externalApi'];
+const keyboardCtaSteps: readonly number[] = [5, 6];
 
 function useKeyboardCtaState() {
   const [keyboardInset, setKeyboardInset] = useState(0);
@@ -140,7 +141,7 @@ export default function SignupPage() {
   const isUniversityServerError =
     isApiError(universitySearchError) && universitySearchError.status === 500;
   const emailVerificationErrorModal = getEmailVerificationErrorModal(state.emailVerification);
-  const isKeyboardCtaStep = state.step === 6 && keyboardCta.isSupported;
+  const isKeyboardCtaStep = keyboardCtaSteps.includes(state.step) && keyboardCta.isSupported;
   const isKeyboardOpen = isKeyboardCtaStep && keyboardCta.isKeyboardOpen;
   const ctaContainerSpacingClassName = isKeyboardOpen
     ? 'px-0 pb-0 pt-0'
