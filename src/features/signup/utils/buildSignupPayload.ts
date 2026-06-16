@@ -19,6 +19,8 @@ export function buildSignupPayload(form: SignupForm, emailVerification: EmailVer
     departmentId: form.departmentId,
     admissionYear: form.admissionYear,
     grade: form.grade,
+    name: form.name,
+    studentNumber: form.studentNumber,
     username: form.username,
     password: form.password,
     nickname: form.nickname,

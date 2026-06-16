@@ -38,8 +38,10 @@ export interface SignupPayload extends ApiObjectData {
   admissionYear: number;
   departmentId: number;
   grade: 1 | 2 | 3 | 4;
+  name: string;
   nickname: string;
   password: string;
+  studentNumber: string;
   username: string;
   verifiedToken: string;
 }
