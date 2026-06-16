@@ -128,11 +128,15 @@ export function isSignupStepValid(step: SignupStep, form: SignupForm, emailVerif
   if (step === 2) return form.departmentId !== null;
   if (step === 3) return Boolean(form.admissionYear);
   if (step === 4) return form.grade !== null;
-  if (step === 5) return Boolean(form.name.trim()) && Boolean(form.studentNumber.trim());
+  if (step === 5) return Boolean(form.name.trim()) && isSignupStudentNumberValid(form.studentNumber);
   if (step === 6) return validateSignupUsername(form.username).isValid && validateSignupPassword(form.password).isValid;
   if (step === 7) return validateSignupNickname(form.nickname).isValid;
 
   return true;
+}
+
+export function isSignupStudentNumberValid(studentNumber: string) {
+  return /^\d+$/.test(studentNumber.trim());
 }
 
 export function validateSignupUsername(username: string): UsernameValidationResult {

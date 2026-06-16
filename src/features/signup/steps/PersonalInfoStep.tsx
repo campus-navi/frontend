@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 
 import { ClearIcon } from '@/features/signup/components/SignupIcons';
 import { SignupTextField } from '@/features/signup/components/SignupTextField';
+import { isSignupStudentNumberValid } from '@/features/signup/utils';
 
 type PersonalInfoStepProps = {
   name: string;
@@ -16,6 +17,7 @@ export function PersonalInfoStep({
   onNameChange,
   onStudentNumberChange,
 }: PersonalInfoStepProps) {
+  const isStudentNumberInvalid = Boolean(studentNumber.trim()) && !isSignupStudentNumberValid(studentNumber);
   const nameActions = useMemo(
     () =>
       name ? (
@@ -65,6 +67,8 @@ export function PersonalInfoStep({
           label="학번"
           value={studentNumber}
           placeholder="학번을 입력해주세요"
+          helperText={isStudentNumberInvalid ? '학번은 숫자만 입력해주세요.' : undefined}
+          helperTone={isStudentNumberInvalid ? 'error' : 'default'}
           trailingActions={studentNumberActions}
           onChange={onStudentNumberChange}
         />
