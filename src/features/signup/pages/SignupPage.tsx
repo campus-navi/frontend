@@ -5,7 +5,7 @@ import { isApiError } from '@/api';
 import { AlertModal } from '@/components/ui/AlertModal';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { CtaButton } from '@/components/ui/CtaButton';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { SignupCtaSection } from '@/features/signup/components/SignupCtaSection';
 import { SignupHeader } from '@/features/signup/components/SignupHeader';
 import { SignupStepRenderer } from '@/features/signup/components/SignupStepRenderer';
 import {
@@ -44,13 +44,6 @@ export function SignupPage() {
   const emailVerificationErrorModal = getEmailVerificationErrorModal(state.emailVerification);
   const isKeyboardCtaStep = keyboardCtaSteps.includes(state.step) && keyboardCta.isSupported;
   const isKeyboardOpen = isKeyboardCtaStep && keyboardCta.isKeyboardOpen;
-  const ctaContainerSpacingClassName = isKeyboardOpen
-    ? 'px-0 pb-0 pt-0'
-    : 'px-5 pb-[max(24px,env(safe-area-inset-bottom))] pt-2';
-  const ctaButtonClassName = isKeyboardOpen ? '!rounded-none' : '';
-  const ctaPositionTransitionClassName = isKeyboardOpen
-    ? ''
-    : 'transition-[bottom] duration-200 ease-out';
   const wasEmailVerifiedRef = useRef(state.emailVerification.verifiedToken.isVerified);
   const signupSubmit = useSignupSubmit({
     emailDomain,
@@ -245,56 +238,16 @@ export function SignupPage() {
             <SignupStepRenderer flow={signupFlow} isUniversityServerError={isUniversityServerError} />
           </div>
 
-          {isKeyboardCtaStep ? (
-            <div
-              aria-hidden="true"
-              className="mt-auto h-[calc(88px+max(24px,env(safe-area-inset-bottom)))] shrink-0"
-            />
-          ) : null}
-
-          {isKeyboardCtaStep ? (
-            <div
-              className={[
-                "fixed left-1/2 z-20 w-full max-w-[393px] -translate-x-1/2 bg-white before:pointer-events-none before:absolute before:inset-x-0 before:-top-4 before:bottom-0 before:bg-white before:content-['']",
-                ctaPositionTransitionClassName,
-                ctaContainerSpacingClassName,
-              ].join(' ')}
-              style={{ bottom: `${isKeyboardOpen ? keyboardCta.keyboardInset : 0}px` }}
-            >
-              <CtaButton
-                className={['relative z-10', ctaButtonClassName].filter(Boolean).join(' ')}
-                disabled={isPrimaryCtaDisabled}
-                onClick={isKeyboardOpen ? undefined : actions.nextStep}
-                onPointerDown={(event) => {
-                  if (!isKeyboardOpen || isPrimaryCtaDisabled) {
-                    return;
-                  }
-
-                  event.preventDefault();
-                  actions.nextStep();
-                }}
-              >
-                다음
-              </CtaButton>
-            </div>
-          ) : state.step !== SIGNUP_STEP.EMAIL_VERIFICATION ? (
-            <div className="mt-auto pt-8">
-              <CtaButton
-                disabled={isPrimaryCtaDisabled}
-                onClick={state.step === SIGNUP_STEP.NICKNAME ? openTermsAgreementSheet : actions.nextStep}
-              >
-                {state.step === SIGNUP_STEP.NICKNAME ? (
-                  signupSubmit.isPending ? (
-                    <LoadingSpinner ariaLabel="회원가입 중" />
-                  ) : (
-                    '다음'
-                  )
-                ) : (
-                  '다음'
-                )}
-              </CtaButton>
-            </div>
-          ) : null}
+          <SignupCtaSection
+            isKeyboardCtaStep={isKeyboardCtaStep}
+            isKeyboardOpen={isKeyboardOpen}
+            isPrimaryCtaDisabled={isPrimaryCtaDisabled}
+            isSubmitting={signupSubmit.isPending}
+            keyboardInset={keyboardCta.keyboardInset}
+            step={state.step}
+            onNext={actions.nextStep}
+            onOpenTermsAgreement={openTermsAgreementSheet}
+          />
         </section>
       </div>
     </main>
