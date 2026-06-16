@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { isApiError } from '@/api';
@@ -10,9 +9,9 @@ import { SignupTermsAgreementSheet } from '@/features/signup/components/SignupTe
 import { useSignupEmailVerificationModal } from '@/features/signup/hooks/useSignupEmailVerificationModal';
 import { useKeyboardCtaState } from '@/features/signup/hooks/useKeyboardCtaState';
 import { useSignupFlow } from '@/features/signup/hooks/useSignupFlow';
+import { useSignupNavigation } from '@/features/signup/hooks/useSignupNavigation';
 import { useSignupSubmit } from '@/features/signup/hooks/useSignupSubmit';
 import { useSignupTermsAgreement } from '@/features/signup/hooks/useSignupTermsAgreement';
-import { useSignupFlowStore } from '@/features/signup/store/signupFlowStore';
 import { SIGNUP_STEP } from '@/features/signup/types';
 
 const keyboardCtaSteps: readonly number[] = [SIGNUP_STEP.PERSONAL_INFO, SIGNUP_STEP.ACCOUNT];
@@ -55,40 +54,16 @@ export function SignupPage() {
     isSubmitting: signupSubmit.isPending,
     onSubmit: () => void signupSubmit.submit(),
   });
-
-  useEffect(() => {
-    return () => {
-      useSignupFlowStore.getState().actions.resetFlow();
-    };
-  }, []);
-
-  const handleBack = () => {
-    if (termsAgreement.isOpen) {
-      termsAgreement.close();
-      return;
-    }
-
-    if (signupSubmit.isPending) {
-      return;
-    }
-
-    if (state.step === SIGNUP_STEP.UNIVERSITY) {
-      navigate(-1);
-      return;
-    }
-
-    if (state.step === SIGNUP_STEP.DEPARTMENT) {
-      actions.returnToEmailVerificationStep();
-      return;
-    }
-
-    if (state.step === SIGNUP_STEP.EMAIL_VERIFICATION) {
-      actions.returnToUniversityStep();
-      return;
-    }
-
-    actions.previousStep();
-  };
+  const signupNavigation = useSignupNavigation({
+    isSubmitting: signupSubmit.isPending,
+    isTermsAgreementOpen: termsAgreement.isOpen,
+    step: state.step,
+    onCloseTermsAgreement: termsAgreement.close,
+    onNavigateBack: () => navigate(-1),
+    onPreviousStep: actions.previousStep,
+    onReturnToEmailVerificationStep: actions.returnToEmailVerificationStep,
+    onReturnToUniversityStep: actions.returnToUniversityStep,
+  });
 
   return (
     <main className="h-[100svh] overflow-hidden bg-white">
@@ -113,7 +88,7 @@ export function SignupPage() {
       />
 
       <div className="mx-auto flex h-[100svh] w-full max-w-[393px] flex-col overflow-hidden bg-white">
-        <SignupHeader progressValue={progressValue} onBack={handleBack} />
+        <SignupHeader progressValue={progressValue} onBack={signupNavigation.handleBack} />
 
         <section
           className={[
