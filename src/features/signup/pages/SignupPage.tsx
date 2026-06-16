@@ -7,6 +7,7 @@ import { BottomSheet } from '@/components/ui/BottomSheet';
 import { CtaButton } from '@/components/ui/CtaButton';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { SignupHeader } from '@/features/signup/components/SignupHeader';
+import { SignupStepRenderer } from '@/features/signup/components/SignupStepRenderer';
 import {
   SignupTermsAgreementSheet,
   type SignupTermId,
@@ -16,14 +17,6 @@ import { useKeyboardCtaState } from '@/features/signup/hooks/useKeyboardCtaState
 import { useSignupFlow } from '@/features/signup/hooks/useSignupFlow';
 import { useSignupSubmit } from '@/features/signup/hooks/useSignupSubmit';
 import { useSignupFlowStore } from '@/features/signup/store/signupFlowStore';
-import { AdmissionYearStep } from '@/features/signup/steps/AdmissionYearStep';
-import { DepartmentStep } from '@/features/signup/steps/DepartmentStep';
-import { EmailVerificationStep } from '@/features/signup/steps/EmailVerificationStep';
-import { GradeStep } from '@/features/signup/steps/GradeStep';
-import { NicknameStep } from '@/features/signup/steps/NicknameStep';
-import { PersonalInfoStep } from '@/features/signup/steps/PersonalInfoStep';
-import { UniversityStep } from '@/features/signup/steps/UniversityStep';
-import { AccountStep } from '@/features/signup/steps/AccountStep';
 import { SIGNUP_STEP } from '@/features/signup/types';
 
 const requiredSignupTermIds: SignupTermId[] = ['privacy', 'age', 'externalApi'];
@@ -36,26 +29,15 @@ export function SignupPage() {
   const [isTermsAgreementSheetOpen, setIsTermsAgreementSheetOpen] = useState(false);
   const [agreedSignupTermIds, setAgreedSignupTermIds] = useState<SignupTermId[]>([]);
   const keyboardCta = useKeyboardCtaState();
+  const signupFlow = useSignupFlow();
   const {
     state,
     emailDomain,
-    emailVerification,
-    nicknameValidation,
-    usernameAvailability,
-    passwordValidation,
-    shouldShowPasswordField,
-    shouldShowPasswordConfirmField,
-    filteredUniversities,
-    filteredDepartments,
     isCurrentStepValid,
     progressValue,
-    admissionYears,
     universitySearch,
-    departmentSearch,
-    isDepartmentSearchVisible,
-    isUniversitySearchVisible,
     actions,
-  } = useSignupFlow();
+  } = signupFlow;
   const universitySearchError = universitySearch.isError ? universitySearch.error : null;
   const isUniversityServerError =
     isApiError(universitySearchError) && universitySearchError.status === 500;
@@ -260,115 +242,7 @@ export function SignupPage() {
           ].join(' ')}
         >
           <div className="min-h-0 flex-1 overflow-hidden">
-            {state.step === SIGNUP_STEP.UNIVERSITY ? (
-              <UniversityStep
-                isLoading={universitySearch.isLoading}
-                isResultsVisible={isUniversitySearchVisible}
-                query={state.universityQuery}
-                selectedUniversity={state.form.selectedUniversity}
-                suggestions={filteredUniversities}
-                errorMessage={
-                  universitySearch.isError && !isUniversityServerError
-                    ? universitySearch.error.message
-                    : undefined
-                }
-                onChange={actions.updateUniversityQuery}
-                onClear={actions.clearUniversityQuery}
-                onRetry={() => void universitySearch.refetch()}
-                onSelect={actions.selectUniversity}
-              />
-            ) : null}
-
-            {state.step === SIGNUP_STEP.EMAIL_VERIFICATION ? (
-              <EmailVerificationStep
-                emailLocalPart={state.form.emailLocalPart}
-                emailDomain={emailDomain}
-                isCodeSent={emailVerification.ui.isCodeSent}
-                isSendEnabled={emailVerification.ui.canSend}
-                isSendPending={emailVerification.ui.isSending}
-                isVerifyPending={emailVerification.ui.isVerifying}
-                isVerifyButtonEnabled={emailVerification.ui.canVerify}
-                isVerificationCodeReadOnly={emailVerification.ui.isVerificationCodeReadOnly}
-                codeHelperMessage={emailVerification.ui.codeHelperMessage}
-                emailHelperMessage={emailVerification.ui.emailHelperMessage}
-                sendButtonLabel={emailVerification.ui.sendButtonLabel}
-                verificationTimerLabel={emailVerification.ui.verificationTimerLabel}
-                verification={state.emailVerification}
-                verifyButtonLabel={emailVerification.ui.verifyButtonLabel}
-                onEmailChange={actions.updateEmailLocalPart}
-                onVerificationCodeChange={actions.updateVerificationCode}
-                onSendVerification={actions.sendVerification}
-                onSubmitVerification={actions.submitVerification}
-              />
-            ) : null}
-
-            {state.step === SIGNUP_STEP.DEPARTMENT ? (
-              <DepartmentStep
-                errorMessage={departmentSearch.isError ? departmentSearch.error.message : undefined}
-                isLoading={departmentSearch.isLoading}
-                isResultsVisible={isDepartmentSearchVisible}
-                query={state.departmentQuery}
-                selectedDepartmentId={state.form.departmentId}
-                suggestions={filteredDepartments}
-                onChange={actions.updateDepartmentQuery}
-                onClear={actions.clearDepartmentQuery}
-                onRetry={() => void departmentSearch.refetch()}
-                onSelect={(department) =>
-                  actions.selectDepartment({ id: department.id, name: department.label })
-                }
-              />
-            ) : null}
-
-            {state.step === SIGNUP_STEP.ADMISSION_YEAR ? (
-              <AdmissionYearStep
-                selectedYear={state.form.admissionYear}
-                years={admissionYears}
-                onSelect={actions.selectAdmissionYear}
-              />
-            ) : null}
-
-            {state.step === SIGNUP_STEP.GRADE ? (
-              <GradeStep selectedGrade={state.form.grade} onSelect={actions.selectGrade} />
-            ) : null}
-
-            {state.step === SIGNUP_STEP.PERSONAL_INFO ? (
-              <PersonalInfoStep
-                name={state.form.name}
-                studentNumber={state.form.studentNumber}
-                onNameChange={actions.updateName}
-                onStudentNumberChange={actions.updateStudentNumber}
-              />
-            ) : null}
-
-            {state.step === SIGNUP_STEP.ACCOUNT ? (
-              <AccountStep
-                helperText={usernameAvailability.helperText}
-                helperTone={usernameAvailability.helperTone}
-                isUsernameChecking={usernameAvailability.availability.status === 'checking'}
-                password={state.form.password}
-                passwordConfirm={state.form.passwordConfirm}
-                passwordHelperText={passwordValidation.passwordHelperText}
-                passwordHelperTone={passwordValidation.passwordHelperTone}
-                shouldShowPasswordField={shouldShowPasswordField}
-                shouldShowPasswordConfirmField={shouldShowPasswordConfirmField}
-                confirmHelperText={passwordValidation.confirmHelperText}
-                confirmHelperTone={passwordValidation.confirmHelperTone}
-                username={state.form.username}
-                onChange={actions.updateUsername}
-                onPasswordChange={actions.updatePassword}
-                onPasswordConfirmChange={actions.updatePasswordConfirm}
-              />
-            ) : null}
-
-            {state.step === SIGNUP_STEP.NICKNAME ? (
-              <NicknameStep
-                nickname={state.form.nickname}
-                helperText={nicknameValidation.helperText}
-                helperTone={nicknameValidation.helperTone}
-                isNicknameChecking={nicknameValidation.availability.status === 'checking'}
-                onChange={actions.updateNickname}
-              />
-            ) : null}
+            <SignupStepRenderer flow={signupFlow} isUniversityServerError={isUniversityServerError} />
           </div>
 
           {isKeyboardCtaStep ? (
