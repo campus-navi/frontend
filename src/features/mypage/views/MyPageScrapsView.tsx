@@ -1,9 +1,10 @@
-import type { MouseEventHandler, PointerEventHandler, RefObject } from 'react';
+import type { ChangeEventHandler, MouseEventHandler, PointerEventHandler, RefObject } from 'react';
 
 import { AppHeader } from '@/components/ui/AppHeader';
 import { EmptyStateMessage } from '@/features/mypage/components/scraps/EmptyStateMessage';
 import { RecentScrapCard } from '@/features/mypage/components/scraps/RecentScrapCard';
 import { ScrapFolderCreateBottomSheet } from '@/features/mypage/components/scraps/ScrapFolderCreateBottomSheet';
+import { ScrapFolderEditBottomSheet } from '@/features/mypage/components/scraps/ScrapFolderEditBottomSheet';
 import { ScrapFolderRow } from '@/features/mypage/components/scraps/ScrapFolderRow';
 import { PlusIcon } from '@/features/mypage/components/scraps/ScrapIcons';
 import type { MyPageRecentScrapCardItem, MyPageScrapFolderListItem } from '@/features/mypage/types';
@@ -22,23 +23,36 @@ type MyPageScrapsViewProps = {
   createFolderErrorMessage: string | null;
   createFolderName: string;
   createFolderNameMaxLength: number;
+  editFolderDescription: string;
+  editFolderDescriptionMaxLength: number;
+  editFolderName: string;
+  editFolderNameMaxLength: number;
+  editingFolder: MyPageScrapFolderListItem | null;
   isCreateFolderPending: boolean;
   folders: MyPageScrapFolderListItem[];
   isCreateFolderSheetOpen: boolean;
   isCreateFolderSubmitDisabled: boolean;
+  isEditFolderSheetOpen: boolean;
+  isEditFolderSubmitDisabled: boolean;
   isFolderMoreMenuOpen: boolean;
   onBack: () => void;
-  onChangeCreateFolderDescription: React.ChangeEventHandler<HTMLInputElement>;
-  onChangeCreateFolderName: React.ChangeEventHandler<HTMLInputElement>;
+  onChangeCreateFolderDescription: ChangeEventHandler<HTMLInputElement>;
+  onChangeCreateFolderName: ChangeEventHandler<HTMLInputElement>;
+  onChangeEditFolderDescription: ChangeEventHandler<HTMLInputElement>;
+  onChangeEditFolderName: ChangeEventHandler<HTMLInputElement>;
   onClearCreateFolderDescription: () => void;
   onClearCreateFolderName: () => void;
+  onClearEditFolderDescription: () => void;
+  onClearEditFolderName: () => void;
   onCloseCreateFolderSheet: () => void;
+  onCloseEditFolderSheet: () => void;
   onCloseFolderMoreMenu: () => void;
   onDeleteFolder: () => void;
   onEditFolder: () => void;
   onFolderMoreClick: (folder: MyPageScrapFolderListItem) => void;
   onOpenCreateFolderSheet: () => void;
   onSubmitCreateFolder: () => void;
+  onSubmitEditFolder: () => void;
   recentScraps: MyPageRecentScrapCardItem[];
   recentScrapsHandlers: RecentScrapsHandlers;
   recentScrapsRef: RefObject<HTMLDivElement>;
@@ -55,23 +69,36 @@ export function MyPageScrapsView({
   createFolderErrorMessage,
   createFolderName,
   createFolderNameMaxLength,
+  editFolderDescription,
+  editFolderDescriptionMaxLength,
+  editFolderName,
+  editFolderNameMaxLength,
+  editingFolder,
   folders,
   isCreateFolderPending,
   isCreateFolderSheetOpen,
   isCreateFolderSubmitDisabled,
+  isEditFolderSheetOpen,
+  isEditFolderSubmitDisabled,
   isFolderMoreMenuOpen,
   onBack,
   onChangeCreateFolderDescription,
   onChangeCreateFolderName,
+  onChangeEditFolderDescription,
+  onChangeEditFolderName,
   onClearCreateFolderDescription,
   onClearCreateFolderName,
+  onClearEditFolderDescription,
+  onClearEditFolderName,
   onCloseCreateFolderSheet,
+  onCloseEditFolderSheet,
   onCloseFolderMoreMenu,
   onDeleteFolder,
   onEditFolder,
   onFolderMoreClick,
   onOpenCreateFolderSheet,
   onSubmitCreateFolder,
+  onSubmitEditFolder,
   recentScraps,
   recentScrapsHandlers,
   recentScrapsRef,
@@ -201,6 +228,22 @@ export function MyPageScrapsView({
         onClearDescription={onClearCreateFolderDescription}
         onClose={onCloseCreateFolderSheet}
         onSubmit={onSubmitCreateFolder}
+      />
+
+      <ScrapFolderEditBottomSheet
+        isOpen={isEditFolderSheetOpen}
+        folderName={editingFolder?.name ?? ''}
+        name={editFolderName}
+        nameMaxLength={editFolderNameMaxLength}
+        description={editFolderDescription}
+        descriptionMaxLength={editFolderDescriptionMaxLength}
+        isSubmitDisabled={isEditFolderSubmitDisabled}
+        onChangeName={onChangeEditFolderName}
+        onChangeDescription={onChangeEditFolderDescription}
+        onClearName={onClearEditFolderName}
+        onClearDescription={onClearEditFolderDescription}
+        onClose={onCloseEditFolderSheet}
+        onSubmit={onSubmitEditFolder}
       />
     </main>
   );
