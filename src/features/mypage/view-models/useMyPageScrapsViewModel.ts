@@ -13,6 +13,10 @@ export function useMyPageScrapsViewModel() {
   const [isCreateFolderSheetOpen, setIsCreateFolderSheetOpen] = useState(false);
   const [createFolderName, setCreateFolderName] = useState('');
   const [createFolderDescription, setCreateFolderDescription] = useState('');
+  const [isEditFolderSheetOpen, setIsEditFolderSheetOpen] = useState(false);
+  const [editingFolder, setEditingFolder] = useState<MyPageScrapFolderListItem | null>(null);
+  const [editFolderName, setEditFolderName] = useState('');
+  const [editFolderDescription, setEditFolderDescription] = useState('');
   const [selectedMoreMenuFolder, setSelectedMoreMenuFolder] = useState<MyPageScrapFolderListItem | null>(null);
   const createScrapFolderMutation = useCreateScrapFolder();
   const { data: scraps, isError, isLoading } = useMyPageScraps();
@@ -63,9 +67,54 @@ export function useMyPageScrapsViewModel() {
     setSelectedMoreMenuFolder(null);
   };
 
+  const resetEditFolderInputs = () => {
+    setEditingFolder(null);
+    setEditFolderName('');
+    setEditFolderDescription('');
+  };
+
   const handleEditFolder = () => {
-    // Folder edit flow will be connected in a later issue.
+    if (!selectedMoreMenuFolder) {
+      return;
+    }
+
+    setEditingFolder(selectedMoreMenuFolder);
+    setEditFolderName(selectedMoreMenuFolder.name);
+    setEditFolderDescription(selectedMoreMenuFolder.description);
+    setIsEditFolderSheetOpen(true);
     handleCloseFolderMoreMenu();
+  };
+
+  const handleCloseEditFolderSheet = () => {
+    setIsEditFolderSheetOpen(false);
+    resetEditFolderInputs();
+  };
+
+  const handleChangeEditFolderName: ChangeEventHandler<HTMLInputElement> = (event) => {
+    setEditFolderName(event.target.value.slice(0, SCRAP_FOLDER_INPUT_MAX_LENGTH));
+  };
+
+  const handleChangeEditFolderDescription: ChangeEventHandler<HTMLInputElement> = (event) => {
+    setEditFolderDescription(event.target.value.slice(0, SCRAP_FOLDER_INPUT_MAX_LENGTH));
+  };
+
+  const handleClearEditFolderName = () => {
+    setEditFolderName('');
+  };
+
+  const handleClearEditFolderDescription = () => {
+    setEditFolderDescription('');
+  };
+
+  const handleSubmitEditFolder = () => {
+    const trimmedName = editFolderName.trim();
+
+    if (!trimmedName) {
+      return;
+    }
+
+    // TODO: Connect PATCH /api/v1/scrap-folders/{id} in a later issue.
+    handleCloseEditFolderSheet();
   };
 
   const handleDeleteFolder = () => {
@@ -221,22 +270,35 @@ export function useMyPageScrapsViewModel() {
     createFolderErrorMessage,
     createFolderName,
     createFolderNameMaxLength: SCRAP_FOLDER_INPUT_MAX_LENGTH,
+    editFolderDescription,
+    editFolderDescriptionMaxLength: SCRAP_FOLDER_INPUT_MAX_LENGTH,
+    editFolderName,
+    editFolderNameMaxLength: SCRAP_FOLDER_INPUT_MAX_LENGTH,
+    editingFolder,
     isCreateFolderPending: createScrapFolderMutation.isPending,
     isCreateFolderSheetOpen,
     isCreateFolderSubmitDisabled: createFolderName.trim().length === 0 || createScrapFolderMutation.isPending,
+    isEditFolderSheetOpen,
+    isEditFolderSubmitDisabled: editFolderName.trim().length === 0,
     isFolderMoreMenuOpen: selectedMoreMenuFolder !== null,
     onBack: handleBack,
     onChangeCreateFolderDescription: handleCreateFolderDescriptionChange,
     onChangeCreateFolderName: handleCreateFolderNameChange,
+    onChangeEditFolderDescription: handleChangeEditFolderDescription,
+    onChangeEditFolderName: handleChangeEditFolderName,
     onClearCreateFolderDescription: handleClearCreateFolderDescription,
     onClearCreateFolderName: handleClearCreateFolderName,
+    onClearEditFolderDescription: handleClearEditFolderDescription,
+    onClearEditFolderName: handleClearEditFolderName,
     onCloseCreateFolderSheet: handleCloseCreateFolderSheet,
+    onCloseEditFolderSheet: handleCloseEditFolderSheet,
     onCloseFolderMoreMenu: handleCloseFolderMoreMenu,
     onDeleteFolder: handleDeleteFolder,
     onEditFolder: handleEditFolder,
     onFolderMoreClick: handleOpenFolderMoreMenu,
     onOpenCreateFolderSheet: handleOpenCreateFolderSheet,
     onSubmitCreateFolder: handleCreateFolderSubmit,
+    onSubmitEditFolder: handleSubmitEditFolder,
     recentScraps,
     recentScrapsHandlers: {
       onClickCapture: handleRecentScrapsClickCapture,
