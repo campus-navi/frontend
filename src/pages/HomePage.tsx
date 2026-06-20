@@ -7,7 +7,7 @@ import { MobileGnb } from '@/components/ui/MobileGnb';
 import { Modal } from '@/components/ui/Modal';
 import { RadioChip } from '@/components/ui/RadioChip';
 import { SvgIcon } from '@/components/ui/SvgIcon';
-import { Tags } from '@/components/ui/Tags';
+import { DeadlinePreviewSection } from '@/features/deadlines/components/DeadlinePreviewSection';
 import { FeaturedNoticeContent } from '@/features/home/components/FeaturedNoticeContent';
 import { dismissNoticeInterestPrompt, useHasDismissedNoticeInterestPrompt } from '@/features/home/noticeInterestPromptDismissState';
 import { useFeedCards } from '@/features/home/hooks/useFeedCards';
@@ -15,11 +15,6 @@ import { useMemberMe } from '@/features/home/hooks/useMemberMe';
 
 const TEMP_NICKNAME = '익명';
 const HAS_NEW_NOTIFICATION = true;
-const deadlineCards = [
-  { id: 1, daysLeft: 'D-6', category: '수강', title: '공지글입니다.\n두줄까지 쓸 수 있어요', meta: '04/10 | OO학사팀' },
-  { id: 2, daysLeft: 'D-3', category: '장학', title: '성적 장학금 신청 안내', meta: '04/12 | 장학팀' },
-];
-
 const communityPosts = [
   {
     id: 1,
@@ -104,14 +99,7 @@ export default function HomePage() {
           />
         </section>
 
-        <section className="flex flex-col gap-4 bg-white py-5">
-          <SectionHeader keyword="마감임박" suffix="공지" />
-          <div className="flex gap-4 overflow-x-auto px-5 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {deadlineCards.map((card) => (
-              <DeadlineCard key={card.id} {...card} />
-            ))}
-          </div>
-        </section>
+        <DeadlinePreviewSection />
 
         <section className="flex flex-col gap-5 bg-white px-4 py-4">
           <div className="flex items-center justify-between gap-3">
@@ -182,18 +170,6 @@ function SectionTitle({ nickname, suffix }: { nickname: string; suffix: string }
   );
 }
 
-function SectionHeader({ keyword, suffix }: { keyword: string; suffix: string }) {
-  return (
-    <div className="flex items-center justify-between gap-3 px-4">
-      <h2 className="flex items-center gap-1 text-[20px] font-bold leading-[1.2] tracking-[-0.02em] text-[#1A1A1A]">
-        <span>{keyword}</span>
-        <span className="text-[#939393]">{suffix}</span>
-      </h2>
-      <SeeAllButton />
-    </div>
-  );
-}
-
 function SeeAllButton() {
   return (
     <button
@@ -205,37 +181,6 @@ function SeeAllButton() {
         <path d="m3 1.5 2.5 2.5L3 6.5" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.2" />
       </SvgIcon>
     </button>
-  );
-}
-
-function DeadlineCard({
-  daysLeft,
-  category,
-  title,
-  meta,
-}: {
-  daysLeft: string;
-  category: string;
-  title: string;
-  meta: string;
-}) {
-  return (
-    <article className="flex h-[140px] w-[316px] shrink-0 flex-col gap-3 rounded-2xl bg-[#FAFAFC] p-4">
-      <div className="flex items-center gap-1.5">
-        <Tags size="lg" type="primary">
-          {daysLeft}
-        </Tags>
-        <span className="inline-flex h-8 items-center justify-center rounded-lg border border-[#DCDFE2] px-2.5 text-[14px] font-medium leading-[1.4] text-[#292B2C]">
-          {category}
-        </span>
-      </div>
-      <div className="flex flex-col gap-1">
-        <h3 className="whitespace-pre-line text-[16px] font-semibold leading-[1.4] tracking-[0.01em] text-[#333333]">
-          {title}
-        </h3>
-        <p className="text-[14px] font-normal leading-[1.4] text-[#9E9E9E]">{meta}</p>
-      </div>
-    </article>
   );
 }
 

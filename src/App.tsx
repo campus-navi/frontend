@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/routing/ProtectedRoute';
 import { PublicOnlyRoute } from '@/components/routing/PublicOnlyRoute';
 import CardNewsDetailPage from '@/pages/CardNewsDetailPage';
+import DeadlinesPage from '@/pages/DeadlinesPage';
 import HomePage from '@/pages/HomePage';
 import InfoPage from '@/pages/InfoPage';
 import InfoPostDetailPage from '@/pages/InfoPostDetailPage';
@@ -41,6 +42,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <HomePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/deadlines"
+        element={
+          <ProtectedRoute>
+            <DeadlinesPage />
           </ProtectedRoute>
         }
       />

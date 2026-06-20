@@ -19,6 +19,20 @@ export interface FeedCards extends ApiObjectData {
   recommendedPosts: FeedCardPost[];
 }
 
+export interface DeadlinePost extends ApiObjectData {
+  endDate: string;
+  isNotificationOn: boolean;
+  postId: number;
+  publishedAt: string;
+  publisher: string;
+  tagName: string;
+  title: string;
+}
+
+export interface DeadlinePosts extends ApiObjectData {
+  posts: DeadlinePost[];
+}
+
 interface FeedCardPostResponse extends ApiObjectData {
   postId?: number | string;
   title?: string;
@@ -33,11 +47,28 @@ interface FeedCardsResponse extends ApiObjectData {
   recommendedPosts?: FeedCardPostResponse[];
 }
 
-function normalizePostId(postId: number | string): number {
+interface DeadlinePostResponse extends ApiObjectData {
+  endDate?: string;
+  isNotificationOn?: boolean;
+  postId?: number | string;
+  publishedAt?: string;
+  publisher?: string;
+  tagName?: string;
+  title?: string;
+}
+
+interface DeadlinePostsResponse extends ApiObjectData {
+  posts?: DeadlinePostResponse[];
+}
+
+function normalizePostId(
+  postId: number | string,
+  invalidResponseMessage = '카드뉴스 응답 형식이 올바르지 않습니다.',
+): number {
   if (typeof postId === 'string' && postId.trim() === '') {
     throw createApiError({
       code: COMMON_ERROR_CODES.INVALID_RESPONSE,
-      message: '카드뉴스 응답 형식이 올바르지 않습니다.',
+      message: invalidResponseMessage,
       status: 200,
     });
   }
@@ -47,7 +78,7 @@ function normalizePostId(postId: number | string): number {
   if (!Number.isFinite(normalizedPostId)) {
     throw createApiError({
       code: COMMON_ERROR_CODES.INVALID_RESPONSE,
-      message: '카드뉴스 응답 형식이 올바르지 않습니다.',
+      message: invalidResponseMessage,
       status: 200,
     });
   }
@@ -97,6 +128,58 @@ function normalizeFeedCards(data: FeedCardsResponse): FeedCards {
   };
 }
 
+function normalizeDeadlinePost(item: DeadlinePostResponse): DeadlinePost {
+  const {
+    endDate,
+    isNotificationOn,
+    postId,
+    publishedAt,
+    publisher,
+    tagName,
+    title,
+  } = item;
+
+  if (
+    (typeof postId !== 'number' && typeof postId !== 'string') ||
+    typeof title !== 'string' ||
+    typeof tagName !== 'string' ||
+    typeof publisher !== 'string' ||
+    typeof publishedAt !== 'string' ||
+    typeof endDate !== 'string' ||
+    typeof isNotificationOn !== 'boolean'
+  ) {
+    throw createApiError({
+      code: COMMON_ERROR_CODES.INVALID_RESPONSE,
+      message: '마감임박 공지 응답 형식이 올바르지 않습니다.',
+      status: 200,
+    });
+  }
+
+  return {
+    endDate,
+    isNotificationOn,
+    postId: normalizePostId(postId, '마감임박 공지 응답 형식이 올바르지 않습니다.'),
+    publishedAt,
+    publisher,
+    tagName,
+    title,
+  };
+}
+
+function normalizeDeadlinePosts(data: DeadlinePostsResponse): DeadlinePosts {
+  if (!Array.isArray(data.posts)) {
+    throw createApiError({
+      code: COMMON_ERROR_CODES.INVALID_RESPONSE,
+      message: '마감임박 공지 목록 응답 형식이 올바르지 않습니다.',
+      status: 200,
+    });
+  }
+
+  return {
+    posts: data.posts.map(normalizeDeadlinePost),
+  };
+}
+
 export const feedApi = {
   async getCards() {
     const response = await request<FeedCardsResponse>({
@@ -107,6 +190,28 @@ export const feedApi = {
     return {
       ...response,
       data: normalizeFeedCards(response.data),
+    };
+  },
+  async getDeadlinePreview() {
+    const response = await request<DeadlinePostsResponse>({
+      method: 'get',
+      url: '/feed/deadlines/preview',
+    });
+
+    return {
+      ...response,
+      data: normalizeDeadlinePosts(response.data),
+    };
+  },
+  async getDeadlines() {
+    const response = await request<DeadlinePostsResponse>({
+      method: 'get',
+      url: '/feed/deadlines',
+    });
+
+    return {
+      ...response,
+      data: normalizeDeadlinePosts(response.data),
     };
   },
 };
