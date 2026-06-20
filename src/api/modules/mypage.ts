@@ -71,6 +71,10 @@ export interface RemoveScrapsFromFolderResult extends ApiObjectData {
   deletedPostIds: number[];
 }
 
+export interface RestoreScrapsToFolderRequest extends ApiObjectData {
+  postIds: number[];
+}
+
 interface MyPageSummaryResponse extends ApiObjectData {
   admissionYear?: unknown;
   campus?: unknown;
@@ -354,6 +358,17 @@ export const mypageApi = {
       ...response,
       data: normalizeRemoveScrapsFromFolderResult(response.data),
     };
+  },
+
+  async restoreScrapsToFolder(
+    folderId: number,
+    restoreRequest: RestoreScrapsToFolderRequest,
+  ) {
+    return request<null>({
+      data: restoreRequest,
+      method: 'post',
+      url: `/scrap-folders/${folderId}/scraps/restore`,
+    });
   },
 
   async createScrapFolder(createRequest: CreateScrapFolderRequest) {
