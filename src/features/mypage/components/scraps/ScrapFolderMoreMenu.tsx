@@ -31,14 +31,14 @@ export function ScrapFolderMoreMenu({
     <>
       <button
         type="button"
-        className="fixed inset-0 z-20 cursor-default"
+        className="fixed inset-0 z-30 cursor-default"
         onClick={onClose}
         aria-label="폴더 더보기 메뉴 닫기"
       />
       <SelectList
         ariaLabel={`${folderName} 폴더 관리 메뉴`}
         items={items}
-        className="absolute right-4 top-11 z-30"
+        className="absolute right-4 top-11 z-40"
       />
     </>
   );
