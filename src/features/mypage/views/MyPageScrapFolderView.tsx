@@ -1,8 +1,11 @@
+import type { MyPageScrapFolder } from '@/api';
 import { FolderScrapListItem } from '@/features/mypage/components/scraps/FolderScrapListItem';
 import { ScrapFolderDetailHeader } from '@/features/mypage/components/scraps/ScrapFolderDetailHeader';
+import { ScrapMoveBottomSheet } from '@/features/mypage/components/scraps/ScrapMoveBottomSheet';
 import type { MyPageFolderScrapListItem } from '@/features/mypage/types';
 
 type MyPageScrapFolderViewProps = {
+  availableMoveFolders: MyPageScrapFolder[];
   emptyMessage: string;
   errorMessage: string;
   folderName: string;
@@ -10,21 +13,32 @@ type MyPageScrapFolderViewProps = {
   isError: boolean;
   isInvalidFolderId: boolean;
   isLoading: boolean;
+  isMoveFoldersLoading: boolean;
+  isMoveScrapPending: boolean;
+  isMoveSheetOpen: boolean;
   isRemoveScrapPending: boolean;
   items: MyPageFolderScrapListItem[];
+  moveScrapErrorMessage: string | null;
+  movingScrap: MyPageFolderScrapListItem | null;
   onBack: () => void;
+  onCloseMoveSheet: () => void;
   onCloseScrapMoreMenu: () => void;
+  onConfirmMoveScrap: () => void;
   onDeleteScrap: (item: MyPageFolderScrapListItem) => void;
   onEnterMultiSelectMode: () => void;
   onMoveScrap: (item: MyPageFolderScrapListItem) => void;
+  onOpenCreateFolderFromMoveSheet: () => void;
   onScrapMoreClick: (item: MyPageFolderScrapListItem) => void;
+  onSelectMoveTargetFolder: (folderId: number) => void;
   removeScrapErrorMessage: string | null;
   scrapCount: number;
+  selectedTargetFolderId: number | null;
   selectedScrapMoreMenu: MyPageFolderScrapListItem | null;
   shouldShowEmptyMessage: boolean;
 };
 
 export function MyPageScrapFolderView({
+  availableMoveFolders,
   emptyMessage,
   errorMessage,
   folderName,
@@ -32,16 +46,26 @@ export function MyPageScrapFolderView({
   isError,
   isInvalidFolderId,
   isLoading,
+  isMoveFoldersLoading,
+  isMoveScrapPending,
+  isMoveSheetOpen,
   isRemoveScrapPending,
   items,
+  moveScrapErrorMessage,
+  movingScrap,
   onBack,
+  onCloseMoveSheet,
   onCloseScrapMoreMenu,
+  onConfirmMoveScrap,
   onDeleteScrap,
   onEnterMultiSelectMode,
   onMoveScrap,
+  onOpenCreateFolderFromMoveSheet,
   onScrapMoreClick,
+  onSelectMoveTargetFolder,
   removeScrapErrorMessage,
   scrapCount,
+  selectedTargetFolderId,
   selectedScrapMoreMenu,
   shouldShowEmptyMessage,
 }: MyPageScrapFolderViewProps) {
@@ -117,6 +141,19 @@ export function MyPageScrapFolderView({
           </div>
         </section>
       </div>
+
+      <ScrapMoveBottomSheet
+        errorMessage={moveScrapErrorMessage}
+        folders={availableMoveFolders}
+        isLoading={isMoveFoldersLoading}
+        isOpen={isMoveSheetOpen && movingScrap !== null}
+        isPending={isMoveScrapPending}
+        selectedTargetFolderId={selectedTargetFolderId}
+        onClose={onCloseMoveSheet}
+        onConfirm={onConfirmMoveScrap}
+        onOpenCreateFolder={onOpenCreateFolderFromMoveSheet}
+        onSelectFolder={onSelectMoveTargetFolder}
+      />
     </main>
   );
 }

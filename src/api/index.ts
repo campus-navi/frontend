@@ -33,6 +33,7 @@ export type {
   MyPageSummary,
   RemoveScrapsFromFolderRequest,
   RemoveScrapsFromFolderResult,
+  RestoreScrapsToFolderRequest,
   UpdateScrapFolderRequest,
 } from '@/api/modules/mypage';
 export type {
