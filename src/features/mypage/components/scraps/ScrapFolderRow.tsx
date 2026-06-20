@@ -25,6 +25,7 @@ export function ScrapFolderRow({
     <article className="relative flex h-[72px] items-center justify-between">
       <Link
         to={folder.detailPath}
+        state={{ folderName: folder.name }}
         className="flex min-w-0 flex-1 items-center self-stretch py-3 pl-4"
         aria-label={`${folder.name} 스크랩 폴더 보기`}
       >

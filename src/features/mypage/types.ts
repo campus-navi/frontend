@@ -24,3 +24,7 @@ export type MyPageFolderScrapListItem = {
   tagName: string;
   title: string;
 };
+
+export type MyPageScrapFolderRouteState = {
+  folderName?: string;
+};

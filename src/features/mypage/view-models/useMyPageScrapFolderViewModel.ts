@@ -1,8 +1,12 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import { useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { isApiError } from '@/api';
 import { useMyPageScrapFolderScraps } from '@/features/mypage/hooks/useMyPageScrapFolderScraps';
-import type { MyPageFolderScrapListItem } from '@/features/mypage/types';
+import type {
+  MyPageFolderScrapListItem,
+  MyPageScrapFolderRouteState,
+} from '@/features/mypage/types';
 
 function parseFolderId(folderId: string | undefined) {
   if (!folderId) {
@@ -19,12 +23,16 @@ function parseFolderId(folderId: string | undefined) {
 }
 
 export function useMyPageScrapFolderViewModel() {
+  const location = useLocation();
   const navigate = useNavigate();
   const { folderId } = useParams<{ folderId: string }>();
+  const [selectedScrapMoreMenu, setSelectedScrapMoreMenu] =
+    useState<MyPageFolderScrapListItem | null>(null);
   const parsedFolderId = parseFolderId(folderId);
   const { data: scraps, error, isError, isLoading } = useMyPageScrapFolderScraps(parsedFolderId);
+  const routeState = location.state as MyPageScrapFolderRouteState | null;
   const displayFolderId = parsedFolderId?.toString() ?? '알 수 없음';
-  const title = `스크랩 폴더 ${displayFolderId}`;
+  const folderName = routeState?.folderName?.trim() || `스크랩 폴더 ${displayFolderId}`;
   const items = (scraps ?? []).map<MyPageFolderScrapListItem>((scrap) => ({
     detailPath: scrap.isActive ? `/info/posts/${scrap.postId}` : null,
     endDate: scrap.endDate,
@@ -42,17 +50,53 @@ export function useMyPageScrapFolderViewModel() {
     navigate('/mypage/scraps');
   };
 
+  const handleScrapMoreClick = (item: MyPageFolderScrapListItem) => {
+    setSelectedScrapMoreMenu(item);
+  };
+
+  const handleCloseScrapMoreMenu = () => {
+    setSelectedScrapMoreMenu(null);
+  };
+
+  const handleMoveScrap = (item: MyPageFolderScrapListItem) => {
+    if (selectedScrapMoreMenu?.scrapId !== item.scrapId) {
+      return;
+    }
+
+    // TODO: Connect the scrap folder move flow in a later issue.
+    handleCloseScrapMoreMenu();
+  };
+
+  const handleDeleteScrap = (item: MyPageFolderScrapListItem) => {
+    if (selectedScrapMoreMenu?.scrapId !== item.scrapId) {
+      return;
+    }
+
+    // TODO: Connect the single scrap delete flow in a later issue.
+    handleCloseScrapMoreMenu();
+  };
+
+  const handleEnterMultiSelectMode = () => {
+    // TODO: Connect the multi-select flow in a later issue.
+  };
+
   return {
-    displayFolderId,
     emptyMessage: '이 폴더에 저장된 스크랩이 없습니다.',
     errorMessage: isNotFoundError ? '폴더를 찾을 수 없습니다.' : '스크랩 목록을 불러오지 못했습니다.',
+    folderName,
     invalidFolderMessage: '올바르지 않은 스크랩 폴더입니다.',
     isError,
     isInvalidFolderId,
     isLoading,
     items,
     onBack: handleBack,
+    onCloseScrapMoreMenu: handleCloseScrapMoreMenu,
+    onDeleteScrap: handleDeleteScrap,
+    onEnterMultiSelectMode: handleEnterMultiSelectMode,
+    onMoveScrap: handleMoveScrap,
+    onScrapMoreClick: handleScrapMoreClick,
+    scrapCount: items.length,
+    selectedScrapMoreMenu,
     shouldShowEmptyMessage: !isInvalidFolderId && !isLoading && !isError && items.length === 0,
-    title,
   };
 }
