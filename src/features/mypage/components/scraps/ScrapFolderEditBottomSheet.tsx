@@ -1,13 +1,16 @@
 import type { ChangeEventHandler } from 'react';
 
 import { BottomSheet } from '@/components/ui/BottomSheet';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { SvgIcon } from '@/components/ui/SvgIcon';
 
 type ScrapFolderEditBottomSheetProps = {
   description: string;
   descriptionMaxLength: number;
+  errorMessage: string | null;
   folderName: string;
   isOpen: boolean;
+  isPending: boolean;
   isSubmitDisabled: boolean;
   name: string;
   nameMaxLength: number;
@@ -21,6 +24,7 @@ type ScrapFolderEditBottomSheetProps = {
 
 type ScrapFolderEditFieldProps = {
   clearAriaLabel: string;
+  disabled: boolean;
   label: string;
   maxLength: number;
   onChange: ChangeEventHandler<HTMLInputElement>;
@@ -47,6 +51,7 @@ function ScrapFolderEditClearIcon() {
 
 function ScrapFolderEditField({
   clearAriaLabel,
+  disabled,
   label,
   maxLength,
   onChange,
@@ -68,14 +73,16 @@ function ScrapFolderEditField({
           type="text"
           value={value}
           onChange={onChange}
+          disabled={disabled}
           maxLength={maxLength}
           placeholder={placeholder}
-          className="min-w-0 flex-1 bg-transparent text-base font-normal leading-[1.4] text-[#292B2C] outline-none placeholder:text-[#BFC4C8]"
+          className="min-w-0 flex-1 bg-transparent text-base font-normal leading-[1.4] text-[#292B2C] outline-none placeholder:text-[#BFC4C8] disabled:text-[#8A9299]"
         />
         {value ? (
           <button
             type="button"
             className="ml-2 flex h-8 w-8 shrink-0 items-center justify-center text-[#BFC4C8]"
+            disabled={disabled}
             onMouseDown={(event) => event.preventDefault()}
             onClick={onClear}
             aria-label={clearAriaLabel}
@@ -95,8 +102,10 @@ function ScrapFolderEditField({
 export function ScrapFolderEditBottomSheet({
   description,
   descriptionMaxLength,
+  errorMessage,
   folderName,
   isOpen,
+  isPending,
   isSubmitDisabled,
   name,
   nameMaxLength,
@@ -124,13 +133,14 @@ export function ScrapFolderEditBottomSheet({
           disabled={isSubmitDisabled}
           onClick={onSubmit}
         >
-          저장
+          {isPending ? <LoadingSpinner ariaLabel="폴더 수정 중" className="h-5 w-5" /> : '저장'}
         </button>
       }
     >
       <div className="flex h-[284px] w-full flex-col gap-5 px-4">
         <p className="sr-only">{folderName} 폴더 정보를 수정합니다.</p>
         <ScrapFolderEditField
+          disabled={isPending}
           label="폴더명"
           required
           value={name}
@@ -141,6 +151,7 @@ export function ScrapFolderEditBottomSheet({
           clearAriaLabel="폴더명 입력 지우기"
         />
         <ScrapFolderEditField
+          disabled={isPending}
           label="설명"
           value={description}
           maxLength={descriptionMaxLength}
@@ -149,6 +160,11 @@ export function ScrapFolderEditBottomSheet({
           onClear={onClearDescription}
           clearAriaLabel="설명 입력 지우기"
         />
+        {errorMessage ? (
+          <p className="-mt-2 text-sm font-medium leading-[1.4] text-[#FF5E47]" role="alert">
+            {errorMessage}
+          </p>
+        ) : null}
       </div>
     </BottomSheet>
   );
