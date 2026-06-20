@@ -4,6 +4,7 @@ import { AppHeader } from '@/components/ui/AppHeader';
 import { EmptyStateMessage } from '@/features/mypage/components/scraps/EmptyStateMessage';
 import { RecentScrapCard } from '@/features/mypage/components/scraps/RecentScrapCard';
 import { ScrapFolderCreateBottomSheet } from '@/features/mypage/components/scraps/ScrapFolderCreateBottomSheet';
+import { ScrapFolderDeleteConfirmModal } from '@/features/mypage/components/scraps/ScrapFolderDeleteConfirmModal';
 import { ScrapFolderEditBottomSheet } from '@/features/mypage/components/scraps/ScrapFolderEditBottomSheet';
 import { ScrapFolderRow } from '@/features/mypage/components/scraps/ScrapFolderRow';
 import { PlusIcon } from '@/features/mypage/components/scraps/ScrapIcons';
@@ -23,6 +24,8 @@ type MyPageScrapsViewProps = {
   createFolderErrorMessage: string | null;
   createFolderName: string;
   createFolderNameMaxLength: number;
+  deleteFolderErrorMessage: string | null;
+  deletingFolder: MyPageScrapFolderListItem | null;
   editFolderDescription: string;
   editFolderDescriptionMaxLength: number;
   editFolderErrorMessage: string | null;
@@ -33,6 +36,8 @@ type MyPageScrapsViewProps = {
   folders: MyPageScrapFolderListItem[];
   isCreateFolderSheetOpen: boolean;
   isCreateFolderSubmitDisabled: boolean;
+  isDeleteFolderModalOpen: boolean;
+  isDeleteFolderPending: boolean;
   isEditFolderSheetOpen: boolean;
   isEditFolderPending: boolean;
   isEditFolderSubmitDisabled: boolean;
@@ -47,11 +52,13 @@ type MyPageScrapsViewProps = {
   onClearEditFolderDescription: () => void;
   onClearEditFolderName: () => void;
   onCloseCreateFolderSheet: () => void;
+  onCloseDeleteFolderModal: () => void;
   onCloseEditFolderSheet: () => void;
   onCloseFolderMoreMenu: () => void;
   onDeleteFolder: () => void;
   onEditFolder: () => void;
   onFolderMoreClick: (folder: MyPageScrapFolderListItem) => void;
+  onConfirmDeleteFolder: () => void;
   onOpenCreateFolderSheet: () => void;
   onSubmitCreateFolder: () => void;
   onSubmitEditFolder: () => void;
@@ -71,6 +78,8 @@ export function MyPageScrapsView({
   createFolderErrorMessage,
   createFolderName,
   createFolderNameMaxLength,
+  deleteFolderErrorMessage,
+  deletingFolder,
   editFolderDescription,
   editFolderDescriptionMaxLength,
   editFolderErrorMessage,
@@ -81,6 +90,8 @@ export function MyPageScrapsView({
   isCreateFolderPending,
   isCreateFolderSheetOpen,
   isCreateFolderSubmitDisabled,
+  isDeleteFolderModalOpen,
+  isDeleteFolderPending,
   isEditFolderSheetOpen,
   isEditFolderPending,
   isEditFolderSubmitDisabled,
@@ -95,11 +106,13 @@ export function MyPageScrapsView({
   onClearEditFolderDescription,
   onClearEditFolderName,
   onCloseCreateFolderSheet,
+  onCloseDeleteFolderModal,
   onCloseEditFolderSheet,
   onCloseFolderMoreMenu,
   onDeleteFolder,
   onEditFolder,
   onFolderMoreClick,
+  onConfirmDeleteFolder,
   onOpenCreateFolderSheet,
   onSubmitCreateFolder,
   onSubmitEditFolder,
@@ -251,6 +264,15 @@ export function MyPageScrapsView({
         onClearDescription={onClearEditFolderDescription}
         onClose={onCloseEditFolderSheet}
         onSubmit={onSubmitEditFolder}
+      />
+
+      <ScrapFolderDeleteConfirmModal
+        errorMessage={deleteFolderErrorMessage}
+        folderName={deletingFolder?.name ?? ''}
+        isOpen={isDeleteFolderModalOpen}
+        isPending={isDeleteFolderPending}
+        onCancel={onCloseDeleteFolderModal}
+        onConfirm={onConfirmDeleteFolder}
       />
     </main>
   );
