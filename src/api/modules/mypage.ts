@@ -155,7 +155,9 @@ function isMyPageScrapFolderResponse(folder: unknown): folder is MyPageScrapFold
   return (
     typeof scrapFolder.folderId === 'number' &&
     typeof scrapFolder.name === 'string' &&
-    typeof scrapFolder.description === 'string' &&
+    (typeof scrapFolder.description === 'string' ||
+      scrapFolder.description === null ||
+      typeof scrapFolder.description === 'undefined') &&
     typeof scrapFolder.scrapCount === 'number'
   );
 }
@@ -185,7 +187,7 @@ function normalizeMyPageScraps(data: MyPageScrapsResponse): MyPageScraps {
     folders: data.folders.map((folder) => ({
       folderId: folder.folderId,
       name: folder.name,
-      description: folder.description,
+      description: typeof folder.description === 'string' ? folder.description : '',
       scrapCount: folder.scrapCount,
     })),
   };
