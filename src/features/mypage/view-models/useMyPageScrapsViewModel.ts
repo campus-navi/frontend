@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { isApiError } from '@/api';
 import { useCreateScrapFolder } from '@/features/mypage/hooks/useCreateScrapFolder';
+import { useDeleteScrapFolder } from '@/features/mypage/hooks/useDeleteScrapFolder';
 import { useMyPageScraps } from '@/features/mypage/hooks/useMyPageScraps';
 import { useUpdateScrapFolder } from '@/features/mypage/hooks/useUpdateScrapFolder';
 import type { MyPageRecentScrapCardItem, MyPageScrapFolderListItem } from '@/features/mypage/types';
@@ -20,7 +21,9 @@ export function useMyPageScrapsViewModel() {
   const [editFolderName, setEditFolderName] = useState('');
   const [editFolderDescription, setEditFolderDescription] = useState('');
   const [selectedMoreMenuFolder, setSelectedMoreMenuFolder] = useState<MyPageScrapFolderListItem | null>(null);
+  const [deletingFolder, setDeletingFolder] = useState<MyPageScrapFolderListItem | null>(null);
   const createScrapFolderMutation = useCreateScrapFolder();
+  const deleteScrapFolderMutation = useDeleteScrapFolder();
   const updateScrapFolderMutation = useUpdateScrapFolder();
   const { data: scraps, isError, isLoading } = useMyPageScraps();
   const recentScraps = (scraps?.recentScraps ?? [])
@@ -148,8 +151,35 @@ export function useMyPageScrapsViewModel() {
   };
 
   const handleDeleteFolder = () => {
-    // Folder delete flow will be connected in a later issue.
+    if (!selectedMoreMenuFolder) {
+      return;
+    }
+
+    deleteScrapFolderMutation.reset();
+    setDeletingFolder(selectedMoreMenuFolder);
     handleCloseFolderMoreMenu();
+  };
+
+  const handleCloseDeleteFolderModal = () => {
+    if (deleteScrapFolderMutation.isPending) {
+      return;
+    }
+
+    deleteScrapFolderMutation.reset();
+    setDeletingFolder(null);
+  };
+
+  const handleConfirmDeleteFolder = () => {
+    if (!deletingFolder || deleteScrapFolderMutation.isPending) {
+      return;
+    }
+
+    deleteScrapFolderMutation.mutate(deletingFolder.folderId, {
+      onSuccess: () => {
+        deleteScrapFolderMutation.reset();
+        setDeletingFolder(null);
+      },
+    });
   };
 
   const resetCreateFolderInputs = () => {
@@ -253,6 +283,20 @@ export function useMyPageScrapsViewModel() {
     return '폴더를 수정하지 못했습니다.';
   })();
 
+  const deleteFolderErrorMessage = (() => {
+    const error = deleteScrapFolderMutation.error;
+
+    if (!error) {
+      return null;
+    }
+
+    if (isApiError(error) && error.status === 404) {
+      return '폴더를 찾을 수 없습니다.';
+    }
+
+    return '폴더를 삭제하지 못했습니다.';
+  })();
+
   const handleRecentScrapsPointerDown: PointerEventHandler<HTMLDivElement> = (event) => {
     const container = recentScrapsRef.current;
     if (!container) {
@@ -318,6 +362,8 @@ export function useMyPageScrapsViewModel() {
     createFolderErrorMessage,
     createFolderName,
     createFolderNameMaxLength: SCRAP_FOLDER_INPUT_MAX_LENGTH,
+    deleteFolderErrorMessage,
+    deletingFolder,
     editFolderDescription,
     editFolderDescriptionMaxLength: SCRAP_FOLDER_INPUT_MAX_LENGTH,
     editFolderErrorMessage,
@@ -327,6 +373,8 @@ export function useMyPageScrapsViewModel() {
     isCreateFolderPending: createScrapFolderMutation.isPending,
     isCreateFolderSheetOpen,
     isCreateFolderSubmitDisabled: createFolderName.trim().length === 0 || createScrapFolderMutation.isPending,
+    isDeleteFolderModalOpen: deletingFolder !== null,
+    isDeleteFolderPending: deleteScrapFolderMutation.isPending,
     isEditFolderSheetOpen,
     isEditFolderPending: updateScrapFolderMutation.isPending,
     isEditFolderSubmitDisabled:
@@ -342,11 +390,13 @@ export function useMyPageScrapsViewModel() {
     onClearEditFolderDescription: handleClearEditFolderDescription,
     onClearEditFolderName: handleClearEditFolderName,
     onCloseCreateFolderSheet: handleCloseCreateFolderSheet,
+    onCloseDeleteFolderModal: handleCloseDeleteFolderModal,
     onCloseEditFolderSheet: handleCloseEditFolderSheet,
     onCloseFolderMoreMenu: handleCloseFolderMoreMenu,
     onDeleteFolder: handleDeleteFolder,
     onEditFolder: handleEditFolder,
     onFolderMoreClick: handleOpenFolderMoreMenu,
+    onConfirmDeleteFolder: handleConfirmDeleteFolder,
     onOpenCreateFolderSheet: handleOpenCreateFolderSheet,
     onSubmitCreateFolder: handleCreateFolderSubmit,
     onSubmitEditFolder: handleSubmitEditFolder,

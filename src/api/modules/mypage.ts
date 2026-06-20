@@ -288,4 +288,11 @@ export const mypageApi = {
       url: `/scrap-folders/${folderId}`,
     });
   },
+
+  async deleteScrapFolder(folderId: number) {
+    return request<null>({
+      method: 'delete',
+      url: `/scrap-folders/${folderId}`,
+    });
+  },
 };
