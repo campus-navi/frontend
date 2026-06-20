@@ -128,11 +128,13 @@ export function MyPageScrapsView({
   return (
     <main className="min-h-[100svh] bg-white">
       <div className="mx-auto flex min-h-[100svh] w-full max-w-[393px] flex-col bg-white">
-        <AppHeader
-          title="스크랩 설정"
-          onBack={onBack}
-          className="fixed left-1/2 top-0 z-10 w-full max-w-[393px] -translate-x-1/2 bg-white"
-        />
+        <div className="fixed inset-x-0 top-0 z-20 bg-white">
+          <AppHeader
+            title="스크랩 설정"
+            onBack={onBack}
+            className="mx-auto w-full max-w-[393px] bg-white"
+          />
+        </div>
         <div className="h-[calc(64px+max(20px,env(safe-area-inset-top)))] shrink-0" aria-hidden="true" />
 
         <section className="flex flex-1 flex-col gap-1.5 pb-[max(32px,env(safe-area-inset-bottom))]">
