@@ -6,11 +6,6 @@ const applicationMenu = {
   label: '신청 정보 등록',
 };
 
-const settingMenus = [
-  { label: '스크랩 설정', to: '/mypage/scraps' },
-  { label: '리마인드 설정' },
-] as const;
-
 const postMenus = [
   { label: '최근 본 게시물' },
   { label: '임시저장 게시물', count: 2 },
@@ -38,12 +33,6 @@ export function MyPageMenuList() {
         </span>
         <span>{applicationMenu.label}</span>
       </div>
-
-      <MenuCard>
-        {settingMenus.map((item) => (
-          <MenuRow key={item.label} label={item.label} to={'to' in item ? item.to : undefined} />
-        ))}
-      </MenuCard>
 
       <ul className="grid h-[52px] grid-cols-[1fr_auto_1fr] items-center rounded-xl bg-white px-3">
         <PostMenuItem label={postMenus[0].label} />

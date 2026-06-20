@@ -1,11 +1,11 @@
 import { SvgIcon } from '@/components/ui/SvgIcon';
 
 type MyPageProfileSummaryProps = {
-  nickname: string;
   email: string;
+  name: string;
 };
 
-export function MyPageProfileSummary({ nickname, email }: MyPageProfileSummaryProps) {
+export function MyPageProfileSummary({ email, name }: MyPageProfileSummaryProps) {
   return (
     <section className="relative rounded-xl bg-white px-4 pb-5 pt-3" aria-labelledby="mypage-profile-title">
       <ProfileImagePlaceholder />
@@ -16,7 +16,7 @@ export function MyPageProfileSummary({ nickname, email }: MyPageProfileSummaryPr
             id="mypage-profile-title"
             className="min-w-0 truncate text-[20px] font-semibold leading-[1.4] tracking-normal text-black"
           >
-            {nickname}
+            {name}
           </h2>
           <span
             className="flex h-5 w-5 shrink-0 items-center justify-center text-[#565656]"

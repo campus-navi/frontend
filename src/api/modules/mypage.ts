@@ -10,6 +10,7 @@ export interface MyPageSummary extends ApiObjectData {
   email: string;
   grade: number;
   interestCount: number;
+  name: string;
   nickname: string;
   remindCount: number;
   scrapCount: number;
@@ -57,6 +58,7 @@ interface MyPageSummaryResponse extends ApiObjectData {
   email?: unknown;
   grade?: unknown;
   interestCount?: unknown;
+  name?: unknown;
   nickname?: unknown;
   remindCount?: unknown;
   scrapCount?: unknown;
@@ -94,6 +96,7 @@ interface MyPageFolderScrapResponse extends ApiObjectData {
 
 function normalizeMyPageSummary(data: MyPageSummaryResponse): MyPageSummary {
   if (
+    typeof data.name !== 'string' ||
     typeof data.nickname !== 'string' ||
     typeof data.email !== 'string' ||
     typeof data.campus !== 'string' ||
@@ -119,6 +122,7 @@ function normalizeMyPageSummary(data: MyPageSummaryResponse): MyPageSummary {
     email: data.email,
     grade: data.grade,
     interestCount: data.interestCount,
+    name: data.name,
     nickname: data.nickname,
     remindCount: data.remindCount,
     scrapCount: data.scrapCount,

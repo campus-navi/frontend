@@ -1,24 +1,26 @@
 import { Tags } from '@/components/ui/Tags';
+import { formatAdmissionYearTag } from '@/features/mypage/utils/formatAdmissionYearTag';
 
 type MyPageInfoTagsProps = {
   admissionYear: number;
   campus: string;
   departments: string[];
-  grade: number;
+  nickname: string;
 };
 
 export function MyPageInfoTags({
   admissionYear,
   campus,
   departments,
-  grade,
+  nickname,
 }: MyPageInfoTagsProps) {
+  const admissionYearTag = formatAdmissionYearTag(admissionYear);
   const infoTags = [
-    campus,
-    admissionYear > 0 ? `${admissionYear}학번` : '',
-    grade > 0 ? `${grade}학년` : '',
+    nickname,
     ...departments,
-  ].filter((tag) => tag.length > 0);
+    campus,
+    admissionYearTag,
+  ].map((tag) => tag.trim()).filter((tag) => tag.length > 0);
 
   return (
     <section aria-labelledby="mypage-info-tags-title">
@@ -26,8 +28,8 @@ export function MyPageInfoTags({
         사용자 정보
       </h2>
       <ul className="flex flex-wrap gap-2">
-        {infoTags.map((tag) => (
-          <li key={tag}>
+        {infoTags.map((tag, index) => (
+          <li key={`${tag}-${index}`}>
             <Tags size="lg" type="tertiary">
               {tag}
             </Tags>
