@@ -114,8 +114,9 @@ export function MyPageScrapsView({
         <AppHeader
           title="스크랩 설정"
           onBack={onBack}
-          className="bg-white"
+          className="fixed left-1/2 top-0 z-40 w-full max-w-[393px] -translate-x-1/2 bg-white"
         />
+        <div className="h-[calc(64px+max(20px,env(safe-area-inset-top)))] shrink-0" aria-hidden="true" />
 
         <section className="flex flex-1 flex-col gap-1.5 pb-[max(32px,env(safe-area-inset-bottom))]">
           <h1 className="sr-only">스크랩 설정</h1>

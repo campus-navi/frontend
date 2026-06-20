@@ -7,6 +7,7 @@ import { useMyPageScraps } from '@/features/mypage/hooks/useMyPageScraps';
 import type { MyPageRecentScrapCardItem, MyPageScrapFolderListItem } from '@/features/mypage/types';
 
 const SCRAP_FOLDER_INPUT_MAX_LENGTH = 20;
+const MAX_RECENT_SCRAPS = 8;
 
 export function useMyPageScrapsViewModel() {
   const navigate = useNavigate();
@@ -20,13 +21,15 @@ export function useMyPageScrapsViewModel() {
   const [selectedMoreMenuFolder, setSelectedMoreMenuFolder] = useState<MyPageScrapFolderListItem | null>(null);
   const createScrapFolderMutation = useCreateScrapFolder();
   const { data: scraps, isError, isLoading } = useMyPageScraps();
-  const recentScraps = (scraps?.recentScraps ?? []).map<MyPageRecentScrapCardItem>((scrap) => ({
-    detailPath: `/info/posts/${scrap.postId}`,
-    endDate: scrap.endDate,
-    publishedAt: scrap.publishedAt,
-    tagName: scrap.tagName,
-    title: scrap.title,
-  }));
+  const recentScraps = (scraps?.recentScraps ?? [])
+    .slice(0, MAX_RECENT_SCRAPS)
+    .map<MyPageRecentScrapCardItem>((scrap) => ({
+      detailPath: `/info/posts/${scrap.postId}`,
+      endDate: scrap.endDate,
+      publishedAt: scrap.publishedAt,
+      tagName: scrap.tagName,
+      title: scrap.title,
+    }));
   const folders = (scraps?.folders ?? []).map<MyPageScrapFolderListItem>((folder) => ({
     description: folder.description,
     detailPath: `/mypage/scraps/folders/${folder.folderId}`,
