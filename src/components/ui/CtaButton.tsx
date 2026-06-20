@@ -2,7 +2,7 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
 type CtaButtonVariant = 'primary' | 'secondary' | 'tertiary';
 type CtaButtonSize = 'xlg' | 'md' | 'sm' | 'xsm';
-type CtaButtonState = 'default' | 'disabled' | 'ghosted';
+type CtaButtonState = 'default' | 'disabled' | 'ghosted' | 'error';
 
 type CtaButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   children: ReactNode;
@@ -17,16 +17,19 @@ const variantClassNames: Record<CtaButtonVariant, Record<CtaButtonState, string>
     default: 'bg-[#31FFCC] text-[#333333]',
     ghosted: 'bg-[#31FFCC] text-[#333333] opacity-30',
     disabled: 'bg-[#E7E7E7] text-[#BBBBBB]',
+    error: 'bg-[#FF5E47] text-white',
   },
   secondary: {
     default: 'bg-[#1E2530] text-white',
     ghosted: 'bg-[#1E2530] text-white opacity-30',
     disabled: 'bg-[#E7E7E7] text-[#BBBBBB]',
+    error: 'bg-[#FF5E47] text-white',
   },
   tertiary: {
     default: 'border border-[#D6D6D6] bg-white text-[#333333]',
     ghosted: 'border border-[#D6D6D6] bg-white text-[#333333] opacity-30',
     disabled: 'bg-[#E7E7E7] text-[#BBBBBB]',
+    error: 'border border-[#D6D6D6] bg-[#FF5E47] text-white',
   },
 };
 
