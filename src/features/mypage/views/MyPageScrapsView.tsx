@@ -1,5 +1,6 @@
 import type { ChangeEventHandler, MouseEventHandler, PointerEventHandler, RefObject } from 'react';
 
+import type { MyPageScrapFolderSort } from '@/api';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { EmptyStateMessage } from '@/features/mypage/components/scraps/EmptyStateMessage';
 import { RecentScrapCard } from '@/features/mypage/components/scraps/RecentScrapCard';
@@ -7,6 +8,7 @@ import { ScrapFolderCreateBottomSheet } from '@/features/mypage/components/scrap
 import { ScrapFolderDeleteConfirmModal } from '@/features/mypage/components/scraps/ScrapFolderDeleteConfirmModal';
 import { ScrapFolderEditBottomSheet } from '@/features/mypage/components/scraps/ScrapFolderEditBottomSheet';
 import { ScrapFolderRow } from '@/features/mypage/components/scraps/ScrapFolderRow';
+import { ScrapFolderSortBottomSheet } from '@/features/mypage/components/scraps/ScrapFolderSortBottomSheet';
 import { PlusIcon } from '@/features/mypage/components/scraps/ScrapIcons';
 import type { MyPageRecentScrapCardItem, MyPageScrapFolderListItem } from '@/features/mypage/types';
 
@@ -24,6 +26,8 @@ type MyPageScrapsViewProps = {
   createFolderErrorMessage: string | null;
   createFolderName: string;
   createFolderNameMaxLength: number;
+  currentSort: MyPageScrapFolderSort;
+  currentSortLabel: string;
   deleteFolderErrorMessage: string | null;
   deletingFolder: MyPageScrapFolderListItem | null;
   editFolderDescription: string;
@@ -42,6 +46,7 @@ type MyPageScrapsViewProps = {
   isEditFolderPending: boolean;
   isEditFolderSubmitDisabled: boolean;
   isFolderMoreMenuOpen: boolean;
+  isSortSheetOpen: boolean;
   onBack: () => void;
   onChangeCreateFolderDescription: ChangeEventHandler<HTMLInputElement>;
   onChangeCreateFolderName: ChangeEventHandler<HTMLInputElement>;
@@ -55,11 +60,14 @@ type MyPageScrapsViewProps = {
   onCloseDeleteFolderModal: () => void;
   onCloseEditFolderSheet: () => void;
   onCloseFolderMoreMenu: () => void;
+  onCloseSortSheet: () => void;
   onDeleteFolder: () => void;
   onEditFolder: () => void;
   onFolderMoreClick: (folder: MyPageScrapFolderListItem) => void;
   onConfirmDeleteFolder: () => void;
   onOpenCreateFolderSheet: () => void;
+  onOpenSortSheet: () => void;
+  onSelectSortOption: (sort: MyPageScrapFolderSort) => void;
   onSubmitCreateFolder: () => void;
   onSubmitEditFolder: () => void;
   recentScraps: MyPageRecentScrapCardItem[];
@@ -78,6 +86,8 @@ export function MyPageScrapsView({
   createFolderErrorMessage,
   createFolderName,
   createFolderNameMaxLength,
+  currentSort,
+  currentSortLabel,
   deleteFolderErrorMessage,
   deletingFolder,
   editFolderDescription,
@@ -96,6 +106,7 @@ export function MyPageScrapsView({
   isEditFolderPending,
   isEditFolderSubmitDisabled,
   isFolderMoreMenuOpen,
+  isSortSheetOpen,
   onBack,
   onChangeCreateFolderDescription,
   onChangeCreateFolderName,
@@ -109,11 +120,14 @@ export function MyPageScrapsView({
   onCloseDeleteFolderModal,
   onCloseEditFolderSheet,
   onCloseFolderMoreMenu,
+  onCloseSortSheet,
   onDeleteFolder,
   onEditFolder,
   onFolderMoreClick,
   onConfirmDeleteFolder,
   onOpenCreateFolderSheet,
+  onOpenSortSheet,
+  onSelectSortOption,
   onSubmitCreateFolder,
   onSubmitEditFolder,
   recentScraps,
@@ -188,12 +202,18 @@ export function MyPageScrapsView({
             </h2>
 
             <div className="flex h-[52px] items-center px-4 py-2">
-              <div className="flex h-9 items-center gap-0 rounded-full border border-[#DCDFE2] py-2.5 pl-4 pr-3 text-base font-medium leading-none text-[#565656]">
-                <span>최근 저장</span>
+              <button
+                type="button"
+                className="flex h-9 items-center gap-0 rounded-full border border-[#DCDFE2] py-2.5 pl-4 pr-3 text-base font-medium leading-none text-[#565656]"
+                onClick={onOpenSortSheet}
+                aria-haspopup="dialog"
+                aria-expanded={isSortSheetOpen}
+              >
+                <span>{currentSortLabel}</span>
                 <span className="ml-1 flex h-4 w-4 items-center justify-center" aria-hidden="true">
                   <span className="h-0 w-0 border-x-[5px] border-t-[6px] border-x-transparent border-t-[#565656]" />
                 </span>
-              </div>
+              </button>
             </div>
 
             <div className="mt-3 flex flex-col">
@@ -275,6 +295,13 @@ export function MyPageScrapsView({
         isPending={isDeleteFolderPending}
         onCancel={onCloseDeleteFolderModal}
         onConfirm={onConfirmDeleteFolder}
+      />
+
+      <ScrapFolderSortBottomSheet
+        currentSort={currentSort}
+        isOpen={isSortSheetOpen}
+        onClose={onCloseSortSheet}
+        onSelect={onSelectSortOption}
       />
     </main>
   );

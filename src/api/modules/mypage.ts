@@ -46,6 +46,12 @@ export interface MyPageScraps extends ApiObjectData {
   folders: MyPageScrapFolder[];
 }
 
+export type MyPageScrapFolderSort =
+  | 'RECENT_SAVED'
+  | 'NAME_ASC'
+  | 'NAME_DESC'
+  | 'LIST_ADDED';
+
 export interface CreateScrapFolderRequest extends ApiObjectData {
   name: string;
   description?: string;
@@ -258,6 +264,32 @@ export const mypageApi = {
     return {
       ...response,
       data: normalizeMyPageScraps(response.data),
+    };
+  },
+
+  async getScrapFolders(sort: MyPageScrapFolderSort = 'RECENT_SAVED') {
+    const response = await request<MyPageScrapFolderResponse[]>({
+      method: 'get',
+      params: { sort },
+      url: '/scrap-folders',
+    });
+
+    if (!Array.isArray(response.data) || !response.data.every(isMyPageScrapFolderResponse)) {
+      throw createApiError({
+        code: COMMON_ERROR_CODES.INVALID_RESPONSE,
+        message: '스크랩 폴더 목록 응답 형식이 올바르지 않습니다.',
+        status: 200,
+      });
+    }
+
+    return {
+      ...response,
+      data: response.data.map((folder) => ({
+        description: typeof folder.description === 'string' ? folder.description : '',
+        folderId: folder.folderId,
+        name: folder.name,
+        scrapCount: folder.scrapCount,
+      })),
     };
   },
 
