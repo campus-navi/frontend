@@ -10,9 +10,11 @@ export interface MyPageSummary extends ApiObjectData {
   email: string;
   grade: number;
   interestCount: number;
+  name: string;
   nickname: string;
   remindCount: number;
   scrapCount: number;
+  studentNumber: string;
 }
 
 export interface MyPageRecentScrap extends ApiObjectData {
@@ -57,9 +59,11 @@ interface MyPageSummaryResponse extends ApiObjectData {
   email?: unknown;
   grade?: unknown;
   interestCount?: unknown;
+  name?: unknown;
   nickname?: unknown;
   remindCount?: unknown;
   scrapCount?: unknown;
+  studentNumber?: unknown;
 }
 
 interface MyPageRecentScrapResponse extends ApiObjectData {
@@ -94,9 +98,11 @@ interface MyPageFolderScrapResponse extends ApiObjectData {
 
 function normalizeMyPageSummary(data: MyPageSummaryResponse): MyPageSummary {
   if (
+    typeof data.name !== 'string' ||
     typeof data.nickname !== 'string' ||
     typeof data.email !== 'string' ||
     typeof data.campus !== 'string' ||
+    typeof data.studentNumber !== 'string' ||
     typeof data.admissionYear !== 'number' ||
     typeof data.grade !== 'number' ||
     !Array.isArray(data.departments) ||
@@ -119,9 +125,11 @@ function normalizeMyPageSummary(data: MyPageSummaryResponse): MyPageSummary {
     email: data.email,
     grade: data.grade,
     interestCount: data.interestCount,
+    name: data.name,
     nickname: data.nickname,
     remindCount: data.remindCount,
     scrapCount: data.scrapCount,
+    studentNumber: data.studentNumber,
   };
 }
 

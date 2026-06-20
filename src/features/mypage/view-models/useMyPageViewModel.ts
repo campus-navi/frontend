@@ -7,12 +7,14 @@ const fallbackMyPageSummary: MyPageSummary = {
   admissionYear: 0,
   campus: '',
   departments: [],
+  name: '캠퍼스네비',
   nickname: '캠퍼스네비',
   email: 'campusnavi@example.com',
   grade: 0,
   interestCount: 0,
   remindCount: 0,
   scrapCount: 0,
+  studentNumber: '',
 };
 
 export function useMyPageViewModel() {

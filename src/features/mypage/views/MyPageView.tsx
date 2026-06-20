@@ -63,8 +63,8 @@ export function MyPageView({
 
           <div className="mt-4">
             <MyPageProfileSummary
-              nickname={summary.nickname}
               email={summary.email}
+              name={summary.name}
             />
           </div>
 
@@ -73,7 +73,7 @@ export function MyPageView({
               admissionYear={summary.admissionYear}
               campus={summary.campus}
               departments={summary.departments}
-              grade={summary.grade}
+              nickname={summary.nickname}
             />
           </div>
 
