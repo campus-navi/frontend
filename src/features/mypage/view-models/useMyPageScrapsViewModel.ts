@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { isApiError } from '@/api';
 import { useCreateScrapFolder } from '@/features/mypage/hooks/useCreateScrapFolder';
 import { useMyPageScraps } from '@/features/mypage/hooks/useMyPageScraps';
+import { useUpdateScrapFolder } from '@/features/mypage/hooks/useUpdateScrapFolder';
 import type { MyPageRecentScrapCardItem, MyPageScrapFolderListItem } from '@/features/mypage/types';
 
 const SCRAP_FOLDER_INPUT_MAX_LENGTH = 20;
@@ -20,6 +21,7 @@ export function useMyPageScrapsViewModel() {
   const [editFolderDescription, setEditFolderDescription] = useState('');
   const [selectedMoreMenuFolder, setSelectedMoreMenuFolder] = useState<MyPageScrapFolderListItem | null>(null);
   const createScrapFolderMutation = useCreateScrapFolder();
+  const updateScrapFolderMutation = useUpdateScrapFolder();
   const { data: scraps, isError, isLoading } = useMyPageScraps();
   const recentScraps = (scraps?.recentScraps ?? [])
     .slice(0, MAX_RECENT_SCRAPS)
@@ -81,6 +83,7 @@ export function useMyPageScrapsViewModel() {
       return;
     }
 
+    updateScrapFolderMutation.reset();
     setEditingFolder(selectedMoreMenuFolder);
     setEditFolderName(selectedMoreMenuFolder.name);
     setEditFolderDescription(selectedMoreMenuFolder.description);
@@ -89,35 +92,59 @@ export function useMyPageScrapsViewModel() {
   };
 
   const handleCloseEditFolderSheet = () => {
+    if (updateScrapFolderMutation.isPending) {
+      return;
+    }
+
     setIsEditFolderSheetOpen(false);
+    updateScrapFolderMutation.reset();
     resetEditFolderInputs();
   };
 
   const handleChangeEditFolderName: ChangeEventHandler<HTMLInputElement> = (event) => {
+    updateScrapFolderMutation.reset();
     setEditFolderName(event.target.value.slice(0, SCRAP_FOLDER_INPUT_MAX_LENGTH));
   };
 
   const handleChangeEditFolderDescription: ChangeEventHandler<HTMLInputElement> = (event) => {
+    updateScrapFolderMutation.reset();
     setEditFolderDescription(event.target.value.slice(0, SCRAP_FOLDER_INPUT_MAX_LENGTH));
   };
 
   const handleClearEditFolderName = () => {
+    updateScrapFolderMutation.reset();
     setEditFolderName('');
   };
 
   const handleClearEditFolderDescription = () => {
+    updateScrapFolderMutation.reset();
     setEditFolderDescription('');
   };
 
   const handleSubmitEditFolder = () => {
     const trimmedName = editFolderName.trim();
+    const trimmedDescription = editFolderDescription.trim();
 
-    if (!trimmedName) {
+    if (!editingFolder || !trimmedName || updateScrapFolderMutation.isPending) {
       return;
     }
 
-    // TODO: Connect PATCH /api/v1/scrap-folders/{id} in a later issue.
-    handleCloseEditFolderSheet();
+    updateScrapFolderMutation.mutate(
+      {
+        folderId: editingFolder.folderId,
+        request: {
+          description: trimmedDescription,
+          name: trimmedName,
+        },
+      },
+      {
+        onSuccess: () => {
+          setIsEditFolderSheetOpen(false);
+          updateScrapFolderMutation.reset();
+          resetEditFolderInputs();
+        },
+      },
+    );
   };
 
   const handleDeleteFolder = () => {
@@ -208,6 +235,24 @@ export function useMyPageScrapsViewModel() {
     return '폴더를 생성하지 못했습니다.';
   })();
 
+  const editFolderErrorMessage = (() => {
+    const error = updateScrapFolderMutation.error;
+
+    if (!error) {
+      return null;
+    }
+
+    if (isApiError(error) && error.status === 409) {
+      return '이미 같은 이름의 폴더가 있습니다.';
+    }
+
+    if (isApiError(error) && error.status === 404) {
+      return '폴더를 찾을 수 없습니다.';
+    }
+
+    return '폴더를 수정하지 못했습니다.';
+  })();
+
   const handleRecentScrapsPointerDown: PointerEventHandler<HTMLDivElement> = (event) => {
     const container = recentScrapsRef.current;
     if (!container) {
@@ -275,6 +320,7 @@ export function useMyPageScrapsViewModel() {
     createFolderNameMaxLength: SCRAP_FOLDER_INPUT_MAX_LENGTH,
     editFolderDescription,
     editFolderDescriptionMaxLength: SCRAP_FOLDER_INPUT_MAX_LENGTH,
+    editFolderErrorMessage,
     editFolderName,
     editFolderNameMaxLength: SCRAP_FOLDER_INPUT_MAX_LENGTH,
     editingFolder,
@@ -282,7 +328,9 @@ export function useMyPageScrapsViewModel() {
     isCreateFolderSheetOpen,
     isCreateFolderSubmitDisabled: createFolderName.trim().length === 0 || createScrapFolderMutation.isPending,
     isEditFolderSheetOpen,
-    isEditFolderSubmitDisabled: editFolderName.trim().length === 0,
+    isEditFolderPending: updateScrapFolderMutation.isPending,
+    isEditFolderSubmitDisabled:
+      editFolderName.trim().length === 0 || updateScrapFolderMutation.isPending,
     isFolderMoreMenuOpen: selectedMoreMenuFolder !== null,
     onBack: handleBack,
     onChangeCreateFolderDescription: handleCreateFolderDescriptionChange,

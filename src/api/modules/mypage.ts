@@ -51,6 +51,11 @@ export interface CreateScrapFolderRequest extends ApiObjectData {
   description?: string;
 }
 
+export interface UpdateScrapFolderRequest extends ApiObjectData {
+  name: string;
+  description: string;
+}
+
 interface MyPageSummaryResponse extends ApiObjectData {
   admissionYear?: unknown;
   campus?: unknown;
@@ -273,6 +278,14 @@ export const mypageApi = {
       data: createRequest,
       method: 'post',
       url: '/scrap-folders',
+    });
+  },
+
+  async updateScrapFolder(folderId: number, updateRequest: UpdateScrapFolderRequest) {
+    return request<null>({
+      data: updateRequest,
+      method: 'patch',
+      url: `/scrap-folders/${folderId}`,
     });
   },
 };

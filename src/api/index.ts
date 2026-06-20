@@ -30,6 +30,7 @@ export type {
   MyPageScrapFolder,
   MyPageScraps,
   MyPageSummary,
+  UpdateScrapFolderRequest,
 } from '@/api/modules/mypage';
 export type {
   OfficialPostAttachment,

@@ -25,6 +25,7 @@ type MyPageScrapsViewProps = {
   createFolderNameMaxLength: number;
   editFolderDescription: string;
   editFolderDescriptionMaxLength: number;
+  editFolderErrorMessage: string | null;
   editFolderName: string;
   editFolderNameMaxLength: number;
   editingFolder: MyPageScrapFolderListItem | null;
@@ -33,6 +34,7 @@ type MyPageScrapsViewProps = {
   isCreateFolderSheetOpen: boolean;
   isCreateFolderSubmitDisabled: boolean;
   isEditFolderSheetOpen: boolean;
+  isEditFolderPending: boolean;
   isEditFolderSubmitDisabled: boolean;
   isFolderMoreMenuOpen: boolean;
   onBack: () => void;
@@ -71,6 +73,7 @@ export function MyPageScrapsView({
   createFolderNameMaxLength,
   editFolderDescription,
   editFolderDescriptionMaxLength,
+  editFolderErrorMessage,
   editFolderName,
   editFolderNameMaxLength,
   editingFolder,
@@ -79,6 +82,7 @@ export function MyPageScrapsView({
   isCreateFolderSheetOpen,
   isCreateFolderSubmitDisabled,
   isEditFolderSheetOpen,
+  isEditFolderPending,
   isEditFolderSubmitDisabled,
   isFolderMoreMenuOpen,
   onBack,
@@ -238,6 +242,8 @@ export function MyPageScrapsView({
         nameMaxLength={editFolderNameMaxLength}
         description={editFolderDescription}
         descriptionMaxLength={editFolderDescriptionMaxLength}
+        errorMessage={editFolderErrorMessage}
+        isPending={isEditFolderPending}
         isSubmitDisabled={isEditFolderSubmitDisabled}
         onChangeName={onChangeEditFolderName}
         onChangeDescription={onChangeEditFolderDescription}
