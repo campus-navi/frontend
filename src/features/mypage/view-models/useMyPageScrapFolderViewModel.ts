@@ -40,6 +40,7 @@ export function useMyPageScrapFolderViewModel() {
   const [removeSelectedValidationError, setRemoveSelectedValidationError] =
     useState<string | null>(null);
   const [removedScrapCount, setRemovedScrapCount] = useState<number | null>(null);
+  const [removeSnackbarEventId, setRemoveSnackbarEventId] = useState(0);
   const parsedFolderId = parseFolderId(folderId);
   const moveFolderScrapMutation = useMoveFolderScrap();
   const removeFolderScrapsMutation = useRemoveFolderScraps();
@@ -75,7 +76,12 @@ export function useMyPageScrapFolderViewModel() {
     }, 3000);
 
     return () => window.clearTimeout(timeoutId);
-  }, [removedScrapCount]);
+  }, [removedScrapCount, removeSnackbarEventId]);
+
+  const showRemoveSnackbar = (deletedCount: number) => {
+    setRemovedScrapCount(deletedCount);
+    setRemoveSnackbarEventId((currentEventId) => currentEventId + 1);
+  };
 
   const handleBack = () => {
     navigate('/mypage/scraps');
@@ -190,7 +196,7 @@ export function useMyPageScrapFolderViewModel() {
       },
       {
         onSuccess: (result) => {
-          setRemovedScrapCount(result.deletedCount);
+          showRemoveSnackbar(result.deletedCount);
           removeFolderScrapsMutation.reset();
           setSelectedScrapMoreMenu(null);
         },
@@ -273,7 +279,7 @@ export function useMyPageScrapFolderViewModel() {
       },
       {
         onSuccess: (result) => {
-          setRemovedScrapCount(result.deletedCount);
+          showRemoveSnackbar(result.deletedCount);
           setSelectedScrapIds([]);
           setRemoveSelectedValidationError(null);
           setIsRemovingSelected(false);
