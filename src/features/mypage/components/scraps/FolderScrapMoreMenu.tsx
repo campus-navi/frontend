@@ -1,6 +1,7 @@
 import { SelectList, type SelectListItem } from '@/features/mypage/components/scraps/SelectList';
 
 type FolderScrapMoreMenuProps = {
+  isDeleteDisabled: boolean;
   scrapTitle: string;
   onClose: () => void;
   onDelete: () => void;
@@ -8,6 +9,7 @@ type FolderScrapMoreMenuProps = {
 };
 
 export function FolderScrapMoreMenu({
+  isDeleteDisabled,
   scrapTitle,
   onClose,
   onDelete,
@@ -23,7 +25,11 @@ export function FolderScrapMoreMenu({
       id: 'delete',
       label: '삭제',
       tone: 'danger',
-      onClick: onDelete,
+      onClick: () => {
+        if (!isDeleteDisabled) {
+          onDelete();
+        }
+      },
     },
   ];
 

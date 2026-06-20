@@ -62,6 +62,15 @@ export interface UpdateScrapFolderRequest extends ApiObjectData {
   description: string;
 }
 
+export interface RemoveScrapsFromFolderRequest extends ApiObjectData {
+  scrapIds: number[];
+}
+
+export interface RemoveScrapsFromFolderResult extends ApiObjectData {
+  deletedCount: number;
+  deletedPostIds: number[];
+}
+
 interface MyPageSummaryResponse extends ApiObjectData {
   admissionYear?: unknown;
   campus?: unknown;
@@ -103,6 +112,11 @@ interface MyPageFolderScrapResponse extends ApiObjectData {
   endDate?: unknown;
   publishedAt?: unknown;
   isActive?: unknown;
+}
+
+interface RemoveScrapsFromFolderResponse extends ApiObjectData {
+  deletedCount?: unknown;
+  deletedPostIds?: unknown;
 }
 
 function normalizeMyPageSummary(data: MyPageSummaryResponse): MyPageSummary {
@@ -242,6 +256,27 @@ function normalizeMyPageFolderScraps(data: unknown): MyPageFolderScrap[] {
   }));
 }
 
+function normalizeRemoveScrapsFromFolderResult(
+  data: RemoveScrapsFromFolderResponse,
+): RemoveScrapsFromFolderResult {
+  if (
+    typeof data.deletedCount !== 'number' ||
+    !Array.isArray(data.deletedPostIds) ||
+    !data.deletedPostIds.every((postId) => typeof postId === 'number')
+  ) {
+    throw createApiError({
+      code: COMMON_ERROR_CODES.INVALID_RESPONSE,
+      message: '스크랩 제거 응답 형식이 올바르지 않습니다.',
+      status: 200,
+    });
+  }
+
+  return {
+    deletedCount: data.deletedCount,
+    deletedPostIds: data.deletedPostIds,
+  };
+}
+
 export const mypageApi = {
   async getSummary() {
     const response = await request<MyPageSummaryResponse>({
@@ -302,6 +337,22 @@ export const mypageApi = {
     return {
       ...response,
       data: normalizeMyPageFolderScraps(response.data),
+    };
+  },
+
+  async removeScrapsFromFolder(
+    folderId: number,
+    removeRequest: RemoveScrapsFromFolderRequest,
+  ) {
+    const response = await request<RemoveScrapsFromFolderResponse>({
+      data: removeRequest,
+      method: 'delete',
+      url: `/scrap-folders/${folderId}/scraps`,
+    });
+
+    return {
+      ...response,
+      data: normalizeRemoveScrapsFromFolderResult(response.data),
     };
   },
 
