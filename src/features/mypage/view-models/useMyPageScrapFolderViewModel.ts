@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { isApiError } from '@/api';
@@ -34,6 +34,13 @@ export function useMyPageScrapFolderViewModel() {
   const [movingScrap, setMovingScrap] = useState<MyPageFolderScrapListItem | null>(null);
   const [selectedTargetFolderId, setSelectedTargetFolderId] = useState<number | null>(null);
   const [moveValidationError, setMoveValidationError] = useState<string | null>(null);
+  const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
+  const [selectedScrapIds, setSelectedScrapIds] = useState<number[]>([]);
+  const [isRemovingSelected, setIsRemovingSelected] = useState(false);
+  const [removeSelectedValidationError, setRemoveSelectedValidationError] =
+    useState<string | null>(null);
+  const [removedScrapCount, setRemovedScrapCount] = useState<number | null>(null);
+  const [removeSnackbarEventId, setRemoveSnackbarEventId] = useState(0);
   const parsedFolderId = parseFolderId(folderId);
   const moveFolderScrapMutation = useMoveFolderScrap();
   const removeFolderScrapsMutation = useRemoveFolderScraps();
@@ -57,16 +64,39 @@ export function useMyPageScrapFolderViewModel() {
   const availableMoveFolders = (scrapFolders ?? []).filter(
     (folder) => folder.folderId !== parsedFolderId,
   );
+  const selectedScrapCount = selectedScrapIds.length;
+
+  useEffect(() => {
+    if (removedScrapCount === null) {
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setRemovedScrapCount(null);
+    }, 3000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [removedScrapCount, removeSnackbarEventId]);
+
+  const showRemoveSnackbar = (deletedCount: number) => {
+    setRemovedScrapCount(deletedCount);
+    setRemoveSnackbarEventId((currentEventId) => currentEventId + 1);
+  };
 
   const handleBack = () => {
     navigate('/mypage/scraps');
   };
 
   const handleScrapMoreClick = (item: MyPageFolderScrapListItem) => {
-    if (removeFolderScrapsMutation.isPending || moveFolderScrapMutation.isPending) {
+    if (
+      isMultiSelectMode ||
+      removeFolderScrapsMutation.isPending ||
+      moveFolderScrapMutation.isPending
+    ) {
       return;
     }
 
+    setIsRemovingSelected(false);
     removeFolderScrapsMutation.reset();
     setSelectedScrapMoreMenu(item);
   };
@@ -155,6 +185,8 @@ export function useMyPageScrapFolderViewModel() {
       return;
     }
 
+    setIsRemovingSelected(false);
+    setRemoveSelectedValidationError(null);
     removeFolderScrapsMutation.mutate(
       {
         folderId: parsedFolderId,
@@ -163,7 +195,8 @@ export function useMyPageScrapFolderViewModel() {
         },
       },
       {
-        onSuccess: () => {
+        onSuccess: (result) => {
+          showRemoveSnackbar(result.deletedCount);
           removeFolderScrapsMutation.reset();
           setSelectedScrapMoreMenu(null);
         },
@@ -172,10 +205,126 @@ export function useMyPageScrapFolderViewModel() {
   };
 
   const handleEnterMultiSelectMode = () => {
-    // TODO: Connect the multi-select flow in a later issue.
+    if (
+      items.length === 0 ||
+      removeFolderScrapsMutation.isPending ||
+      moveFolderScrapMutation.isPending
+    ) {
+      return;
+    }
+
+    removeFolderScrapsMutation.reset();
+    setSelectedScrapMoreMenu(null);
+    setSelectedScrapIds([]);
+    setRemoveSelectedValidationError(null);
+    setIsRemovingSelected(false);
+    setIsMultiSelectMode(true);
+  };
+
+  const handleExitMultiSelectMode = () => {
+    if (removeFolderScrapsMutation.isPending) {
+      return;
+    }
+
+    removeFolderScrapsMutation.reset();
+    setSelectedScrapIds([]);
+    setRemoveSelectedValidationError(null);
+    setIsRemovingSelected(false);
+    setIsMultiSelectMode(false);
+  };
+
+  const handleToggleScrapSelection = (scrapId: number) => {
+    if (
+      !isMultiSelectMode ||
+      removeFolderScrapsMutation.isPending ||
+      moveFolderScrapMutation.isPending
+    ) {
+      return;
+    }
+
+    removeFolderScrapsMutation.reset();
+    setRemoveSelectedValidationError(null);
+    setSelectedScrapIds((currentIds) =>
+      currentIds.includes(scrapId)
+        ? currentIds.filter((selectedId) => selectedId !== scrapId)
+        : [...currentIds, scrapId],
+    );
+  };
+
+  const handleRemoveSelectedScraps = () => {
+    if (
+      parsedFolderId === null ||
+      !isMultiSelectMode ||
+      removeFolderScrapsMutation.isPending ||
+      moveFolderScrapMutation.isPending
+    ) {
+      return;
+    }
+
+    if (selectedScrapIds.length === 0) {
+      setRemoveSelectedValidationError('제거할 스크랩을 선택해주세요.');
+      return;
+    }
+
+    const requestedScrapIds = [...selectedScrapIds];
+
+    setIsRemovingSelected(true);
+    setRemoveSelectedValidationError(null);
+    removeFolderScrapsMutation.mutate(
+      {
+        folderId: parsedFolderId,
+        request: {
+          scrapIds: requestedScrapIds,
+        },
+      },
+      {
+        onSuccess: (result) => {
+          showRemoveSnackbar(result.deletedCount);
+          setSelectedScrapIds([]);
+          setRemoveSelectedValidationError(null);
+          setIsRemovingSelected(false);
+          setIsMultiSelectMode(false);
+          removeFolderScrapsMutation.reset();
+        },
+      },
+    );
+  };
+
+  const handleCloseRemoveSelectedSnackbar = () => {
+    setRemovedScrapCount(null);
   };
 
   const removeScrapErrorMessage = (() => {
+    if (isRemovingSelected) {
+      return null;
+    }
+
+    const mutationError = removeFolderScrapsMutation.error;
+
+    if (!mutationError) {
+      return null;
+    }
+
+    if (isApiError(mutationError) && mutationError.status === 400) {
+      return '제거할 스크랩을 선택해주세요.';
+    }
+
+    if (isApiError(mutationError) && mutationError.status === 404) {
+      return '폴더를 찾을 수 없습니다.';
+    }
+
+    return '스크랩을 제거하지 못했습니다.';
+  })();
+
+  const removeSelectedErrorMessage = (() => {
+    if (removeSelectedValidationError) {
+      return removeSelectedValidationError;
+    }
+
+    if (!isRemovingSelected) {
+      return null;
+    }
+
     const mutationError = removeFolderScrapsMutation.error;
 
     if (!mutationError) {
@@ -217,7 +366,7 @@ export function useMyPageScrapFolderViewModel() {
 
   return {
     availableMoveFolders,
-    emptyMessage: '이 폴더에 저장된 스크랩이 없습니다.',
+    emptyMessage: `${folderName} 스크랩이 없어요`,
     errorMessage: isNotFoundError ? '폴더를 찾을 수 없습니다.' : '스크랩 목록을 불러오지 못했습니다.',
     folderName,
     invalidFolderMessage: '올바르지 않은 스크랩 폴더입니다.',
@@ -227,21 +376,34 @@ export function useMyPageScrapFolderViewModel() {
     isMoveFoldersLoading,
     isMoveScrapPending: moveFolderScrapMutation.isPending,
     isMoveSheetOpen: movingScrap !== null,
-    isRemoveScrapPending: removeFolderScrapsMutation.isPending,
+    isMultiSelectMode,
+    isRemoveScrapPending:
+      removeFolderScrapsMutation.isPending && !isRemovingSelected,
+    isRemoveSelectedPending:
+      removeFolderScrapsMutation.isPending && isRemovingSelected,
+    isRemoveSelectedSnackbarVisible: removedScrapCount !== null,
     items,
     moveScrapErrorMessage,
     movingScrap,
     onBack: handleBack,
     onCloseMoveSheet: handleCloseMoveSheet,
+    onCloseRemoveSelectedSnackbar: handleCloseRemoveSelectedSnackbar,
     onCloseScrapMoreMenu: handleCloseScrapMoreMenu,
     onConfirmMoveScrap: handleConfirmMoveScrap,
     onDeleteScrap: handleDeleteScrap,
     onEnterMultiSelectMode: handleEnterMultiSelectMode,
+    onExitMultiSelectMode: handleExitMultiSelectMode,
     onMoveScrap: handleMoveScrap,
+    onRemoveSelectedScraps: handleRemoveSelectedScraps,
     onScrapMoreClick: handleScrapMoreClick,
     onSelectMoveTargetFolder: handleSelectMoveTargetFolder,
+    onToggleScrapSelection: handleToggleScrapSelection,
+    removeSelectedErrorMessage,
     removeScrapErrorMessage,
+    removedScrapCount,
     scrapCount: items.length,
+    selectedScrapCount,
+    selectedScrapIds,
     selectedTargetFolderId,
     selectedScrapMoreMenu,
     shouldShowEmptyMessage: !isInvalidFolderId && !isLoading && !isError && items.length === 0,
