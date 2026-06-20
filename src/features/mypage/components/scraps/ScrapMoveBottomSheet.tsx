@@ -11,7 +11,6 @@ type ScrapMoveBottomSheetProps = {
   selectedTargetFolderId: number | null;
   onClose: () => void;
   onConfirm: () => void;
-  onOpenCreateFolder: () => void;
   onSelectFolder: (folderId: number) => void;
 };
 
@@ -24,7 +23,6 @@ export function ScrapMoveBottomSheet({
   selectedTargetFolderId,
   onClose,
   onConfirm,
-  onOpenCreateFolder,
   onSelectFolder,
 }: ScrapMoveBottomSheetProps) {
   const isSubmitDisabled = selectedTargetFolderId === null || isPending;
@@ -37,28 +35,16 @@ export function ScrapMoveBottomSheet({
       type="center"
       onClose={onClose}
       footer={
-        <div className="flex w-full gap-2">
-          <CtaButton
-            type="button"
-            variant="tertiary"
-            size="xlg"
-            state="default"
-            disabled={isPending}
-            onClick={onOpenCreateFolder}
-          >
-            새 폴더
-          </CtaButton>
-          <CtaButton
-            type="button"
-            variant="primary"
-            size="xlg"
-            state="default"
-            disabled={isSubmitDisabled}
-            onClick={onConfirm}
-          >
-            저장
-          </CtaButton>
-        </div>
+        <CtaButton
+          type="button"
+          variant="primary"
+          size="xlg"
+          state="default"
+          disabled={isSubmitDisabled}
+          onClick={onConfirm}
+        >
+          저장
+        </CtaButton>
       }
     >
       <div className="flex min-h-[232px] w-full flex-col px-4">

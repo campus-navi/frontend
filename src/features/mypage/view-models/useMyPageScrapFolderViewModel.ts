@@ -145,10 +145,6 @@ export function useMyPageScrapFolderViewModel() {
     );
   };
 
-  const handleOpenCreateFolderFromMoveSheet = () => {
-    // TODO: Reuse the scrap folder creation flow when sheet coordination is added.
-  };
-
   const handleDeleteScrap = (item: MyPageFolderScrapListItem) => {
     if (
       parsedFolderId === null ||
@@ -242,7 +238,6 @@ export function useMyPageScrapFolderViewModel() {
     onDeleteScrap: handleDeleteScrap,
     onEnterMultiSelectMode: handleEnterMultiSelectMode,
     onMoveScrap: handleMoveScrap,
-    onOpenCreateFolderFromMoveSheet: handleOpenCreateFolderFromMoveSheet,
     onScrapMoreClick: handleScrapMoreClick,
     onSelectMoveTargetFolder: handleSelectMoveTargetFolder,
     removeScrapErrorMessage,

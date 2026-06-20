@@ -27,7 +27,6 @@ type MyPageScrapFolderViewProps = {
   onDeleteScrap: (item: MyPageFolderScrapListItem) => void;
   onEnterMultiSelectMode: () => void;
   onMoveScrap: (item: MyPageFolderScrapListItem) => void;
-  onOpenCreateFolderFromMoveSheet: () => void;
   onScrapMoreClick: (item: MyPageFolderScrapListItem) => void;
   onSelectMoveTargetFolder: (folderId: number) => void;
   removeScrapErrorMessage: string | null;
@@ -60,7 +59,6 @@ export function MyPageScrapFolderView({
   onDeleteScrap,
   onEnterMultiSelectMode,
   onMoveScrap,
-  onOpenCreateFolderFromMoveSheet,
   onScrapMoreClick,
   onSelectMoveTargetFolder,
   removeScrapErrorMessage,
@@ -151,7 +149,6 @@ export function MyPageScrapFolderView({
         selectedTargetFolderId={selectedTargetFolderId}
         onClose={onCloseMoveSheet}
         onConfirm={onConfirmMoveScrap}
-        onOpenCreateFolder={onOpenCreateFolderFromMoveSheet}
         onSelectFolder={onSelectMoveTargetFolder}
       />
     </main>
