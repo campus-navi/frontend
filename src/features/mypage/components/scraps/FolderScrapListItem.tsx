@@ -102,7 +102,7 @@ export function FolderScrapListItem({
       {isMoreMenuOpen ? (
         <FolderScrapMoreMenu
           scrapTitle={item.title}
-          isDeleteDisabled={isRemovePending}
+          isActionDisabled={isRemovePending}
           onClose={onCloseMoreMenu}
           onMove={() => onMove(item)}
           onDelete={() => onDelete(item)}

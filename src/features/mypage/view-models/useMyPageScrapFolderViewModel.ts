@@ -83,6 +83,7 @@ export function useMyPageScrapFolderViewModel() {
   const handleMoveScrap = (item: MyPageFolderScrapListItem) => {
     if (
       selectedScrapMoreMenu?.scrapId !== item.scrapId ||
+      removeFolderScrapsMutation.isPending ||
       moveFolderScrapMutation.isPending
     ) {
       return;
@@ -152,7 +153,8 @@ export function useMyPageScrapFolderViewModel() {
     if (
       parsedFolderId === null ||
       selectedScrapMoreMenu?.scrapId !== item.scrapId ||
-      removeFolderScrapsMutation.isPending
+      removeFolderScrapsMutation.isPending ||
+      moveFolderScrapMutation.isPending
     ) {
       return;
     }

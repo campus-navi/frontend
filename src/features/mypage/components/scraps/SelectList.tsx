@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 export type SelectListItem = {
+  disabled?: boolean;
   id: string;
   label: string;
   tone?: 'default' | 'danger';
@@ -31,7 +32,9 @@ export function SelectList({ ariaLabel, items, className = '' }: SelectListProps
             className={[
               'flex h-12 w-full items-center gap-1 bg-white px-3 py-3 text-left text-base font-normal leading-[1.2]',
               item.tone === 'danger' ? 'text-[#FF5E47]' : 'text-[#292B2C]',
+              item.disabled ? 'cursor-not-allowed opacity-50' : '',
             ].join(' ')}
+            disabled={item.disabled}
             onClick={item.onClick}
             role="menuitem"
           >
