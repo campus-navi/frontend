@@ -1,19 +1,32 @@
 import type { ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
 
+import type { DeadlinePost } from '@/api';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { SvgIcon } from '@/components/ui/SvgIcon';
 import { DeadlinePostCard } from '@/features/deadlines/components/DeadlinePostCard';
-import { useDeadlinePreview } from '@/features/deadlines/hooks/useDeadlinePreview';
 import { useDeadlinePreviewScroll } from '@/features/deadlines/hooks/useDeadlinePreviewScroll';
 
 const MAX_PREVIEW_POSTS = 8;
 
-export function DeadlinePreviewSection() {
-  const navigate = useNavigate();
-  const { data, isError, isLoading } = useDeadlinePreview();
+type DeadlinePreviewSectionProps = {
+  isEmpty: boolean;
+  isError: boolean;
+  isLoading: boolean;
+  onPostClick: (postId: number) => void;
+  onSeeAll: () => void;
+  posts: DeadlinePost[];
+};
+
+export function DeadlinePreviewSection({
+  isEmpty,
+  isError,
+  isLoading,
+  onPostClick,
+  onSeeAll,
+  posts: deadlinePosts,
+}: DeadlinePreviewSectionProps) {
   const { handlers: scrollHandlers, scrollRef } = useDeadlinePreviewScroll();
-  const posts = data?.posts.slice(0, MAX_PREVIEW_POSTS) ?? [];
+  const posts = deadlinePosts.slice(0, MAX_PREVIEW_POSTS);
 
   return (
     <section className="flex flex-col gap-4 bg-white py-5">
@@ -24,7 +37,7 @@ export function DeadlinePreviewSection() {
         <button
           type="button"
           className="flex shrink-0 items-center gap-1 text-[14px] font-normal leading-[1.2] tracking-[-0.02em] text-[#9D9D9D]"
-          onClick={() => navigate('/deadlines')}
+          onClick={onSeeAll}
         >
           모두보기
           <SvgIcon size={8} viewBox="0 0 8 8">
@@ -47,10 +60,10 @@ export function DeadlinePreviewSection() {
       {isError ? (
         <DeadlinePreviewMessage>마감임박 공지를 불러오지 못했어요.</DeadlinePreviewMessage>
       ) : null}
-      {!isLoading && !isError && posts.length === 0 ? (
+      {isEmpty ? (
         <DeadlinePreviewMessage>마감임박 공지가 없어요.</DeadlinePreviewMessage>
       ) : null}
-      {!isLoading && !isError && posts.length > 0 ? (
+      {!isLoading && !isError && !isEmpty ? (
         <div
           ref={scrollRef}
           className="flex cursor-grab gap-3 overflow-x-auto px-4 pb-1 active:cursor-grabbing [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
@@ -65,7 +78,7 @@ export function DeadlinePreviewSection() {
             <DeadlinePostCard
               key={post.postId}
               post={post}
-              onClick={() => navigate(`/info/posts/${post.postId}`)}
+              onClick={() => onPostClick(post.postId)}
             />
           ))}
         </div>

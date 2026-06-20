@@ -1,5 +1,4 @@
 import { type CSSProperties, type MouseEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useFeaturedNoticeCarousel, CARD_SNAP_DURATION_MS } from '@/features/home/hooks/useFeaturedNoticeCarousel';
@@ -9,15 +8,20 @@ import { ProgressDots } from '@/features/home/components/ProgressDots';
 import type { FeedCardPost } from '@/api';
 
 export function FeaturedNoticeContent({
+  isEmpty,
   isError,
   isLoading,
+  onCardClick,
+  onNoticeDetailClick,
   posts,
 }: {
+  isEmpty: boolean;
   isError: boolean;
   isLoading: boolean;
+  onCardClick: (post: FeedCardPost) => void;
+  onNoticeDetailClick: (postId: number) => void;
   posts: FeedCardPost[];
 }) {
-  const navigate = useNavigate();
   const {
     activeIndex,
     carouselViewportRef,
@@ -46,7 +50,7 @@ export function FeaturedNoticeContent({
     return <FeaturedNoticePlaceholder>주요 공지를 불러오지 못했어요.</FeaturedNoticePlaceholder>;
   }
 
-  if (posts.length === 0) {
+  if (isEmpty) {
     return <FeaturedNoticePlaceholder>표시할 주요 공지가 없어요.</FeaturedNoticePlaceholder>;
   }
 
@@ -54,40 +58,17 @@ export function FeaturedNoticeContent({
   const previousPost = posts[previousIndex];
   const nextPost = posts[nextIndex];
 
-  const handleOpenCardNews = (post: FeedCardPost) => {
-    navigate(`/card-news/${post.postId}`, {
-      state: {
-        cards: posts.map(({ imageUrl, postId, summary, tagName, title }) => ({
-          imageUrl,
-          postId,
-          summary,
-          tagName,
-          title,
-        })),
-        imageUrl: post.imageUrl,
-        postId: post.postId,
-        summary: post.summary,
-        tagName: post.tagName,
-        title: post.title,
-      },
-    });
-  };
-
-  const handleOpenNoticeDetail = (postId: number) => {
-    navigate(`/info/posts/${postId}`);
-  };
-
   const handleCardClick = () => {
     if (!shouldHandleCardClick()) {
       return;
     }
 
-    handleOpenCardNews(activePost);
+    onCardClick(activePost);
   };
 
   const handleNoticeDetailClick = (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
-    handleOpenNoticeDetail(activePost.postId);
+    onNoticeDetailClick(activePost.postId);
   };
 
   const trackStyle = {
