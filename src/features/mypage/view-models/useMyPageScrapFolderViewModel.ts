@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { isApiError } from '@/api';
 import { useMyPageScrapFolderScraps } from '@/features/mypage/hooks/useMyPageScrapFolderScraps';
+import { useRemoveFolderScraps } from '@/features/mypage/hooks/useRemoveFolderScraps';
 import type {
   MyPageFolderScrapListItem,
   MyPageScrapFolderRouteState,
@@ -29,6 +30,7 @@ export function useMyPageScrapFolderViewModel() {
   const [selectedScrapMoreMenu, setSelectedScrapMoreMenu] =
     useState<MyPageFolderScrapListItem | null>(null);
   const parsedFolderId = parseFolderId(folderId);
+  const removeFolderScrapsMutation = useRemoveFolderScraps();
   const { data: scraps, error, isError, isLoading } = useMyPageScrapFolderScraps(parsedFolderId);
   const routeState = location.state as MyPageScrapFolderRouteState | null;
   const displayFolderId = parsedFolderId?.toString() ?? '알 수 없음';
@@ -51,10 +53,20 @@ export function useMyPageScrapFolderViewModel() {
   };
 
   const handleScrapMoreClick = (item: MyPageFolderScrapListItem) => {
+    if (removeFolderScrapsMutation.isPending) {
+      return;
+    }
+
+    removeFolderScrapsMutation.reset();
     setSelectedScrapMoreMenu(item);
   };
 
   const handleCloseScrapMoreMenu = () => {
+    if (removeFolderScrapsMutation.isPending) {
+      return;
+    }
+
+    removeFolderScrapsMutation.reset();
     setSelectedScrapMoreMenu(null);
   };
 
@@ -68,17 +80,51 @@ export function useMyPageScrapFolderViewModel() {
   };
 
   const handleDeleteScrap = (item: MyPageFolderScrapListItem) => {
-    if (selectedScrapMoreMenu?.scrapId !== item.scrapId) {
+    if (
+      parsedFolderId === null ||
+      selectedScrapMoreMenu?.scrapId !== item.scrapId ||
+      removeFolderScrapsMutation.isPending
+    ) {
       return;
     }
 
-    // TODO: Connect the single scrap delete flow in a later issue.
-    handleCloseScrapMoreMenu();
+    removeFolderScrapsMutation.mutate(
+      {
+        folderId: parsedFolderId,
+        request: {
+          scrapIds: [item.scrapId],
+        },
+      },
+      {
+        onSuccess: () => {
+          removeFolderScrapsMutation.reset();
+          setSelectedScrapMoreMenu(null);
+        },
+      },
+    );
   };
 
   const handleEnterMultiSelectMode = () => {
     // TODO: Connect the multi-select flow in a later issue.
   };
+
+  const removeScrapErrorMessage = (() => {
+    const mutationError = removeFolderScrapsMutation.error;
+
+    if (!mutationError) {
+      return null;
+    }
+
+    if (isApiError(mutationError) && mutationError.status === 400) {
+      return '제거할 스크랩을 선택해주세요.';
+    }
+
+    if (isApiError(mutationError) && mutationError.status === 404) {
+      return '폴더를 찾을 수 없습니다.';
+    }
+
+    return '스크랩을 제거하지 못했습니다.';
+  })();
 
   return {
     emptyMessage: '이 폴더에 저장된 스크랩이 없습니다.',
@@ -88,6 +134,7 @@ export function useMyPageScrapFolderViewModel() {
     isError,
     isInvalidFolderId,
     isLoading,
+    isRemoveScrapPending: removeFolderScrapsMutation.isPending,
     items,
     onBack: handleBack,
     onCloseScrapMoreMenu: handleCloseScrapMoreMenu,
@@ -95,6 +142,7 @@ export function useMyPageScrapFolderViewModel() {
     onEnterMultiSelectMode: handleEnterMultiSelectMode,
     onMoveScrap: handleMoveScrap,
     onScrapMoreClick: handleScrapMoreClick,
+    removeScrapErrorMessage,
     scrapCount: items.length,
     selectedScrapMoreMenu,
     shouldShowEmptyMessage: !isInvalidFolderId && !isLoading && !isError && items.length === 0,

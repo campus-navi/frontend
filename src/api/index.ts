@@ -31,6 +31,8 @@ export type {
   MyPageScrapFolderSort,
   MyPageScraps,
   MyPageSummary,
+  RemoveScrapsFromFolderRequest,
+  RemoveScrapsFromFolderResult,
   UpdateScrapFolderRequest,
 } from '@/api/modules/mypage';
 export type {

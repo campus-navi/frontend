@@ -10,6 +10,7 @@ type MyPageScrapFolderViewProps = {
   isError: boolean;
   isInvalidFolderId: boolean;
   isLoading: boolean;
+  isRemoveScrapPending: boolean;
   items: MyPageFolderScrapListItem[];
   onBack: () => void;
   onCloseScrapMoreMenu: () => void;
@@ -17,6 +18,7 @@ type MyPageScrapFolderViewProps = {
   onEnterMultiSelectMode: () => void;
   onMoveScrap: (item: MyPageFolderScrapListItem) => void;
   onScrapMoreClick: (item: MyPageFolderScrapListItem) => void;
+  removeScrapErrorMessage: string | null;
   scrapCount: number;
   selectedScrapMoreMenu: MyPageFolderScrapListItem | null;
   shouldShowEmptyMessage: boolean;
@@ -30,6 +32,7 @@ export function MyPageScrapFolderView({
   isError,
   isInvalidFolderId,
   isLoading,
+  isRemoveScrapPending,
   items,
   onBack,
   onCloseScrapMoreMenu,
@@ -37,6 +40,7 @@ export function MyPageScrapFolderView({
   onEnterMultiSelectMode,
   onMoveScrap,
   onScrapMoreClick,
+  removeScrapErrorMessage,
   scrapCount,
   selectedScrapMoreMenu,
   shouldShowEmptyMessage,
@@ -76,6 +80,15 @@ export function MyPageScrapFolderView({
               </div>
             ) : null}
 
+            {removeScrapErrorMessage ? (
+              <div
+                className="mb-4 rounded-xl bg-[#FFF4F2] px-4 py-3 text-sm font-medium leading-[1.4] text-[#FF5E47]"
+                role="alert"
+              >
+                {removeScrapErrorMessage}
+              </div>
+            ) : null}
+
             {shouldShowEmptyMessage ? (
               <div className="flex flex-1 items-center justify-center px-4 text-center">
                 <p className="text-sm font-medium leading-[1.4] text-[#8A9299]">{emptyMessage}</p>
@@ -89,6 +102,10 @@ export function MyPageScrapFolderView({
                     key={item.scrapId}
                     item={item}
                     isMoreMenuOpen={selectedScrapMoreMenu?.scrapId === item.scrapId}
+                    isRemovePending={
+                      isRemoveScrapPending &&
+                      selectedScrapMoreMenu?.scrapId === item.scrapId
+                    }
                     onCloseMoreMenu={onCloseScrapMoreMenu}
                     onDelete={onDeleteScrap}
                     onMoreClick={onScrapMoreClick}

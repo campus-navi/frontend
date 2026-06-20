@@ -11,6 +11,7 @@ import type { MyPageFolderScrapListItem } from '@/features/mypage/types';
 
 type FolderScrapListItemProps = {
   isMoreMenuOpen: boolean;
+  isRemovePending: boolean;
   item: MyPageFolderScrapListItem;
   onCloseMoreMenu: () => void;
   onDelete: (item: MyPageFolderScrapListItem) => void;
@@ -20,6 +21,7 @@ type FolderScrapListItemProps = {
 
 export function FolderScrapListItem({
   isMoreMenuOpen,
+  isRemovePending,
   item,
   onCloseMoreMenu,
   onDelete,
@@ -90,6 +92,7 @@ export function FolderScrapListItem({
           aria-expanded={isMoreMenuOpen}
           aria-haspopup="menu"
           aria-label={`${item.title} 스크랩 더보기`}
+          disabled={isRemovePending}
           onClick={() => onMoreClick(item)}
         >
           <MoreIcon />
@@ -99,6 +102,7 @@ export function FolderScrapListItem({
       {isMoreMenuOpen ? (
         <FolderScrapMoreMenu
           scrapTitle={item.title}
+          isDeleteDisabled={isRemovePending}
           onClose={onCloseMoreMenu}
           onMove={() => onMove(item)}
           onDelete={() => onDelete(item)}
