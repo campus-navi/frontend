@@ -10,6 +10,7 @@ const DRAG_THRESHOLD = 6;
 export function useDeadlinePreviewScroll() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const cleanupDragListenersRef = useRef<(() => void) | null>(null);
+  const resetHasDraggedTimerRef = useRef<number | null>(null);
   const dragStateRef = useRef({
     hasDragged: false,
     isDragging: false,
@@ -22,12 +23,32 @@ export function useDeadlinePreviewScroll() {
     cleanupDragListenersRef.current = null;
   };
 
+  const clearHasDraggedResetTimer = () => {
+    if (resetHasDraggedTimerRef.current === null) {
+      return;
+    }
+
+    window.clearTimeout(resetHasDraggedTimerRef.current);
+    resetHasDraggedTimerRef.current = null;
+  };
+
   const endDrag = () => {
     dragStateRef.current.isDragging = false;
     cleanupDragListeners();
+    clearHasDraggedResetTimer();
+    resetHasDraggedTimerRef.current = window.setTimeout(() => {
+      dragStateRef.current.hasDragged = false;
+      resetHasDraggedTimerRef.current = null;
+    }, 0);
   };
 
-  useEffect(() => cleanupDragListeners, []);
+  useEffect(
+    () => () => {
+      cleanupDragListeners();
+      clearHasDraggedResetTimer();
+    },
+    [],
+  );
 
   const handlePointerDown: PointerEventHandler<HTMLDivElement> = (event) => {
     const container = scrollRef.current;
@@ -36,6 +57,7 @@ export function useDeadlinePreviewScroll() {
       return;
     }
 
+    clearHasDraggedResetTimer();
     dragStateRef.current = {
       hasDragged: false,
       isDragging: true,
@@ -88,6 +110,7 @@ export function useDeadlinePreviewScroll() {
 
     event.preventDefault();
     event.stopPropagation();
+    clearHasDraggedResetTimer();
     dragStateRef.current.hasDragged = false;
   };
 
