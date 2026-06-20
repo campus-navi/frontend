@@ -68,13 +68,8 @@ export function FolderScrapListItem({
   );
 
   return (
-    <article
-      className={[
-        'relative flex w-full flex-col gap-3',
-        item.isActive ? '' : 'opacity-60',
-      ].join(' ')}
-    >
-      <div className="flex items-start gap-3">
+    <article className="relative flex w-full flex-col gap-3">
+      <div className={['flex items-start gap-3', item.isActive ? '' : 'opacity-60'].join(' ')}>
         {item.isActive && item.detailPath ? (
           <Link
             to={item.detailPath}
