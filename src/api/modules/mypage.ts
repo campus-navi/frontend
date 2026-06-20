@@ -14,7 +14,6 @@ export interface MyPageSummary extends ApiObjectData {
   nickname: string;
   remindCount: number;
   scrapCount: number;
-  studentNumber: string;
 }
 
 export interface MyPageRecentScrap extends ApiObjectData {
@@ -63,7 +62,6 @@ interface MyPageSummaryResponse extends ApiObjectData {
   nickname?: unknown;
   remindCount?: unknown;
   scrapCount?: unknown;
-  studentNumber?: unknown;
 }
 
 interface MyPageRecentScrapResponse extends ApiObjectData {
@@ -102,7 +100,6 @@ function normalizeMyPageSummary(data: MyPageSummaryResponse): MyPageSummary {
     typeof data.nickname !== 'string' ||
     typeof data.email !== 'string' ||
     typeof data.campus !== 'string' ||
-    typeof data.studentNumber !== 'string' ||
     typeof data.admissionYear !== 'number' ||
     typeof data.grade !== 'number' ||
     !Array.isArray(data.departments) ||
@@ -129,7 +126,6 @@ function normalizeMyPageSummary(data: MyPageSummaryResponse): MyPageSummary {
     nickname: data.nickname,
     remindCount: data.remindCount,
     scrapCount: data.scrapCount,
-    studentNumber: data.studentNumber,
   };
 }
 

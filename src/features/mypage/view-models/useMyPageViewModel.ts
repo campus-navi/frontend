@@ -14,7 +14,6 @@ const fallbackMyPageSummary: MyPageSummary = {
   interestCount: 0,
   remindCount: 0,
   scrapCount: 0,
-  studentNumber: '',
 };
 
 export function useMyPageViewModel() {
