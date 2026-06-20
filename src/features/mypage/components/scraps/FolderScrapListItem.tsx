@@ -1,55 +1,109 @@
 import { Link } from 'react-router-dom';
 
+import { Tags } from '@/components/ui/Tags';
+import {
+  formatDeadlineDDay,
+  formatDeadlinePublishedDaysAgo,
+} from '@/features/deadlines/utils/deadlinePostDate';
+import { FolderScrapMoreMenu } from '@/features/mypage/components/scraps/FolderScrapMoreMenu';
+import { MoreIcon } from '@/features/mypage/components/scraps/ScrapIcons';
 import type { MyPageFolderScrapListItem } from '@/features/mypage/types';
 
 type FolderScrapListItemProps = {
+  isMoreMenuOpen: boolean;
   item: MyPageFolderScrapListItem;
+  onCloseMoreMenu: () => void;
+  onDelete: (item: MyPageFolderScrapListItem) => void;
+  onMoreClick: (item: MyPageFolderScrapListItem) => void;
+  onMove: (item: MyPageFolderScrapListItem) => void;
 };
 
-function FolderScrapContent({ item }: FolderScrapListItemProps) {
-  return (
-    <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap gap-1.5">
-        <span className="rounded-lg bg-[#292B2C] px-2.5 py-1.5 text-sm font-medium leading-[1.4] text-white">
-          {item.endDate || '마감일 없음'}
-        </span>
-        <span className="rounded-lg border border-[#DCDFE2] px-2.5 py-1.5 text-sm font-medium leading-[1.4] text-[#292B2C]">
+export function FolderScrapListItem({
+  isMoreMenuOpen,
+  item,
+  onCloseMoreMenu,
+  onDelete,
+  onMoreClick,
+  onMove,
+}: FolderScrapListItemProps) {
+  const content = (
+    <>
+      <div className="flex h-7 min-w-0 items-center gap-1.5">
+        <Tags
+          size="sm"
+          type="tertiary"
+          className="h-7 bg-[#F3F5FA] px-1.5 py-1 text-[14px] font-medium leading-[1.4]"
+        >
           {item.tagName}
-        </span>
+        </Tags>
+        {item.endDate ? (
+          <Tags
+            size="sm"
+            type="primary"
+            className="h-7 px-1.5 py-1 text-[14px] font-medium leading-[1.4]"
+          >
+            {formatDeadlineDDay(item.endDate)}
+          </Tags>
+        ) : null}
         {!item.isActive ? (
-          <span className="rounded-lg bg-[#EEF0F2] px-2.5 py-1.5 text-sm font-medium leading-[1.4] text-[#8A9299]">
+          <Tags
+            size="sm"
+            type="secondary"
+            className="h-7 px-1.5 py-1 text-[14px] font-medium leading-[1.4] text-[#8A9299]"
+          >
             비활성
-          </span>
+          </Tags>
         ) : null}
       </div>
 
-      <div className="flex flex-col gap-1">
-        <h2 className="line-clamp-2 whitespace-pre-line text-base font-semibold leading-[1.4] tracking-normal text-[#292B2C]">
+      <div className="flex min-w-0 flex-col gap-1.5">
+        <h2 className="line-clamp-2 break-words text-[16px] font-semibold leading-[1.4] tracking-normal text-[#292B2C]">
           {item.title}
         </h2>
-        <p className="text-xs font-medium leading-[1.4] tracking-normal text-[#BFC4C8]">{item.publishedAt}</p>
+        <p className="text-[12px] font-normal leading-[1.4] text-[#BFC4C8]">
+          {formatDeadlinePublishedDaysAgo(item.publishedAt)}
+        </p>
       </div>
-    </div>
+    </>
   );
-}
-
-export function FolderScrapListItem({ item }: FolderScrapListItemProps) {
-  const className = [
-    'block rounded-2xl bg-[#FAFBFD] p-4',
-    item.isActive ? 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0BC798]' : 'opacity-60',
-  ].join(' ');
-
-  if (!item.isActive || item.detailPath === null) {
-    return (
-      <article className={className} aria-label={`${item.title} 비활성 스크랩`}>
-        <FolderScrapContent item={item} />
-      </article>
-    );
-  }
 
   return (
-    <Link to={item.detailPath} className={className} aria-label={`${item.title} 공지 상세 보기`}>
-      <FolderScrapContent item={item} />
-    </Link>
+    <article className="relative flex w-full flex-col gap-3">
+      <div className={['flex items-start gap-3', item.isActive ? '' : 'opacity-60'].join(' ')}>
+        {item.isActive && item.detailPath ? (
+          <Link
+            to={item.detailPath}
+            className="flex min-w-0 flex-1 flex-col gap-3 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0BC798]"
+            aria-label={`${item.title} 공지 상세 보기`}
+          >
+            {content}
+          </Link>
+        ) : (
+          <div className="flex min-w-0 flex-1 flex-col gap-3" aria-label={`${item.title} 비활성 스크랩`}>
+            {content}
+          </div>
+        )}
+
+        <button
+          type="button"
+          className="relative z-10 flex h-7 w-7 shrink-0 items-center justify-center text-[#292B2C]"
+          aria-expanded={isMoreMenuOpen}
+          aria-haspopup="menu"
+          aria-label={`${item.title} 스크랩 더보기`}
+          onClick={() => onMoreClick(item)}
+        >
+          <MoreIcon />
+        </button>
+      </div>
+
+      {isMoreMenuOpen ? (
+        <FolderScrapMoreMenu
+          scrapTitle={item.title}
+          onClose={onCloseMoreMenu}
+          onMove={() => onMove(item)}
+          onDelete={() => onDelete(item)}
+        />
+      ) : null}
+    </article>
   );
 }
