@@ -28,6 +28,7 @@ export type {
   MyPageFolderScrap,
   MyPageRecentScrap,
   MyPageScrapFolder,
+  MyPageScrapFolderSort,
   MyPageScraps,
   MyPageSummary,
   UpdateScrapFolderRequest,

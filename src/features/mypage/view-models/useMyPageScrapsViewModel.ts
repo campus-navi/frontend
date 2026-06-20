@@ -1,18 +1,30 @@
 import { useEffect, useRef, useState, type ChangeEventHandler, type MouseEventHandler, type PointerEventHandler } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { isApiError } from '@/api';
+import { isApiError, type MyPageScrapFolderSort } from '@/api';
 import { useCreateScrapFolder } from '@/features/mypage/hooks/useCreateScrapFolder';
 import { useDeleteScrapFolder } from '@/features/mypage/hooks/useDeleteScrapFolder';
 import { useMyPageScraps } from '@/features/mypage/hooks/useMyPageScraps';
+import { useScrapFolders } from '@/features/mypage/hooks/useScrapFolders';
 import { useUpdateScrapFolder } from '@/features/mypage/hooks/useUpdateScrapFolder';
 import type { MyPageRecentScrapCardItem, MyPageScrapFolderListItem } from '@/features/mypage/types';
 
 const SCRAP_FOLDER_INPUT_MAX_LENGTH = 20;
 const MAX_RECENT_SCRAPS = 8;
+const DEFAULT_SCRAP_FOLDER_SORT: MyPageScrapFolderSort = 'RECENT_SAVED';
+
+const scrapFolderSortLabels: Record<MyPageScrapFolderSort, string> = {
+  RECENT_SAVED: '최근 저장',
+  NAME_ASC: '이름 순(A-Z)',
+  NAME_DESC: '이름 순(Z-A)',
+  LIST_ADDED: '리스트 추가 순',
+};
 
 export function useMyPageScrapsViewModel() {
   const navigate = useNavigate();
+  const [currentSort, setCurrentSort] =
+    useState<MyPageScrapFolderSort>(DEFAULT_SCRAP_FOLDER_SORT);
+  const [isSortSheetOpen, setIsSortSheetOpen] = useState(false);
   const [isCreateFolderSheetOpen, setIsCreateFolderSheetOpen] = useState(false);
   const [createFolderName, setCreateFolderName] = useState('');
   const [createFolderDescription, setCreateFolderDescription] = useState('');
@@ -25,7 +37,16 @@ export function useMyPageScrapsViewModel() {
   const createScrapFolderMutation = useCreateScrapFolder();
   const deleteScrapFolderMutation = useDeleteScrapFolder();
   const updateScrapFolderMutation = useUpdateScrapFolder();
-  const { data: scraps, isError, isLoading } = useMyPageScraps();
+  const {
+    data: scraps,
+    isError: isScrapsError,
+    isLoading: isScrapsLoading,
+  } = useMyPageScraps();
+  const {
+    data: scrapFolders,
+    isError: isScrapFoldersError,
+    isLoading: isScrapFoldersLoading,
+  } = useScrapFolders(currentSort);
   const recentScraps = (scraps?.recentScraps ?? [])
     .slice(0, MAX_RECENT_SCRAPS)
     .map<MyPageRecentScrapCardItem>((scrap) => ({
@@ -35,7 +56,7 @@ export function useMyPageScrapsViewModel() {
       tagName: scrap.tagName,
       title: scrap.title,
     }));
-  const folders = (scraps?.folders ?? []).map<MyPageScrapFolderListItem>((folder) => ({
+  const folders = (scrapFolders ?? scraps?.folders ?? []).map<MyPageScrapFolderListItem>((folder) => ({
     description: folder.description,
     detailPath: `/mypage/scraps/folders/${folder.folderId}`,
     folderId: folder.folderId,
@@ -65,6 +86,22 @@ export function useMyPageScrapsViewModel() {
 
   const handleBack = () => {
     navigate('/mypage', { replace: true });
+  };
+
+  const handleOpenSortSheet = () => {
+    setIsSortSheetOpen(true);
+  };
+
+  const handleCloseSortSheet = () => {
+    setIsSortSheetOpen(false);
+  };
+
+  const handleSelectSortOption = (sort: MyPageScrapFolderSort) => {
+    if (sort !== currentSort) {
+      setCurrentSort(sort);
+    }
+
+    setIsSortSheetOpen(false);
   };
 
   const handleOpenFolderMoreMenu = (folder: MyPageScrapFolderListItem) => {
@@ -362,6 +399,8 @@ export function useMyPageScrapsViewModel() {
     createFolderErrorMessage,
     createFolderName,
     createFolderNameMaxLength: SCRAP_FOLDER_INPUT_MAX_LENGTH,
+    currentSort,
+    currentSortLabel: scrapFolderSortLabels[currentSort],
     deleteFolderErrorMessage,
     deletingFolder,
     editFolderDescription,
@@ -380,6 +419,7 @@ export function useMyPageScrapsViewModel() {
     isEditFolderSubmitDisabled:
       editFolderName.trim().length === 0 || updateScrapFolderMutation.isPending,
     isFolderMoreMenuOpen: selectedMoreMenuFolder !== null,
+    isSortSheetOpen,
     onBack: handleBack,
     onChangeCreateFolderDescription: handleCreateFolderDescriptionChange,
     onChangeCreateFolderName: handleCreateFolderNameChange,
@@ -393,11 +433,14 @@ export function useMyPageScrapsViewModel() {
     onCloseDeleteFolderModal: handleCloseDeleteFolderModal,
     onCloseEditFolderSheet: handleCloseEditFolderSheet,
     onCloseFolderMoreMenu: handleCloseFolderMoreMenu,
+    onCloseSortSheet: handleCloseSortSheet,
     onDeleteFolder: handleDeleteFolder,
     onEditFolder: handleEditFolder,
     onFolderMoreClick: handleOpenFolderMoreMenu,
     onConfirmDeleteFolder: handleConfirmDeleteFolder,
     onOpenCreateFolderSheet: handleOpenCreateFolderSheet,
+    onOpenSortSheet: handleOpenSortSheet,
+    onSelectSortOption: handleSelectSortOption,
     onSubmitCreateFolder: handleCreateFolderSubmit,
     onSubmitEditFolder: handleSubmitEditFolder,
     recentScraps,
@@ -409,10 +452,12 @@ export function useMyPageScrapsViewModel() {
       onPointerUp: endRecentScrapsDrag,
     },
     recentScrapsRef,
-    shouldShowErrorMessage: isError,
-    shouldShowFoldersEmptyState: !isLoading && !isError && folders.length === 0,
-    shouldShowLoadingMessage: isLoading,
-    shouldShowRecentScrapsEmptyState: !isLoading && !isError && recentScraps.length === 0,
+    shouldShowErrorMessage: isScrapsError || isScrapFoldersError,
+    shouldShowFoldersEmptyState:
+      !isScrapFoldersLoading && !isScrapFoldersError && folders.length === 0,
+    shouldShowLoadingMessage: isScrapsLoading || isScrapFoldersLoading,
+    shouldShowRecentScrapsEmptyState:
+      !isScrapsLoading && !isScrapsError && recentScraps.length === 0,
     selectedMoreMenuFolder,
   };
 }
