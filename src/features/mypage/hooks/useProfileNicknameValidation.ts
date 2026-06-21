@@ -1,11 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { authApi, normalizeApiError } from '@/api';
+import { signupNicknamePolicy } from '@/features/signup/constants';
 import { useDebouncedValue } from '@/features/signup/hooks/useDebouncedValue';
-import {
-  profileNicknameCheckDebounceMs,
-  validateProfileNickname,
-} from '@/features/mypage/utils/profileValidation';
+import { validateSignupNickname } from '@/features/signup/utils';
 
 type AvailabilityStatus = 'idle' | 'checking' | 'available' | 'duplicate' | 'error';
 
@@ -22,12 +20,26 @@ const INITIAL_AVAILABILITY: AvailabilityState = {
 };
 
 export function useProfileNicknameValidation(nickname: string, originalNickname: string) {
-  const debouncedNickname = useDebouncedValue(nickname, profileNicknameCheckDebounceMs);
+  const debouncedNickname = useDebouncedValue(
+    nickname,
+    signupNicknamePolicy.checkDebounceMs,
+  );
   const currentNicknameRef = useRef(nickname);
   const latestRequestIdRef = useRef(0);
   const nicknameVersionRef = useRef(0);
   const [availability, setAvailability] = useState<AvailabilityState>(INITIAL_AVAILABILITY);
-  const validation = useMemo(() => validateProfileNickname(nickname), [nickname]);
+  const validation = useMemo(() => {
+    const result = validateSignupNickname(nickname);
+
+    if (/\s/.test(nickname)) {
+      return {
+        ...result,
+        message: '닉네임에 공백(띄어쓰기)을 포함할 수 없습니다.',
+      };
+    }
+
+    return result;
+  }, [nickname]);
   const isChanged = nickname !== originalNickname;
 
   useEffect(() => {
@@ -69,7 +81,7 @@ export function useProfileNicknameValidation(nickname: string, originalNickname:
 
         setAvailability({
           checkedNickname: requestNickname,
-          message: '사용 가능한 닉네임입니다.',
+          message: '사용가능한 닉네임입니다.',
           status: 'available',
         });
       } catch (error) {
@@ -103,7 +115,7 @@ export function useProfileNicknameValidation(nickname: string, originalNickname:
     ? undefined
     : validation.message ??
       (availability.status === 'checking'
-        ? '닉네임 중복 여부를 확인하고 있습니다.'
+        ? undefined
         : availability.message ?? undefined);
   const helperTone =
     validation.message ||

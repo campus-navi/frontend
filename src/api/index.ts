@@ -25,6 +25,7 @@ export type { DeadlinePost, DeadlinePosts, FeedCardPost, FeedCards } from '@/api
 export type {
   MemberMe,
   UpdateMemberInterestsRequest,
+  UpdateMemberNicknameRequest,
   UpdateMemberProfileRequest,
 } from '@/api/modules/member';
 export type {

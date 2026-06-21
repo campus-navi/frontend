@@ -14,9 +14,7 @@ type MyPageProfileEditViewProps = {
   isLoading: boolean;
   loadErrorMessage: string | null;
   nickname: string;
-  nicknameHelperText?: string;
-  nicknameHelperTone: HelperTone;
-  onNicknameChange: (value: string) => void;
+  onNicknameClick: () => void;
   onStudentNumberChange: (value: string) => void;
   studentNumber: string;
   studentNumberHelperText?: string | null;
@@ -38,9 +36,7 @@ export function MyPageProfileEditView({
   isLoading,
   loadErrorMessage,
   nickname,
-  nicknameHelperText,
-  nicknameHelperTone,
-  onNicknameChange,
+  onNicknameClick,
   onStudentNumberChange,
   studentNumber,
   studentNumberHelperText,
@@ -95,15 +91,7 @@ export function MyPageProfileEditView({
                 기본정보
               </h2>
 
-              <EditableRow
-                label="닉네임"
-                value={nickname}
-                maxLength={20}
-                placeholder="닉네임"
-                helperText={nicknameHelperText}
-                helperTone={nicknameHelperTone}
-                onChange={onNicknameChange}
-              />
+              <ProfileMenuRow label="닉네임" value={nickname} onClick={onNicknameClick} />
               <EditableRow
                 inputMode="numeric"
                 label="학번"
@@ -233,6 +221,34 @@ function ReadOnlyRow({ label, value }: { label: string; value: string }) {
         {value}
       </span>
     </div>
+  );
+}
+
+function ProfileMenuRow({
+  label,
+  onClick,
+  value,
+}: {
+  label: string;
+  onClick: () => void;
+  value: string;
+}) {
+  return (
+    <button
+      type="button"
+      className="flex min-h-11 w-full items-center justify-between gap-4 py-3 text-left"
+      onClick={onClick}
+    >
+      <span className="shrink-0 text-[14px] font-medium leading-[1.4] text-[#292B2C]">
+        {label}
+      </span>
+      <span className="flex min-w-0 items-center gap-1">
+        <span className="truncate text-right text-[12px] font-medium leading-[1.2] text-[#BFC4C8]">
+          {value}
+        </span>
+        <ChevronIcon />
+      </span>
+    </button>
   );
 }
 

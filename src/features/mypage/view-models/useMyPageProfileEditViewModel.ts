@@ -119,6 +119,7 @@ export function useMyPageProfileEditViewModel() {
     nicknameHelperText: nicknameValidation.helperText,
     nicknameHelperTone: nicknameValidation.helperTone,
     onGradeChange: setGrade,
+    onNicknameClick: () => navigate('/mypage/profile/edit/nickname'),
     onNicknameChange: setNickname,
     onStudentNumberChange: (value: string) =>
       setStudentNumber(value.replace(/\D/g, '').slice(0, 10)),
