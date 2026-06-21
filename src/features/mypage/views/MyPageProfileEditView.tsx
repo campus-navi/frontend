@@ -12,6 +12,7 @@ type MyPageProfileEditViewProps = {
   isLoading: boolean;
   loadErrorMessage: string | null;
   nickname: string;
+  onGradeClick: () => void;
   onNicknameClick: () => void;
   onStudentNumberClick: () => void;
   studentNumber: string;
@@ -33,6 +34,7 @@ export function MyPageProfileEditView({
   isLoading,
   loadErrorMessage,
   nickname,
+  onGradeClick,
   onNicknameClick,
   onStudentNumberClick,
   studentNumber,
@@ -93,17 +95,11 @@ export function MyPageProfileEditView({
                 value={studentNumber}
                 onClick={onStudentNumberClick}
               />
-              <div className="py-3">
-                <div className="flex min-h-5 w-full items-center justify-between gap-4">
-                  <span className="text-[14px] font-medium leading-[1.4] text-[#292B2C]">
-                    학년
-                  </span>
-                  <span className="flex items-center gap-1 text-[12px] font-medium leading-[1.2] text-[#BFC4C8]">
-                    {selectedGradeLabel}
-                    <ChevronIcon />
-                  </span>
-                </div>
-              </div>
+              <ProfileMenuRow
+                label="학년"
+                value={selectedGradeLabel}
+                onClick={onGradeClick}
+              />
               <ReadOnlyRow label="학과" value={department || '-'} />
             </section>
 

@@ -22,6 +22,10 @@ export interface UpdateMemberNicknameRequest extends ApiObjectData {
   nickname: string;
 }
 
+export interface UpdateGradeRequest extends ApiObjectData {
+  grade: 1 | 2 | 3 | 4;
+}
+
 export interface UpdateStudentNumberRequest extends ApiObjectData {
   admissionYear: number;
   studentNumber: string;
@@ -81,6 +85,14 @@ export const memberApi = {
       data: payload,
       method: 'patch',
       url: '/members/me',
+    });
+  },
+
+  async updateGrade(payload: UpdateGradeRequest) {
+    return request<string>({
+      data: payload,
+      method: 'patch',
+      url: '/members/me/grade',
     });
   },
 
