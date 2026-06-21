@@ -35,6 +35,8 @@ export function useMyPageProfileGradeEditViewModel() {
   }, [summary]);
 
   const canSubmit =
+    isInitializedRef.current &&
+    originalGrade !== null &&
     grade !== null &&
     grade !== originalGrade &&
     !updateGrade.isPending;
