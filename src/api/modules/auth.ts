@@ -5,7 +5,11 @@ import type { ApiObjectData, ApiRequestConfig, ApiResponse } from '@/api/types';
 import { queryClient } from '@/app/queryClient';
 import { MEMBER_ME_QUERY_KEY } from '@/features/home/memberMeQueryKey';
 import { resetNoticeInterestPromptDismiss } from '@/features/home/noticeInterestPromptDismissState';
-import { extractAccessTokenFromHeaders, tokenStorage } from '@/shared/auth';
+import {
+  clearLogoutSessionRestoreSuppression,
+  extractAccessTokenFromHeaders,
+  tokenStorage,
+} from '@/shared/auth';
 
 export interface LoginPayload extends ApiObjectData {
   password: string;
@@ -84,22 +88,18 @@ export const authApi = {
     const validatedResponse = validateApiResponse(response.status, response.data);
 
     storeAccessTokenFromHeaders(response.headers, '로그인 성공 응답에서 access token을 찾을 수 없습니다.');
+    clearLogoutSessionRestoreSuppression();
     queryClient.removeQueries({ exact: true, queryKey: MEMBER_ME_QUERY_KEY });
     resetNoticeInterestPromptDismiss();
 
     return validatedResponse;
   },
   async logout<TData extends ApiObjectData = ApiObjectData>() {
-    const response = await request<TData>({
+    return request<TData>({
       method: 'post',
       withCredentials: true,
       url: '/auth/logout',
     });
-
-    tokenStorage.clearAccessToken();
-    queryClient.removeQueries({ exact: true, queryKey: MEMBER_ME_QUERY_KEY });
-    resetNoticeInterestPromptDismiss();
-    return response;
   },
   sendSignupEmailVerification(payload: SendSignupEmailVerificationPayload) {
     return request<null>({

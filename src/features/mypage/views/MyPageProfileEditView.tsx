@@ -10,9 +10,11 @@ type MyPageProfileEditViewProps = {
   grade: ProfileGrade;
   interestCount: number;
   isLoading: boolean;
+  isLoggingOut: boolean;
   loadErrorMessage: string | null;
   nickname: string;
   onGradeClick: () => void;
+  onLogout: () => void;
   onNicknameClick: () => void;
   onStudentNumberClick: () => void;
   studentNumber: string;
@@ -32,9 +34,11 @@ export function MyPageProfileEditView({
   grade,
   interestCount,
   isLoading,
+  isLoggingOut,
   loadErrorMessage,
   nickname,
   onGradeClick,
+  onLogout,
   onNicknameClick,
   onStudentNumberClick,
   studentNumber,
@@ -122,7 +126,9 @@ export function MyPageProfileEditView({
             <div className="mt-3 flex h-5 items-center justify-center gap-3">
               <button
                 type="button"
-                className="text-[14px] font-medium leading-[1.4] text-[#636A70]"
+                className="text-[14px] font-medium leading-[1.4] text-[#636A70] disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={isLoggingOut}
+                onClick={onLogout}
               >
                 로그아웃
               </button>

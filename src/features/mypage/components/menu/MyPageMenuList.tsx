@@ -24,7 +24,12 @@ const menuSections = [
 
 const accountActions = ['로그아웃', '회원탈퇴'] as const;
 
-export function MyPageMenuList() {
+type MyPageMenuListProps = {
+  isLoggingOut: boolean;
+  onLogout: () => void;
+};
+
+export function MyPageMenuList({ isLoggingOut, onLogout }: MyPageMenuListProps) {
   return (
     <section className="flex flex-col gap-3" aria-label="주요 메뉴">
       <div className="flex h-[52px] items-center justify-center rounded-xl bg-[#31FFCC] px-4 text-[16px] font-semibold leading-none tracking-normal text-[#202020]">
@@ -52,8 +57,15 @@ export function MyPageMenuList() {
       ))}
 
       <ul className="mt-3 flex items-center justify-center gap-3">
-        <li className="text-[14px] font-medium leading-[1.4] tracking-normal text-[#636A70]">
-          {accountActions[0]}
+        <li>
+          <button
+            type="button"
+            className="text-[14px] font-medium leading-[1.4] tracking-normal text-[#636A70] disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={isLoggingOut}
+            onClick={onLogout}
+          >
+            {accountActions[0]}
+          </button>
         </li>
         <li className="h-3 w-px bg-[#DCDFE2]" aria-hidden="true" />
         <li className="text-[14px] font-medium leading-[1.4] tracking-normal text-[#FF5E47]">

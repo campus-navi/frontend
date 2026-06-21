@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { tokenStorage } from '@/shared/auth';
+import { shouldSuppressSessionRestore, tokenStorage } from '@/shared/auth';
 import { refreshSessionOnce } from '@/shared/auth/refreshSession';
 
 type AuthenticationStatus = 'checking' | 'authenticated' | 'unauthenticated';
@@ -12,12 +12,26 @@ type PublicOnlyRouteProps = {
 };
 
 export function PublicOnlyRoute({ children }: PublicOnlyRouteProps) {
-  const [authenticationStatus, setAuthenticationStatus] = useState<AuthenticationStatus>(() =>
-    tokenStorage.getAccessToken() ? 'authenticated' : 'checking',
-  );
+  const [authenticationStatus, setAuthenticationStatus] = useState<AuthenticationStatus>(() => {
+    if (shouldSuppressSessionRestore()) {
+      return 'unauthenticated';
+    }
+
+    if (tokenStorage.getAccessToken()) {
+      return 'authenticated';
+    }
+
+    return 'checking';
+  });
 
   useEffect(() => {
     if (authenticationStatus !== 'checking') {
+      return undefined;
+    }
+
+    if (shouldSuppressSessionRestore()) {
+      tokenStorage.clearAccessToken();
+      setAuthenticationStatus('unauthenticated');
       return undefined;
     }
 

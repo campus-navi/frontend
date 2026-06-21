@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { normalizeApiError } from '@/api';
+import { useLogout } from '@/features/mypage/hooks/useLogout';
 import { useMyPageSummary } from '@/features/mypage/hooks/useMyPageSummary';
 import { useProfileNicknameValidation } from '@/features/mypage/hooks/useProfileNicknameValidation';
 import { useUpdateProfile } from '@/features/mypage/hooks/useUpdateProfile';
@@ -35,6 +36,7 @@ function normalizeGrade(grade: number): ProfileGrade {
 
 export function useMyPageProfileEditViewModel() {
   const navigate = useNavigate();
+  const { isLoggingOut, logout } = useLogout();
   const { data: summary, isError, isLoading } = useMyPageSummary();
   const updateProfile = useUpdateProfile();
   const isInitializedRef = useRef(false);
@@ -114,12 +116,14 @@ export function useMyPageProfileEditViewModel() {
     grade,
     interestCount: summary?.interestCount ?? 0,
     isLoading,
+    isLoggingOut,
     loadErrorMessage: isError ? '프로필 정보를 불러오지 못했습니다.' : null,
     nickname,
     nicknameHelperText: nicknameValidation.helperText,
     nicknameHelperTone: nicknameValidation.helperTone,
     onGradeChange: setGrade,
     onGradeClick: () => navigate('/mypage/profile/edit/grade'),
+    onLogout: () => void logout(),
     onNicknameClick: () => navigate('/mypage/profile/edit/nickname'),
     onNicknameChange: setNickname,
     onStudentNumberClick: () => navigate('/mypage/profile/edit/student-number'),
