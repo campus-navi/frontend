@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { tokenStorage } from '@/shared/auth';
@@ -12,9 +12,16 @@ type PublicOnlyRouteProps = {
 };
 
 export function PublicOnlyRoute({ children }: PublicOnlyRouteProps) {
-  const [authenticationStatus, setAuthenticationStatus] = useState<AuthenticationStatus>(() =>
-    tokenStorage.getAccessToken() ? 'authenticated' : 'checking',
-  );
+  const location = useLocation();
+  const shouldSkipSessionRestore =
+    (location.state as { skipSessionRestore?: boolean } | null)?.skipSessionRestore === true;
+  const [authenticationStatus, setAuthenticationStatus] = useState<AuthenticationStatus>(() => {
+    if (tokenStorage.getAccessToken()) {
+      return 'authenticated';
+    }
+
+    return shouldSkipSessionRestore ? 'unauthenticated' : 'checking';
+  });
 
   useEffect(() => {
     if (authenticationStatus !== 'checking') {

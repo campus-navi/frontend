@@ -90,16 +90,11 @@ export const authApi = {
     return validatedResponse;
   },
   async logout<TData extends ApiObjectData = ApiObjectData>() {
-    const response = await request<TData>({
+    return request<TData>({
       method: 'post',
       withCredentials: true,
       url: '/auth/logout',
     });
-
-    tokenStorage.clearAccessToken();
-    queryClient.removeQueries({ exact: true, queryKey: MEMBER_ME_QUERY_KEY });
-    resetNoticeInterestPromptDismiss();
-    return response;
   },
   sendSignupEmailVerification(payload: SendSignupEmailVerificationPayload) {
     return request<null>({

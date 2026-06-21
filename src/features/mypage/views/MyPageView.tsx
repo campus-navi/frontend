@@ -8,8 +8,10 @@ import { MyPageProfileSummary } from '@/features/mypage/components/profile/MyPag
 import { MyPageSummaryCards } from '@/features/mypage/components/summary/MyPageSummaryCards';
 
 type MyPageViewProps = {
+  isLoggingOut: boolean;
   onCloseInterestGuide: () => void;
   onEditProfile: () => void;
+  onLogout: () => void;
   shouldOffsetSummary: boolean;
   shouldShowErrorMessage: boolean;
   shouldShowInterestGuide: boolean;
@@ -18,8 +20,10 @@ type MyPageViewProps = {
 };
 
 export function MyPageView({
+  isLoggingOut,
   onCloseInterestGuide,
   onEditProfile,
+  onLogout,
   shouldOffsetSummary,
   shouldShowErrorMessage,
   shouldShowInterestGuide,
@@ -81,7 +85,7 @@ export function MyPageView({
           </div>
 
           <div className="mt-6">
-            <MyPageMenuList />
+            <MyPageMenuList isLoggingOut={isLoggingOut} onLogout={onLogout} />
           </div>
         </section>
       </div>

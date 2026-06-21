@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import type { MyPageSummary } from '@/api';
+import { useLogout } from '@/features/mypage/hooks/useLogout';
 import { useMyPageSummary } from '@/features/mypage/hooks/useMyPageSummary';
 
 const fallbackMyPageSummary: MyPageSummary = {
@@ -20,14 +21,17 @@ const fallbackMyPageSummary: MyPageSummary = {
 
 export function useMyPageViewModel() {
   const navigate = useNavigate();
+  const { isLoggingOut, logout } = useLogout();
   const [isInterestGuideVisible, setIsInterestGuideVisible] = useState(true);
   const { data: myPageSummary, isError, isLoading } = useMyPageSummary();
   const summary = myPageSummary ?? fallbackMyPageSummary;
   const shouldShowInterestGuide = myPageSummary?.interestCount === 0 && isInterestGuideVisible;
 
   return {
+    isLoggingOut,
     onCloseInterestGuide: () => setIsInterestGuideVisible(false),
     onEditProfile: () => navigate('/mypage/profile/edit'),
+    onLogout: () => void logout(),
     shouldOffsetSummary: shouldShowInterestGuide || isLoading || isError,
     shouldShowErrorMessage: isError,
     shouldShowInterestGuide,
