@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { authApi } from '@/api';
 import { queryClient } from '@/app/queryClient';
 import { resetNoticeInterestPromptDismiss } from '@/features/home/noticeInterestPromptDismissState';
-import { tokenStorage } from '@/shared/auth';
+import { setLogoutSessionRestoreSuppression, tokenStorage } from '@/shared/auth';
 
 export function useLogout() {
   const navigate = useNavigate();
@@ -18,6 +18,7 @@ export function useLogout() {
 
     isLoggingOutRef.current = true;
     setIsLoggingOut(true);
+    setLogoutSessionRestoreSuppression();
 
     try {
       await authApi.logout();
@@ -27,10 +28,7 @@ export function useLogout() {
       tokenStorage.clearAccessToken();
       queryClient.clear();
       resetNoticeInterestPromptDismiss();
-      navigate('/login', {
-        replace: true,
-        state: { skipSessionRestore: true },
-      });
+      navigate('/login', { replace: true });
     }
   };
 
