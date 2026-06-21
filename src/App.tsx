@@ -10,6 +10,7 @@ import InfoPostDetailPage from '@/pages/InfoPostDetailPage';
 import InfoSearchPage from '@/pages/InfoSearchPage';
 import MyPage from '@/pages/MyPage';
 import MyPageProfileEditPage from '@/pages/MyPageProfileEditPage';
+import MyPageProfileGradeEditPage from '@/pages/MyPageProfileGradeEditPage';
 import MyPageProfileNicknameEditPage from '@/pages/MyPageProfileNicknameEditPage';
 import MyPageProfileStudentNumberEditPage from '@/pages/MyPageProfileStudentNumberEditPage';
 import MyPageScrapFolderPage from '@/pages/MyPageScrapFolderPage';
@@ -101,6 +102,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <MyPageProfileEditPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/mypage/profile/edit/grade"
+        element={
+          <ProtectedRoute>
+            <MyPageProfileGradeEditPage />
           </ProtectedRoute>
         }
       />
