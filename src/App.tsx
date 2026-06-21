@@ -9,6 +9,7 @@ import InfoPage from '@/pages/InfoPage';
 import InfoPostDetailPage from '@/pages/InfoPostDetailPage';
 import InfoSearchPage from '@/pages/InfoSearchPage';
 import MyPage from '@/pages/MyPage';
+import MyPageProfileEditPage from '@/pages/MyPageProfileEditPage';
 import MyPageScrapFolderPage from '@/pages/MyPageScrapFolderPage';
 import MyPageScrapsPage from '@/pages/MyPageScrapsPage';
 import NoticeInterestsCompletePage from '@/pages/NoticeInterestsCompletePage';
@@ -90,6 +91,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <MyPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/mypage/profile/edit"
+        element={
+          <ProtectedRoute>
+            <MyPageProfileEditPage />
           </ProtectedRoute>
         }
       />

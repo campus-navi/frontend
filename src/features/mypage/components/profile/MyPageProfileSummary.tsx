@@ -1,14 +1,16 @@
 import { SvgIcon } from '@/components/ui/SvgIcon';
+import { MyPageProfileAvatar } from '@/features/mypage/components/profile/MyPageProfileAvatar';
 
 type MyPageProfileSummaryProps = {
   email: string;
   name: string;
+  onEdit: () => void;
 };
 
-export function MyPageProfileSummary({ email, name }: MyPageProfileSummaryProps) {
+export function MyPageProfileSummary({ email, name, onEdit }: MyPageProfileSummaryProps) {
   return (
     <section className="relative rounded-xl bg-white px-4 pb-5 pt-3" aria-labelledby="mypage-profile-title">
-      <ProfileImagePlaceholder />
+      <MyPageProfileAvatar className="absolute right-4 top-[-48px]" />
 
       <div className="flex max-w-[210px] flex-col items-start gap-1">
         <div className="flex max-w-full items-center gap-1">
@@ -18,12 +20,14 @@ export function MyPageProfileSummary({ email, name }: MyPageProfileSummaryProps)
           >
             {name}
           </h2>
-          <span
-            className="flex h-5 w-5 shrink-0 items-center justify-center text-[#565656]"
-            aria-hidden="true"
+          <button
+            type="button"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[#565656] transition-colors hover:bg-[#F3F5FA]"
+            aria-label="프로필 수정"
+            onClick={onEdit}
           >
             <EditIcon />
-          </span>
+          </button>
         </div>
 
         <p className="max-w-full truncate text-[12px] font-normal leading-[1.2] tracking-[-0.02em] text-[#4B5157]">
@@ -31,27 +35,6 @@ export function MyPageProfileSummary({ email, name }: MyPageProfileSummaryProps)
         </p>
       </div>
     </section>
-  );
-}
-
-function ProfileImagePlaceholder() {
-  return (
-    <div
-      className="absolute right-4 top-[-48px] flex h-24 w-24 items-center justify-center rounded-full bg-[#C8FFF0] text-[#0CA98D]"
-      aria-label="프로필 이미지"
-      role="img"
-    >
-      <SvgIcon size={72} viewBox="0 0 72 72">
-        <circle cx="36" cy="22" r="13" fill="none" stroke="currentColor" strokeWidth="2.5" />
-        <path
-          d="M14 63c3.5-15.2 12.8-22.5 22-22.5S54.5 47.8 58 63"
-          fill="none"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeWidth="2.5"
-        />
-      </SvgIcon>
-    </div>
   );
 }
 
