@@ -18,6 +18,10 @@ export interface UpdateMemberProfileRequest extends ApiObjectData {
   studentNumber: string;
 }
 
+export interface UpdateMemberNicknameRequest extends ApiObjectData {
+  nickname: string;
+}
+
 interface MemberMeResponse extends ApiObjectData {
   hasSetInterests?: boolean;
   nickname?: string;
@@ -60,6 +64,14 @@ export const memberApi = {
   },
 
   async updateProfile(payload: UpdateMemberProfileRequest) {
+    return request<null>({
+      data: payload,
+      method: 'patch',
+      url: '/members/me',
+    });
+  },
+
+  async updateNickname(payload: UpdateMemberNicknameRequest) {
     return request<null>({
       data: payload,
       method: 'patch',
