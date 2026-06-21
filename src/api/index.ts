@@ -27,6 +27,7 @@ export type {
   UpdateMemberInterestsRequest,
   UpdateMemberNicknameRequest,
   UpdateMemberProfileRequest,
+  UpdateMemberStudentNumberRequest,
 } from '@/api/modules/member';
 export type {
   CreateScrapFolderRequest,

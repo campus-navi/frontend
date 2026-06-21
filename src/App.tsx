@@ -11,6 +11,7 @@ import InfoSearchPage from '@/pages/InfoSearchPage';
 import MyPage from '@/pages/MyPage';
 import MyPageProfileEditPage from '@/pages/MyPageProfileEditPage';
 import MyPageProfileNicknameEditPage from '@/pages/MyPageProfileNicknameEditPage';
+import MyPageProfileStudentNumberEditPage from '@/pages/MyPageProfileStudentNumberEditPage';
 import MyPageScrapFolderPage from '@/pages/MyPageScrapFolderPage';
 import MyPageScrapsPage from '@/pages/MyPageScrapsPage';
 import NoticeInterestsCompletePage from '@/pages/NoticeInterestsCompletePage';
@@ -108,6 +109,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <MyPageProfileNicknameEditPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/mypage/profile/edit/student-number"
+        element={
+          <ProtectedRoute>
+            <MyPageProfileStudentNumberEditPage />
           </ProtectedRoute>
         }
       />

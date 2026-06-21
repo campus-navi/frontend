@@ -4,8 +4,6 @@ import { SvgIcon } from '@/components/ui/SvgIcon';
 import { MyPageProfileAvatar } from '@/features/mypage/components/profile/MyPageProfileAvatar';
 import type { ProfileGrade } from '@/features/mypage/view-models/useMyPageProfileEditViewModel';
 
-type HelperTone = 'default' | 'success' | 'error';
-
 type MyPageProfileEditViewProps = {
   department: string;
   email: string;
@@ -15,9 +13,8 @@ type MyPageProfileEditViewProps = {
   loadErrorMessage: string | null;
   nickname: string;
   onNicknameClick: () => void;
-  onStudentNumberChange: (value: string) => void;
+  onStudentNumberClick: () => void;
   studentNumber: string;
-  studentNumberHelperText?: string | null;
   submitErrorMessage: string | null;
 };
 
@@ -37,9 +34,8 @@ export function MyPageProfileEditView({
   loadErrorMessage,
   nickname,
   onNicknameClick,
-  onStudentNumberChange,
+  onStudentNumberClick,
   studentNumber,
-  studentNumberHelperText,
   submitErrorMessage,
 }: MyPageProfileEditViewProps) {
   const selectedGradeLabel =
@@ -92,15 +88,10 @@ export function MyPageProfileEditView({
               </h2>
 
               <ProfileMenuRow label="닉네임" value={nickname} onClick={onNicknameClick} />
-              <EditableRow
-                inputMode="numeric"
+              <ProfileMenuRow
                 label="학번"
                 value={studentNumber}
-                maxLength={10}
-                placeholder="학번"
-                helperText={studentNumberHelperText ?? undefined}
-                helperTone={studentNumberHelperText ? 'error' : 'default'}
-                onChange={onStudentNumberChange}
+                onClick={onStudentNumberClick}
               />
               <div className="py-3">
                 <div className="flex min-h-5 w-full items-center justify-between gap-4">
@@ -153,61 +144,6 @@ export function MyPageProfileEditView({
 
       <MobileGnb activeItem="my" />
     </main>
-  );
-}
-
-type EditableRowProps = {
-  helperText?: string;
-  helperTone: HelperTone;
-  inputMode?: 'numeric' | 'text';
-  label: string;
-  maxLength: number;
-  onChange: (value: string) => void;
-  placeholder: string;
-  value: string;
-};
-
-function EditableRow({
-  helperText,
-  helperTone,
-  inputMode = 'text',
-  label,
-  maxLength,
-  onChange,
-  placeholder,
-  value,
-}: EditableRowProps) {
-  const helperClassName =
-    helperTone === 'error'
-      ? 'text-[#FF5E47]'
-      : helperTone === 'success'
-        ? 'text-[#0BC798]'
-        : 'text-[#636A70]';
-
-  return (
-    <label className="block py-3">
-      <span className="flex min-h-5 items-center justify-between gap-4">
-        <span className="shrink-0 text-[14px] font-medium leading-[1.4] text-[#292B2C]">
-          {label}
-        </span>
-        <span className="flex min-w-0 items-center gap-1">
-          <input
-            className="min-w-0 max-w-[190px] bg-transparent text-right text-[12px] font-medium leading-[1.2] text-[#BFC4C8] outline-none placeholder:text-[#BFC4C8]"
-            inputMode={inputMode}
-            maxLength={maxLength}
-            placeholder={placeholder}
-            value={value}
-            onChange={(event) => onChange(event.target.value)}
-          />
-          <ChevronIcon />
-        </span>
-      </span>
-      {helperText ? (
-        <span className={`mt-1 block text-right text-[12px] leading-[1.4] ${helperClassName}`}>
-          {helperText}
-        </span>
-      ) : null}
-    </label>
   );
 }
 

@@ -22,6 +22,10 @@ export interface UpdateMemberNicknameRequest extends ApiObjectData {
   nickname: string;
 }
 
+export interface UpdateMemberStudentNumberRequest extends ApiObjectData {
+  studentNumber: string;
+}
+
 interface MemberMeResponse extends ApiObjectData {
   hasSetInterests?: boolean;
   nickname?: string;
@@ -72,6 +76,14 @@ export const memberApi = {
   },
 
   async updateNickname(payload: UpdateMemberNicknameRequest) {
+    return request<null>({
+      data: payload,
+      method: 'patch',
+      url: '/members/me',
+    });
+  },
+
+  async updateStudentNumber(payload: UpdateMemberStudentNumberRequest) {
     return request<null>({
       data: payload,
       method: 'patch',
