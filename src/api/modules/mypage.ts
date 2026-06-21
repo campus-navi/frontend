@@ -14,6 +14,7 @@ export interface MyPageSummary extends ApiObjectData {
   nickname: string;
   remindCount: number;
   scrapCount: number;
+  studentNumber: string;
 }
 
 export interface MyPageRecentScrap extends ApiObjectData {
@@ -86,6 +87,7 @@ interface MyPageSummaryResponse extends ApiObjectData {
   nickname?: unknown;
   remindCount?: unknown;
   scrapCount?: unknown;
+  studentNumber?: unknown;
 }
 
 interface MyPageRecentScrapResponse extends ApiObjectData {
@@ -135,7 +137,8 @@ function normalizeMyPageSummary(data: MyPageSummaryResponse): MyPageSummary {
     !data.departments.every((department) => typeof department === 'string') ||
     typeof data.scrapCount !== 'number' ||
     typeof data.remindCount !== 'number' ||
-    typeof data.interestCount !== 'number'
+    typeof data.interestCount !== 'number' ||
+    (typeof data.studentNumber !== 'string' && typeof data.studentNumber !== 'number')
   ) {
     throw createApiError({
       code: COMMON_ERROR_CODES.INVALID_RESPONSE,
@@ -155,6 +158,7 @@ function normalizeMyPageSummary(data: MyPageSummaryResponse): MyPageSummary {
     nickname: data.nickname,
     remindCount: data.remindCount,
     scrapCount: data.scrapCount,
+    studentNumber: String(data.studentNumber),
   };
 }
 

@@ -9,6 +9,7 @@ import { MyPageSummaryCards } from '@/features/mypage/components/summary/MyPageS
 
 type MyPageViewProps = {
   onCloseInterestGuide: () => void;
+  onEditProfile: () => void;
   shouldOffsetSummary: boolean;
   shouldShowErrorMessage: boolean;
   shouldShowInterestGuide: boolean;
@@ -18,6 +19,7 @@ type MyPageViewProps = {
 
 export function MyPageView({
   onCloseInterestGuide,
+  onEditProfile,
   shouldOffsetSummary,
   shouldShowErrorMessage,
   shouldShowInterestGuide,
@@ -65,6 +67,7 @@ export function MyPageView({
             <MyPageProfileSummary
               email={summary.email}
               name={summary.name}
+              onEdit={onEditProfile}
             />
           </div>
 

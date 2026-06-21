@@ -22,7 +22,11 @@ export type {
   ApiSuccessResponse,
 } from '@/api/types';
 export type { DeadlinePost, DeadlinePosts, FeedCardPost, FeedCards } from '@/api/modules/feed';
-export type { MemberMe, UpdateMemberInterestsRequest } from '@/api/modules/member';
+export type {
+  MemberMe,
+  UpdateMemberInterestsRequest,
+  UpdateMemberProfileRequest,
+} from '@/api/modules/member';
 export type {
   CreateScrapFolderRequest,
   MyPageFolderScrap,
