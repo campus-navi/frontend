@@ -46,7 +46,6 @@ export function MyPageProfileEditView({
   studentNumberHelperText,
   submitErrorMessage,
 }: MyPageProfileEditViewProps) {
-  const username = email.includes('@') ? email.split('@')[0] : '';
   const selectedGradeLabel =
     GRADE_OPTIONS.find((option) => option.value === grade)?.label ?? '1학년';
 
@@ -137,7 +136,7 @@ export function MyPageProfileEditView({
                 계정
               </h2>
               <ReadOnlyRow label="이메일" value={email || '-'} />
-              <AccountMenuRow label="아이디 변경" value={username || '-'} />
+              <AccountMenuRow label="아이디 변경" />
               <AccountMenuRow label="비밀번호 변경" />
             </section>
 
