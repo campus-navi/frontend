@@ -121,6 +121,7 @@ export function useMyPageProfileEditViewModel() {
     onGradeChange: setGrade,
     onNicknameClick: () => navigate('/mypage/profile/edit/nickname'),
     onNicknameChange: setNickname,
+    onStudentNumberClick: () => navigate('/mypage/profile/edit/student-number'),
     onStudentNumberChange: (value: string) =>
       setStudentNumber(value.replace(/\D/g, '').slice(0, 10)),
     onSubmit: handleSubmit,
