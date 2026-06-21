@@ -171,6 +171,16 @@ export function AdmissionYearStep({ selectedYear, years, onSelect }: AdmissionYe
     }
   };
 
+  const handleYearClick = (year: number) => {
+    const nextIndex = years.indexOf(year);
+
+    scrollToIndex(nextIndex, 'smooth');
+
+    if (year !== selectedYear) {
+      onSelect(year);
+    }
+  };
+
   return (
     <div className="flex h-full flex-col">
       <h1 className="text-[22px] font-bold leading-[1.45] tracking-[-0.03em] text-[#303030]">
@@ -198,7 +208,7 @@ export function AdmissionYearStep({ selectedYear, years, onSelect }: AdmissionYe
                   <button
                     key={year}
                     type="button"
-                    onClick={() => scrollToIndex(years.indexOf(year), 'smooth')}
+                    onClick={() => handleYearClick(year)}
                     className={[
                       'relative z-10 flex w-full snap-center items-center justify-center text-center transition-all duration-150',
                       isSelected ? 'text-[22px] font-medium text-[#121212]' : 'text-[22px] font-medium text-[#E1E1E1]',

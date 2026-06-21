@@ -22,7 +22,8 @@ export interface UpdateMemberNicknameRequest extends ApiObjectData {
   nickname: string;
 }
 
-export interface UpdateMemberStudentNumberRequest extends ApiObjectData {
+export interface UpdateStudentNumberRequest extends ApiObjectData {
+  admissionYear: number;
   studentNumber: string;
 }
 
@@ -83,11 +84,11 @@ export const memberApi = {
     });
   },
 
-  async updateStudentNumber(payload: UpdateMemberStudentNumberRequest) {
-    return request<null>({
+  async updateStudentNumber(payload: UpdateStudentNumberRequest) {
+    return request<string>({
       data: payload,
       method: 'patch',
-      url: '/members/me',
+      url: '/members/me/student-number',
     });
   },
 };

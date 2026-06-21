@@ -16,6 +16,7 @@ export function useMyPageProfileStudentNumberEditViewModel() {
   const isInitializedRef = useRef(false);
   const isSubmittingRef = useRef(false);
   const [step, setStep] = useState<StudentNumberEditStep>('admission-year');
+  const [originalAdmissionYear, setOriginalAdmissionYear] = useState(defaultAdmissionYear);
   const [admissionYear, setAdmissionYear] = useState(defaultAdmissionYear);
   const [originalStudentNumber, setOriginalStudentNumber] = useState('');
   const [studentNumber, setStudentNumber] = useState('');
@@ -26,12 +27,15 @@ export function useMyPageProfileStudentNumberEditViewModel() {
     }
 
     isInitializedRef.current = true;
+    setOriginalAdmissionYear(summary.admissionYear);
     setAdmissionYear(summary.admissionYear);
     setOriginalStudentNumber(summary.studentNumber);
     setStudentNumber(summary.studentNumber);
   }, [summary]);
 
-  const isChanged = studentNumber !== originalStudentNumber;
+  const isChanged =
+    admissionYear !== originalAdmissionYear ||
+    studentNumber !== originalStudentNumber;
   const isValid = isSignupStudentNumberValid(studentNumber);
   const canSubmit =
     isInitializedRef.current &&
@@ -56,6 +60,14 @@ export function useMyPageProfileStudentNumberEditViewModel() {
     setStudentNumber(value.replace(/\D/g, '').slice(0, STUDENT_NUMBER_MAX_LENGTH));
   };
 
+  const handleAdmissionYearChange = (year: number) => {
+    if (updateStudentNumber.isError) {
+      updateStudentNumber.reset();
+    }
+
+    setAdmissionYear(year);
+  };
+
   const handleSubmit = async () => {
     if (step === 'admission-year') {
       setStep('student-number');
@@ -69,7 +81,10 @@ export function useMyPageProfileStudentNumberEditViewModel() {
     isSubmittingRef.current = true;
 
     try {
-      await updateStudentNumber.mutateAsync({ studentNumber });
+      await updateStudentNumber.mutateAsync({
+        admissionYear,
+        studentNumber,
+      });
       navigate('/mypage/profile/edit', { replace: true });
     } catch {
       // Mutation state renders the fixed user-facing error.
@@ -86,7 +101,7 @@ export function useMyPageProfileStudentNumberEditViewModel() {
       submitErrorMessage || !studentNumber || !isValid ? 'error' : 'default',
     isLoading,
     loadErrorMessage: isError ? '프로필 정보를 불러오지 못했습니다.' : null,
-    onAdmissionYearChange: setAdmissionYear,
+    onAdmissionYearChange: handleAdmissionYearChange,
     onBack: () => {
       if (step === 'student-number') {
         setStep('admission-year');
