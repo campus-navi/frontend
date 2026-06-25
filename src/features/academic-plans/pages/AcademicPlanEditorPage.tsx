@@ -8,12 +8,15 @@ import {
   academicPlanSectionConfigs,
   getAcademicPlanEditorRouteState,
 } from '@/features/academic-plans/academicPlanEditorState';
+import { useMyPageSummary } from '@/features/mypage/hooks/useMyPageSummary';
 
 export function AcademicPlanEditorPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isExitModalOpen, setIsExitModalOpen] = useState(false);
   const editorState = getAcademicPlanEditorRouteState(location.state);
+  const { data: summary } = useMyPageSummary();
+  const nickname = summary?.nickname?.trim() || '사용자';
 
   useEffect(() => {
     if (!editorState) {
@@ -47,7 +50,7 @@ export function AcademicPlanEditorPage() {
 
         <section className="px-4 pb-[calc(128px+env(safe-area-inset-bottom))] pt-12">
           <h1 className="text-[24px] font-bold leading-[1.42] text-[#292B2C]">
-            정현우님의 서류양식을
+            {nickname}님의 서류양식을
             <br />
             완성해 주세요.
           </h1>
