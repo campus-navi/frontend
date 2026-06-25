@@ -8,6 +8,14 @@ export type AcademicPlanSelection = {
   selectedTargetName: string;
 };
 
+export type AcademicPlanCompletedSelection = {
+  selectedCampusId: number;
+  selectedCampusName: string;
+  selectedPlanType: AcademicPlanType;
+  selectedTargetId: number;
+  selectedTargetName: string;
+};
+
 export type AcademicPlanTypeOption = {
   type: AcademicPlanType;
   label: string;

@@ -4,7 +4,11 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { isDepartmentPlanType, type AcademicPlanTargetOption, type AcademicPlanType } from '@/api';
 import { useAcademicPlanTargetCampuses } from '@/features/academic-plans/hooks/useAcademicPlanTargetCampuses';
 import { useAcademicPlanTargetOptions } from '@/features/academic-plans/hooks/useAcademicPlanTargetOptions';
-import type { AcademicPlanSelection, AcademicPlanTypeOption } from '@/features/academic-plans/types';
+import type {
+  AcademicPlanCompletedSelection,
+  AcademicPlanSelection,
+  AcademicPlanTypeOption,
+} from '@/features/academic-plans/types';
 
 export const academicPlanTypeOptions: AcademicPlanTypeOption[] = [
   { type: 'DOUBLE_MAJOR', label: '이중전공' },
@@ -86,12 +90,20 @@ export function useAcademicPlanTargetSelectionViewModel() {
   };
 
   const selectTarget = (target: AcademicPlanTargetOption) => {
-    setSelection((current) => ({
-      ...current,
+    if (selection.selectedCampusId === null || selection.selectedPlanType === null) {
+      return;
+    }
+
+    const completedSelection: AcademicPlanCompletedSelection = {
+      selectedCampusId: selection.selectedCampusId,
+      selectedCampusName: selection.selectedCampusName,
+      selectedPlanType: selection.selectedPlanType,
       selectedTargetId: target.id,
       selectedTargetName: target.name,
-    }));
-    navigate('/studio/academic-plans/editor');
+    };
+
+    setSelection(completedSelection);
+    navigate('/studio/academic-plans/editor', { state: completedSelection });
   };
 
   const goBack = () => {

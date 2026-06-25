@@ -1,7 +1,9 @@
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 import { AppHeader } from '@/components/ui/AppHeader';
 import { CtaButton } from '@/components/ui/CtaButton';
+import type { AcademicPlanType } from '@/api';
+import type { AcademicPlanCompletedSelection } from '@/features/academic-plans/types';
 
 const sections = [
   { title: '🪪 지원동기', required: true, status: '작성중' },
@@ -10,8 +12,47 @@ const sections = [
   { title: '🌐 기타', required: false, status: '작성전' },
 ];
 
+const academicPlanTypes = new Set<AcademicPlanType>([
+  'DOUBLE_MAJOR',
+  'COMPLEX_MAJOR',
+  'CONVERGENCE_MAJOR',
+  'STUDENT_DESIGN',
+]);
+
+function getAcademicPlanCompletedSelection(state: unknown): AcademicPlanCompletedSelection | null {
+  if (!state || typeof state !== 'object') {
+    return null;
+  }
+
+  const selection = state as Partial<AcademicPlanCompletedSelection>;
+
+  if (
+    typeof selection.selectedCampusId !== 'number' ||
+    typeof selection.selectedCampusName !== 'string' ||
+    !academicPlanTypes.has(selection.selectedPlanType as AcademicPlanType) ||
+    typeof selection.selectedTargetId !== 'number' ||
+    typeof selection.selectedTargetName !== 'string'
+  ) {
+    return null;
+  }
+
+  return {
+    selectedCampusId: selection.selectedCampusId,
+    selectedCampusName: selection.selectedCampusName,
+    selectedPlanType: selection.selectedPlanType as AcademicPlanType,
+    selectedTargetId: selection.selectedTargetId,
+    selectedTargetName: selection.selectedTargetName,
+  };
+}
+
 export function AcademicPlanEditorPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const selection = getAcademicPlanCompletedSelection(location.state);
+
+  if (!selection) {
+    return <Navigate replace to="/studio/academic-plans/target" />;
+  }
 
   return (
     <main className="min-h-[100svh] bg-white">
