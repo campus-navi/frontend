@@ -2,6 +2,8 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { ProtectedRoute } from '@/components/routing/ProtectedRoute';
 import { PublicOnlyRoute } from '@/components/routing/PublicOnlyRoute';
+import AcademicPlanEditorPage from '@/pages/AcademicPlanEditorPage';
+import AcademicPlanTargetSelectionPage from '@/pages/AcademicPlanTargetSelectionPage';
 import CardNewsDetailPage from '@/pages/CardNewsDetailPage';
 import DeadlinesPage from '@/pages/DeadlinesPage';
 import HomePage from '@/pages/HomePage';
@@ -21,6 +23,7 @@ import OnboardingPage from '@/pages/OnboardingPage';
 import LoginPage from '@/pages/LoginPage';
 import SignupCompletePage from '@/pages/SignupCompletePage';
 import SignupPage from '@/pages/SignupPage';
+import StudioPage from '@/pages/StudioPage';
 
 export default function App() {
   return (
@@ -31,6 +34,38 @@ export default function App() {
           <PublicOnlyRoute>
             <OnboardingPage />
           </PublicOnlyRoute>
+        }
+      />
+      <Route
+        path="/studio"
+        element={
+          <ProtectedRoute>
+            <StudioPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/studio/academic-plans"
+        element={
+          <ProtectedRoute>
+            <AcademicPlanTargetSelectionPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/studio/academic-plans/target"
+        element={
+          <ProtectedRoute>
+            <AcademicPlanTargetSelectionPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/studio/academic-plans/editor"
+        element={
+          <ProtectedRoute>
+            <AcademicPlanEditorPage />
+          </ProtectedRoute>
         }
       />
       <Route

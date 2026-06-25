@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 
 import { SvgIcon } from '@/components/ui/SvgIcon';
 
-type MobileGnbItem = 'home' | 'community' | 'date' | 'info' | 'my';
+type MobileGnbItem = 'home' | 'community' | 'studio' | 'info' | 'my';
 
 type MobileGnbProps = {
   activeItem: MobileGnbItem;
@@ -12,7 +12,7 @@ type MobileGnbProps = {
 const items: Array<{ id: MobileGnbItem; label: string; path?: string; icon: ReactNode }> = [
   { id: 'home', label: '홈', path: '/home', icon: <HomeIcon /> },
   { id: 'community', label: '커뮤니티', icon: <CommunityIcon /> },
-  { id: 'date', label: '시간표', icon: <CalendarIcon /> },
+  { id: 'studio', label: '스튜디오', path: '/studio', icon: <StudioIcon /> },
   { id: 'info', label: '교내정보', path: '/info', icon: <InfoIcon /> },
   { id: 'my', label: '마이페이지', path: '/mypage', icon: <MyIcon /> },
 ];
@@ -102,11 +102,11 @@ function CommunityIcon() {
   );
 }
 
-function CalendarIcon() {
+function StudioIcon() {
   return (
     <SvgIcon size={24} viewBox="0 0 24 24">
       <path
-        d="M7.2 4.2v3M16.8 4.2v3M5 9.2h14M6.5 5.8h11A1.5 1.5 0 0 1 19 7.3v11.2a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 18.5V7.3a1.5 1.5 0 0 1 1.5-1.5Z"
+        d="M6.2 8.4h11.6M7.2 6h9.6M8 8.4v8.8a1.2 1.2 0 0 0 1.2 1.2h5.6a1.2 1.2 0 0 0 1.2-1.2V8.4M10 12.2h4M10 15h4"
         fill="none"
         stroke="currentColor"
         strokeLinecap="round"

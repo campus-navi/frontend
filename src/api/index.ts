@@ -1,6 +1,7 @@
 export { getIsSessionExpired, markSessionExpired, resetSessionExpired, subscribeSessionExpired } from '@/api/auth/session';
 export { apiClient, request } from '@/api/client';
 export { ApiError, createApiError, isApiError, normalizeApiError } from '@/api/errors';
+export { academicPlanApi, isDepartmentPlanType } from '@/api/modules/academicPlan';
 export { authApi } from '@/api/modules/auth';
 export { commentApi } from '@/api/modules/comment';
 export { departmentApi } from '@/api/modules/department';
@@ -21,6 +22,7 @@ export type {
   ApiResponseData,
   ApiSuccessResponse,
 } from '@/api/types';
+export type { AcademicPlanTargetOption, AcademicPlanType } from '@/api/modules/academicPlan';
 export type { DeadlinePost, DeadlinePosts, FeedCardPost, FeedCards } from '@/api/modules/feed';
 export type {
   MemberMe,
