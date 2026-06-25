@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/routing/ProtectedRoute';
 import { PublicOnlyRoute } from '@/components/routing/PublicOnlyRoute';
 import AcademicPlanEditorPage from '@/pages/AcademicPlanEditorPage';
+import AcademicPlanSectionInputPage from '@/pages/AcademicPlanSectionInputPage';
 import AcademicPlanTargetSelectionPage from '@/pages/AcademicPlanTargetSelectionPage';
 import CardNewsDetailPage from '@/pages/CardNewsDetailPage';
 import DeadlinesPage from '@/pages/DeadlinesPage';
@@ -57,6 +58,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <AcademicPlanTargetSelectionPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/studio/academic-plans/editor/:sectionId"
+        element={
+          <ProtectedRoute>
+            <AcademicPlanSectionInputPage />
           </ProtectedRoute>
         }
       />

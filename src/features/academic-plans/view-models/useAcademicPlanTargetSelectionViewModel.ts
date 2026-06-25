@@ -2,10 +2,12 @@ import { useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { isDepartmentPlanType, type AcademicPlanTargetOption, type AcademicPlanType } from '@/api';
+import { createEmptyAcademicPlanSections } from '@/features/academic-plans/academicPlanEditorState';
 import { useAcademicPlanTargetCampuses } from '@/features/academic-plans/hooks/useAcademicPlanTargetCampuses';
 import { useAcademicPlanTargetOptions } from '@/features/academic-plans/hooks/useAcademicPlanTargetOptions';
 import type {
   AcademicPlanCompletedSelection,
+  AcademicPlanEditorRouteState,
   AcademicPlanSelection,
   AcademicPlanTypeOption,
 } from '@/features/academic-plans/types';
@@ -103,7 +105,12 @@ export function useAcademicPlanTargetSelectionViewModel() {
     };
 
     setSelection(completedSelection);
-    navigate('/studio/academic-plans/editor', { state: completedSelection });
+    navigate('/studio/academic-plans/editor', {
+      state: {
+        ...completedSelection,
+        sections: createEmptyAcademicPlanSections(),
+      } satisfies AcademicPlanEditorRouteState,
+    });
   };
 
   const goBack = () => {
