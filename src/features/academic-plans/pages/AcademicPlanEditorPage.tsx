@@ -26,6 +26,9 @@ export function AcademicPlanEditorPage() {
   const handleSectionClick = (sectionId: string) => {
     navigate(`/studio/academic-plans/editor/${sectionId}`, { replace: true, state: editorState });
   };
+  const isAnalysisCtaEnabled = academicPlanSectionConfigs
+    .filter((section) => section.required)
+    .every((section) => editorState.sections[section.id].isSaved);
 
   return (
     <main className="min-h-[100svh] bg-white">
@@ -74,7 +77,7 @@ export function AcademicPlanEditorPage() {
         </section>
 
         <div className="fixed bottom-0 left-1/2 z-20 w-full max-w-[393px] -translate-x-1/2 bg-white px-4 pb-[max(36px,env(safe-area-inset-bottom))] pt-3">
-          <CtaButton>분석 시작</CtaButton>
+          <CtaButton disabled={!isAnalysisCtaEnabled}>분석 시작</CtaButton>
         </div>
       </div>
     </main>
