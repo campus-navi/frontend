@@ -24,7 +24,7 @@ export function AcademicPlanEditorPage() {
   }
 
   const handleSectionClick = (sectionId: string) => {
-    navigate(`/studio/academic-plans/editor/${sectionId}`, { state: editorState });
+    navigate(`/studio/academic-plans/editor/${sectionId}`, { replace: true, state: editorState });
   };
 
   return (
