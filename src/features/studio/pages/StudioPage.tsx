@@ -11,6 +11,13 @@ import { academicPlanTypeOptions } from '@/features/academic-plans/view-models/u
 
 type StudioTab = 'tools' | 'documents';
 type DocumentFilter = 'all' | 'completed' | 'draft';
+type DocumentStatus = 'analyzing' | 'new' | 'draft' | 'completed';
+type StudioDocument = {
+  id: number;
+  title: string;
+  time: string;
+  status: DocumentStatus;
+};
 
 const toolCards = [
   { title: '학업계획서', description: '자기소개서 AI에 대한 기능 설명이 여기에 들어가야합니다.', ready: true },
@@ -18,12 +25,17 @@ const toolCards = [
   { title: '자기소개서', description: '자기소개서 AI에 대한 기능 설명이 여기에 들어가야합니다.', ready: false },
 ];
 
-const documentCards = [
+const documentCards: StudioDocument[] = [
   { id: 1, title: '학업계획서', time: '방금전', status: 'analyzing' },
   { id: 2, title: '학업계획서', time: '방금전', status: 'new' },
   { id: 3, title: '학업계획서', time: '방금전', status: 'draft' },
   { id: 4, title: '학업계획서', time: '6.15(월) 오후 9:03', status: 'completed' },
 ];
+
+const documentFilterStatusMap: Record<Exclude<DocumentFilter, 'all'>, DocumentStatus> = {
+  completed: 'completed',
+  draft: 'draft',
+};
 
 export function StudioPage() {
   const navigate = useNavigate();
@@ -296,6 +308,11 @@ function StudioDocumentsView({
   selectedFilter: DocumentFilter;
   onFilterChange: (filter: DocumentFilter) => void;
 }) {
+  const filteredDocumentCards =
+    selectedFilter === 'all'
+      ? documentCards
+      : documentCards.filter((document) => document.status === documentFilterStatusMap[selectedFilter]);
+
   return (
     <section className="flex flex-1 flex-col overflow-y-auto px-4 py-6">
       <div className="flex gap-2">
@@ -311,9 +328,14 @@ function StudioDocumentsView({
       </div>
 
       <div className="mt-4 flex flex-col gap-2">
-        {documentCards.map((document) => (
+        {filteredDocumentCards.map((document) => (
           <StudioDocumentCard key={document.id} document={document} />
         ))}
+        {filteredDocumentCards.length === 0 ? (
+          <div className="flex min-h-[148px] items-center justify-center rounded-[10px] bg-white px-4 text-center text-[15px] font-medium leading-6 text-[#A0A7AF] shadow-[0_6px_22px_rgba(25,31,40,0.06)]">
+            표시할 문서가 없어요.
+          </div>
+        ) : null}
       </div>
     </section>
   );
@@ -322,7 +344,7 @@ function StudioDocumentsView({
 function StudioDocumentCard({
   document,
 }: {
-  document: { title: string; time: string; status: string };
+  document: StudioDocument;
 }) {
   return (
     <article className="flex h-[106px] rounded-[10px] bg-white px-3 py-4 shadow-[0_6px_22px_rgba(25,31,40,0.06)]">
