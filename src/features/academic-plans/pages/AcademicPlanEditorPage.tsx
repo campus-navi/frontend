@@ -1,4 +1,5 @@
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { AppHeader } from '@/components/ui/AppHeader';
 import { CtaButton } from '@/components/ui/CtaButton';
@@ -50,8 +51,14 @@ export function AcademicPlanEditorPage() {
   const location = useLocation();
   const selection = getAcademicPlanCompletedSelection(location.state);
 
+  useEffect(() => {
+    if (!selection) {
+      navigate('/studio/academic-plans/target', { replace: true });
+    }
+  }, [selection, navigate]);
+
   if (!selection) {
-    return <Navigate replace to="/studio/academic-plans/target" />;
+    return null;
   }
 
   return (
