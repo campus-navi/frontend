@@ -64,8 +64,8 @@ export function AcademicPlanSectionInputPage() {
       },
     });
   };
-  const handleExit = (shouldSaveDraft: boolean) => {
-    navigate(shouldSaveDraft ? '/studio?tab=documents' : '/studio');
+  const handleExit = () => {
+    navigate('/studio/academic-plans/editor', { replace: true, state: editorState });
   };
 
   return (
@@ -114,6 +114,7 @@ export function AcademicPlanSectionInputPage() {
         isOpen={isExitModalOpen}
         onClose={() => setIsExitModalOpen(false)}
         onExit={handleExit}
+        variant="leave"
       />
     </main>
   );

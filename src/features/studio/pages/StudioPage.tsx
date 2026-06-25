@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { MouseEventHandler, PointerEventHandler, ReactNode } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { MobileGnb } from '@/components/ui/MobileGnb';
@@ -17,6 +17,9 @@ type StudioDocument = {
   title: string;
   time: string;
   status: DocumentStatus;
+};
+type StudioRouteState = {
+  showAcademicPlanDraftToast?: boolean;
 };
 
 const toolCards = [
@@ -37,14 +40,47 @@ const documentFilterStatusMap: Record<Exclude<DocumentFilter, 'all'>, DocumentSt
   draft: 'draft',
 };
 
+function isStudioRouteState(state: unknown): state is StudioRouteState {
+  return typeof state === 'object' && state !== null && 'showAcademicPlanDraftToast' in state;
+}
+
 export function StudioPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<StudioTab>(() =>
     searchParams.get('tab') === 'documents' ? 'documents' : 'tools',
   );
   const [documentFilter, setDocumentFilter] = useState<DocumentFilter>('all');
   const [isPlanTypeSheetOpen, setIsPlanTypeSheetOpen] = useState(false);
+  const [isDraftToastVisible, setIsDraftToastVisible] = useState(false);
+
+  useEffect(() => {
+    if (!isStudioRouteState(location.state) || location.state.showAcademicPlanDraftToast !== true) {
+      return;
+    }
+
+    setIsDraftToastVisible(true);
+    navigate(
+      {
+        pathname: location.pathname,
+        search: location.search,
+      },
+      { replace: true, state: null },
+    );
+  }, [location.pathname, location.search, location.state, navigate]);
+
+  useEffect(() => {
+    if (!isDraftToastVisible) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setIsDraftToastVisible(false);
+    }, 3000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [isDraftToastVisible]);
 
   const openAcademicPlanFlow = () => {
     setIsPlanTypeSheetOpen(true);
@@ -78,6 +114,7 @@ export function StudioPage() {
       </div>
 
       <MobileGnb activeItem="studio" />
+      <StudioDraftToast isVisible={isDraftToastVisible} />
 
       <BottomSheet
         isOpen={isPlanTypeSheetOpen}
@@ -99,6 +136,20 @@ export function StudioPage() {
         </div>
       </BottomSheet>
     </main>
+  );
+}
+
+function StudioDraftToast({ isVisible }: { isVisible: boolean }) {
+  if (!isVisible) {
+    return null;
+  }
+
+  return (
+    <div className="pointer-events-none fixed bottom-[calc(54px+max(32px,env(safe-area-inset-bottom))+16px)] left-1/2 z-50 w-full max-w-[393px] -translate-x-1/2 px-3">
+      <div className="flex h-11 items-center rounded-[10px] bg-[#101112] px-4 text-[13px] font-medium leading-[18px] text-white">
+        작성내용이 임시 저장되었어요
+      </div>
+    </div>
   );
 }
 

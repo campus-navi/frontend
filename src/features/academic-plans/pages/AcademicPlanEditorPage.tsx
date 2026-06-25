@@ -29,7 +29,12 @@ export function AcademicPlanEditorPage() {
     navigate(`/studio/academic-plans/editor/${sectionId}`, { replace: true, state: editorState });
   };
   const handleExit = (shouldSaveDraft: boolean) => {
-    navigate(shouldSaveDraft ? '/studio?tab=documents' : '/studio');
+    if (shouldSaveDraft) {
+      navigate('/studio?tab=documents', { state: { showAcademicPlanDraftToast: true } });
+      return;
+    }
+
+    navigate('/studio');
   };
   const isAnalysisCtaEnabled = academicPlanSectionConfigs
     .filter((section) => section.required)
@@ -89,6 +94,7 @@ export function AcademicPlanEditorPage() {
         isOpen={isExitModalOpen}
         onClose={() => setIsExitModalOpen(false)}
         onExit={handleExit}
+        variant="draft"
       />
     </main>
   );
