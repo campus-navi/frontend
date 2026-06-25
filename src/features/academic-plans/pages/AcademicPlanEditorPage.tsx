@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { AppHeader } from '@/components/ui/AppHeader';
 import { CtaButton } from '@/components/ui/CtaButton';
+import { AcademicPlanExitModal } from '@/features/academic-plans/components/AcademicPlanExitModal';
 import {
   academicPlanSectionConfigs,
   getAcademicPlanEditorRouteState,
@@ -11,6 +12,7 @@ import {
 export function AcademicPlanEditorPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [isExitModalOpen, setIsExitModalOpen] = useState(false);
   const editorState = getAcademicPlanEditorRouteState(location.state);
 
   useEffect(() => {
@@ -26,6 +28,9 @@ export function AcademicPlanEditorPage() {
   const handleSectionClick = (sectionId: string) => {
     navigate(`/studio/academic-plans/editor/${sectionId}`, { replace: true, state: editorState });
   };
+  const handleExit = (shouldSaveDraft: boolean) => {
+    navigate(shouldSaveDraft ? '/studio?tab=documents' : '/studio');
+  };
   const isAnalysisCtaEnabled = academicPlanSectionConfigs
     .filter((section) => section.required)
     .every((section) => editorState.sections[section.id].isSaved);
@@ -33,7 +38,7 @@ export function AcademicPlanEditorPage() {
   return (
     <main className="min-h-[100svh] bg-white">
       <div className="mx-auto flex min-h-[100svh] w-full max-w-[393px] flex-col bg-white">
-        <AppHeader title="학업계획서" onBack={() => navigate(-1)} />
+        <AppHeader title="학업계획서" onBack={() => setIsExitModalOpen(true)} />
 
         <section className="px-4 pb-[calc(128px+env(safe-area-inset-bottom))] pt-12">
           <h1 className="text-[24px] font-bold leading-[1.42] text-[#292B2C]">
@@ -80,6 +85,11 @@ export function AcademicPlanEditorPage() {
           <CtaButton disabled={!isAnalysisCtaEnabled}>분석 시작</CtaButton>
         </div>
       </div>
+      <AcademicPlanExitModal
+        isOpen={isExitModalOpen}
+        onClose={() => setIsExitModalOpen(false)}
+        onExit={handleExit}
+      />
     </main>
   );
 }

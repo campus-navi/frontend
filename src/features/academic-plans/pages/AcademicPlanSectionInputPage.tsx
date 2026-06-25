@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { AppHeader } from '@/components/ui/AppHeader';
+import { AcademicPlanExitModal } from '@/features/academic-plans/components/AcademicPlanExitModal';
 import {
   ACADEMIC_PLAN_MAX_SECTION_LENGTH,
   getAcademicPlanEditorRouteState,
@@ -13,6 +14,7 @@ export function AcademicPlanSectionInputPage() {
   const location = useLocation();
   const { sectionId } = useParams();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [isExitModalOpen, setIsExitModalOpen] = useState(false);
   const editorState = getAcademicPlanEditorRouteState(location.state);
   const sectionConfig = getAcademicPlanSectionConfig(sectionId);
   const [value, setValue] = useState(() => {
@@ -62,12 +64,15 @@ export function AcademicPlanSectionInputPage() {
       },
     });
   };
+  const handleExit = (shouldSaveDraft: boolean) => {
+    navigate(shouldSaveDraft ? '/studio?tab=documents' : '/studio');
+  };
 
   return (
     <main className="min-h-[100svh] bg-white">
       <div className="mx-auto flex min-h-[100svh] w-full max-w-[393px] flex-col bg-white">
         <AppHeader
-          onBack={() => navigate(-1)}
+          onBack={() => setIsExitModalOpen(true)}
           rightSlot={
             <button
               type="button"
@@ -105,6 +110,11 @@ export function AcademicPlanSectionInputPage() {
           />
         </section>
       </div>
+      <AcademicPlanExitModal
+        isOpen={isExitModalOpen}
+        onClose={() => setIsExitModalOpen(false)}
+        onExit={handleExit}
+      />
     </main>
   );
 }

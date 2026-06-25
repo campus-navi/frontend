@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { MouseEventHandler, PointerEventHandler, ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { MobileGnb } from '@/components/ui/MobileGnb';
@@ -39,7 +39,10 @@ const documentFilterStatusMap: Record<Exclude<DocumentFilter, 'all'>, DocumentSt
 
 export function StudioPage() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<StudioTab>('tools');
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<StudioTab>(() =>
+    searchParams.get('tab') === 'documents' ? 'documents' : 'tools',
+  );
   const [documentFilter, setDocumentFilter] = useState<DocumentFilter>('all');
   const [isPlanTypeSheetOpen, setIsPlanTypeSheetOpen] = useState(false);
 
