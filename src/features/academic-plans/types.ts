@@ -16,6 +16,19 @@ export type AcademicPlanCompletedSelection = {
   selectedTargetName: string;
 };
 
+export type AcademicPlanSectionId = 'motivation' | 'interest' | 'studyPlan' | 'etc';
+
+export type AcademicPlanSectionState = {
+  value: string;
+  isSaved: boolean;
+};
+
+export type AcademicPlanSectionValues = Record<AcademicPlanSectionId, AcademicPlanSectionState>;
+
+export type AcademicPlanEditorRouteState = AcademicPlanCompletedSelection & {
+  sections: AcademicPlanSectionValues;
+};
+
 export type AcademicPlanTypeOption = {
   type: AcademicPlanType;
   label: string;
