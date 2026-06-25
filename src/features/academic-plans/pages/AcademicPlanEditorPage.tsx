@@ -30,11 +30,11 @@ export function AcademicPlanEditorPage() {
   };
   const handleExit = (shouldSaveDraft: boolean) => {
     if (shouldSaveDraft) {
-      navigate('/studio?tab=documents', { state: { showAcademicPlanDraftToast: true } });
+      navigate('/studio?tab=documents', { replace: true, state: { showAcademicPlanDraftToast: true } });
       return;
     }
 
-    navigate('/studio');
+    navigate('/studio', { replace: true });
   };
   const isAnalysisCtaEnabled = academicPlanSectionConfigs
     .filter((section) => section.required)
