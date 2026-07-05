@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { AppHeader } from '@/components/ui/AppHeader';
@@ -15,6 +15,7 @@ export function AcademicPlanSectionInputPage() {
   const { sectionId } = useParams();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isExitModalOpen, setIsExitModalOpen] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const editorState = getAcademicPlanEditorRouteState(location.state);
   const sectionConfig = getAcademicPlanSectionConfig(sectionId);
   const [value, setValue] = useState(() => {
@@ -36,6 +37,17 @@ export function AcademicPlanSectionInputPage() {
   useEffect(() => {
     textareaRef.current?.focus();
   }, []);
+
+  useLayoutEffect(() => {
+    const textarea = textareaRef.current;
+
+    if (!textarea) {
+      return;
+    }
+
+    textarea.style.height = 'auto';
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  }, [isFocused, sectionConfig?.description, value]);
 
   if (!editorState || !sectionConfig) {
     return null;
@@ -80,7 +92,7 @@ export function AcademicPlanSectionInputPage() {
               onClick={handleSave}
               className={[
                 'h-10 px-1 text-[16px] font-semibold leading-none transition-colors',
-                isSaveEnabled ? 'text-[#292B2C]' : 'cursor-not-allowed text-[#BFC4C8]',
+                isSaveEnabled ? 'text-[#00C99A]' : 'cursor-not-allowed text-[#BFC4C8]',
               ].join(' ')}
             >
               저장
@@ -90,24 +102,24 @@ export function AcademicPlanSectionInputPage() {
 
         <section className="flex min-h-0 flex-1 flex-col px-4 pb-[max(24px,env(safe-area-inset-bottom))] pt-12">
           <h1 className="text-[22px] font-bold leading-[25px] text-[#292B2C]">{sectionConfig.title}</h1>
-          <p className="mt-4 text-[15px] font-medium leading-[22px] text-[#BFC4C8]">
-            {sectionConfig.description}
-          </p>
-
-          <div className="mt-4 flex h-9 items-center justify-end text-[15px] font-medium leading-5 text-[#BFC4C8]">
-            <span>{value.length}</span>
-            <span>/</span>
-            <span>{ACADEMIC_PLAN_MAX_SECTION_LENGTH}</span>
-          </div>
 
           <textarea
             ref={textareaRef}
             value={value}
             maxLength={ACADEMIC_PLAN_MAX_SECTION_LENGTH}
             onChange={(event) => handleChange(event.target.value)}
-            className="mt-2 min-h-0 flex-1 resize-none border-0 bg-transparent text-[17px] font-medium leading-7 text-[#292B2C] outline-none placeholder:text-[#C7CCD1]"
+            onBlur={() => setIsFocused(false)}
+            onFocus={() => setIsFocused(true)}
+            placeholder={isFocused ? '' : sectionConfig.description}
+            rows={3}
+            className="mt-4 min-h-[84px] resize-none overflow-hidden border-0 bg-transparent text-[17px] font-medium leading-7 text-[#292B2C] outline-none placeholder:text-[#C7CCD1]"
             aria-label={`${sectionConfig.title} 입력`}
           />
+          <div className="mt-2 flex h-9 items-center justify-end text-[15px] font-medium leading-5 text-[#BFC4C8]">
+            <span className="text-[#292B2C]">{value.length}</span>
+            <span>/</span>
+            <span>{ACADEMIC_PLAN_MAX_SECTION_LENGTH}</span>
+          </div>
         </section>
       </div>
       <AcademicPlanExitModal
