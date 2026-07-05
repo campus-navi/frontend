@@ -10,6 +10,7 @@ export { memberApi } from '@/api/modules/member';
 export { mypageApi } from '@/api/modules/mypage';
 export { officialPostApi } from '@/api/modules/officialPost';
 export { postApi } from '@/api/modules/post';
+export { studioApi } from '@/api/modules/studio';
 export { universityApi } from '@/api/modules/university';
 export { userApi } from '@/api/modules/user';
 export type {
@@ -62,4 +63,5 @@ export type {
   OfficialPostSummary,
   OfficialPostTagCode,
 } from '@/api/modules/officialPost';
+export type { StudioDocument, StudioDocumentMetadata, StudioDocumentStatus } from '@/api/modules/studio';
 export { tokenStorage } from '@/shared/auth';
