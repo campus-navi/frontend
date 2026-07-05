@@ -12,10 +12,10 @@ export type StudioDocumentStatus =
   | 'UNKNOWN';
 
 export interface StudioDocumentMetadata extends ApiObjectData {
+  campusId?: number;
   campusName: string;
-  majorType: AcademicPlanType | null;
-  selectedCampusId: number | null;
-  selectedTargetId: number | null;
+  majorType?: AcademicPlanType;
+  targetId?: number;
   targetName: string;
 }
 
@@ -56,6 +56,13 @@ interface StudioDocumentSectionResponse extends ApiObjectData {
   sectionKey?: unknown;
 }
 
+interface StudioDocumentSectionsResponse extends ApiObjectData {
+  documentType?: unknown;
+  id?: unknown;
+  sections?: unknown;
+  status?: unknown;
+}
+
 interface StudioDocumentsListResponse extends ApiObjectData {
   content?: unknown;
   documents?: unknown;
@@ -94,7 +101,21 @@ function normalizeNumber(value: unknown) {
 }
 
 function normalizeAcademicPlanType(value: unknown) {
-  return academicPlanTypes.has(value as AcademicPlanType) ? (value as AcademicPlanType) : null;
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  const normalizedValue = value.toUpperCase();
+
+  return academicPlanTypes.has(normalizedValue as AcademicPlanType) ? (normalizedValue as AcademicPlanType) : null;
+}
+
+function getObject(value: unknown) {
+  return value && typeof value === 'object' ? value as ApiObjectData : null;
+}
+
+function getString(value: unknown) {
+  return typeof value === 'string' ? value : null;
 }
 
 function normalizeDocumentStatus(status: unknown): StudioDocumentStatus {
@@ -128,16 +149,69 @@ function normalizeStudioDocument(item: StudioDocumentResponse): StudioDocument {
   const metadata = item.metadata;
   const title = typeof item.title === 'string' ? item.title : null;
   const documentType = typeof item.documentType === 'string' ? item.documentType : '';
-  const metadataObject = metadata && typeof metadata === 'object' ? metadata as ApiObjectData : null;
-  const majorType = normalizeAcademicPlanType(metadataObject?.majorType ?? item.majorType);
-  const selectedCampusId = normalizeNumber(metadataObject?.selectedCampusId ?? metadataObject?.campusId ?? item.campusId);
-  const selectedTargetId = normalizeNumber(metadataObject?.selectedTargetId ?? metadataObject?.targetId ?? item.targetId);
+  const metadataObject = getObject(metadata);
+  const campus = getObject(metadataObject?.campus);
+  const target = getObject(metadataObject?.target);
+  const department = getObject(metadataObject?.department);
+  const plan = getObject(metadataObject?.plan);
+  const planType = getObject(metadataObject?.planType);
+  const academicPlan = getObject(metadataObject?.academicPlan);
+  const academicPlanType = getObject(metadataObject?.academicPlanType);
+  const major = getObject(metadataObject?.major);
+  const majorTypeObject = getObject(metadataObject?.majorType);
+  const majorType = normalizeAcademicPlanType(
+    metadataObject?.majorType ??
+      metadataObject?.planType ??
+      metadataObject?.selectedPlanType ??
+      metadataObject?.academicPlanType ??
+      metadataObject?.type ??
+      metadataObject?.applicationType ??
+      majorTypeObject?.code ??
+      majorTypeObject?.value ??
+      majorTypeObject?.type ??
+      planType?.code ??
+      planType?.value ??
+      planType?.type ??
+      academicPlanType?.code ??
+      academicPlanType?.value ??
+      academicPlanType?.type ??
+      plan?.majorType ??
+      plan?.planType ??
+      plan?.type ??
+      academicPlan?.majorType ??
+      academicPlan?.planType ??
+      academicPlan?.type ??
+      item.majorType,
+  );
+  const campusId = normalizeNumber(
+    metadataObject?.campusId ??
+      metadataObject?.selectedCampusId ??
+      campus?.id ??
+      item.campusId,
+  );
+  const targetId = normalizeNumber(
+    metadataObject?.targetId ??
+      metadataObject?.selectedTargetId ??
+      metadataObject?.departmentId ??
+      metadataObject?.targetMajorId ??
+      metadataObject?.majorId ??
+      target?.id ??
+      department?.id ??
+      major?.id ??
+      item.targetId,
+  );
+  const campusName = getString(metadataObject?.campusName) ?? getString(campus?.name);
+  const targetName =
+    getString(metadataObject?.targetName) ??
+    getString(target?.name) ??
+    getString(department?.name) ??
+    getString(major?.name);
 
   if (
     typeof id !== 'number' ||
     !metadataObject ||
-    typeof metadataObject.campusName !== 'string' ||
-    typeof metadataObject.targetName !== 'string' ||
+    campusName === null ||
+    targetName === null ||
     typeof item.updatedAt !== 'string'
   ) {
     throw createApiError({
@@ -150,11 +224,11 @@ function normalizeStudioDocument(item: StudioDocumentResponse): StudioDocument {
   return {
     id,
     metadata: {
-      campusName: metadataObject.campusName,
-      majorType,
-      selectedCampusId,
-      selectedTargetId,
-      targetName: metadataObject.targetName,
+      ...(campusId === null ? {} : { campusId }),
+      campusName,
+      ...(majorType === null ? {} : { majorType }),
+      ...(targetId === null ? {} : { targetId }),
+      targetName,
     },
     status: normalizeDocumentStatus(item.status),
     title: title || documentTypeTitleMap[documentType] || '문서',
@@ -199,14 +273,29 @@ function getStudioDocumentItems(data: unknown) {
   return null;
 }
 
+function getStudioDocumentSectionItems(data: unknown) {
+  if (Array.isArray(data)) {
+    return data;
+  }
+
+  if (!data || typeof data !== 'object') {
+    return null;
+  }
+
+  const detail = data as StudioDocumentSectionsResponse;
+
+  return Array.isArray(detail.sections) ? detail.sections : null;
+}
+
 export const studioApi = {
   async getDocumentSections(documentId: number) {
-    const response = await request<StudioDocumentSectionResponse[]>({
+    const response = await request<StudioDocumentSectionResponse[] | StudioDocumentSectionsResponse>({
       method: 'get',
       url: `/studio/documents/${documentId}/sections`,
     });
+    const items = getStudioDocumentSectionItems(response.data);
 
-    if (!Array.isArray(response.data)) {
+    if (!items || !items.every((item) => item && typeof item === 'object')) {
       throw createApiError({
         code: COMMON_ERROR_CODES.INVALID_RESPONSE,
         message: '스튜디오 문서 섹션 응답 형식이 올바르지 않습니다.',
@@ -216,8 +305,8 @@ export const studioApi = {
 
     return {
       ...response,
-      data: response.data
-        .map(normalizeStudioDocumentSection)
+      data: items
+        .map((item) => normalizeStudioDocumentSection(item as StudioDocumentSectionResponse))
         .filter((section): section is StudioDocumentSection => section !== null),
     };
   },

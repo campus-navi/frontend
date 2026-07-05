@@ -28,9 +28,9 @@ function createEditorRouteStateFromDocument(
   document: StudioDocument,
   sections: Awaited<ReturnType<typeof studioApi.getDocumentSections>>['data'],
 ): AcademicPlanEditorRouteState {
-  const { majorType, selectedCampusId, selectedTargetId } = document.metadata;
+  const { campusId, majorType, targetId } = document.metadata;
 
-  if (majorType === null || selectedCampusId === null || selectedTargetId === null) {
+  if (majorType === undefined) {
     throw new Error('문서 정보를 불러오지 못했어요. 잠시 후 다시 시도해주세요.');
   }
 
@@ -52,10 +52,10 @@ function createEditorRouteStateFromDocument(
   return {
     documentId: document.id,
     sections: sectionValues,
-    selectedCampusId,
+    selectedCampusId: campusId ?? 0,
     selectedCampusName: document.metadata.campusName,
     selectedPlanType: majorType,
-    selectedTargetId,
+    selectedTargetId: targetId ?? document.id,
     selectedTargetName: document.metadata.targetName,
   };
 }
