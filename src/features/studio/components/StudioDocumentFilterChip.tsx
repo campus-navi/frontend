@@ -15,6 +15,7 @@ export function StudioDocumentFilterChip({
   return (
     <button
       type={type}
+      aria-pressed={selected}
       className={[
         'flex h-[38px] items-center justify-center rounded-full border px-4 text-[14px] font-medium leading-none transition-colors',
         selected ? 'border-[#292B2C] bg-[#292B2C] text-white' : 'border-[#DCDFE2] bg-white text-[#707376]',
