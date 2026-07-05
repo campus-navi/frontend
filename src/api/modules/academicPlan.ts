@@ -14,6 +14,25 @@ export interface AcademicPlanTargetOption extends ApiObjectData {
   name: string;
 }
 
+export type AcademicPlanDocumentSectionKey =
+  | 'application_motive'
+  | 'interest_field'
+  | 'study_plan'
+  | 'academic_plan_etc';
+
+export interface CreateAcademicPlanDocumentSection extends ApiObjectData {
+  content: string;
+  sectionKey: AcademicPlanDocumentSectionKey;
+}
+
+export interface CreateAcademicPlanDocumentRequest extends ApiObjectData {
+  majorType: AcademicPlanType;
+  sections: CreateAcademicPlanDocumentSection[];
+  targetId: number;
+}
+
+export type CreateAcademicPlanDocumentResponse = null;
+
 interface AcademicPlanTargetOptionResponse extends ApiObjectData {
   id?: number | string;
   name?: string;
@@ -44,6 +63,13 @@ export function isDepartmentPlanType(type: AcademicPlanType) {
 }
 
 export const academicPlanApi = {
+  async createDocument(payload: CreateAcademicPlanDocumentRequest) {
+    return request<CreateAcademicPlanDocumentResponse>({
+      data: payload,
+      method: 'post',
+      url: '/academic-plans/documents',
+    });
+  },
   async getTargetCampuses() {
     const response = await request<AcademicPlanTargetOptionResponse[]>({
       method: 'get',

@@ -22,7 +22,14 @@ export type {
   ApiResponseData,
   ApiSuccessResponse,
 } from '@/api/types';
-export type { AcademicPlanTargetOption, AcademicPlanType } from '@/api/modules/academicPlan';
+export type {
+  AcademicPlanDocumentSectionKey,
+  AcademicPlanTargetOption,
+  AcademicPlanType,
+  CreateAcademicPlanDocumentRequest,
+  CreateAcademicPlanDocumentResponse,
+  CreateAcademicPlanDocumentSection,
+} from '@/api/modules/academicPlan';
 export type { DeadlinePost, DeadlinePosts, FeedCardPost, FeedCards } from '@/api/modules/feed';
 export type {
   MemberMe,
