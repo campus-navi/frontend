@@ -7,14 +7,18 @@ import { useBodyScrollLock } from '@/components/ui/useBodyScrollLock';
 type AcademicPlanExitModalVariant = 'draft' | 'leave';
 
 type AcademicPlanExitModalProps = {
+  errorMessage?: string;
   isOpen: boolean;
+  isPending?: boolean;
   onClose: () => void;
   onExit: (shouldSaveDraft: boolean) => void;
   variant?: AcademicPlanExitModalVariant;
 };
 
 export function AcademicPlanExitModal({
+  errorMessage = '',
   isOpen,
+  isPending = false,
   onClose,
   onExit,
   variant = 'draft',
@@ -78,6 +82,7 @@ export function AcademicPlanExitModal({
             <input
               type="checkbox"
               checked={shouldSaveDraft}
+              disabled={isPending}
               onChange={(event) => setShouldSaveDraft(event.target.checked)}
               className="sr-only"
             />
@@ -94,11 +99,20 @@ export function AcademicPlanExitModal({
           </label>
         ) : null}
 
+        {errorMessage ? (
+          <p className="mt-4 text-center text-[14px] font-medium leading-5 text-[#FF5E47]">{errorMessage}</p>
+        ) : null}
+
         <div className="mt-6 flex gap-2">
-          <CtaButton variant="tertiary" size="md" onClick={onClose}>
+          <CtaButton variant="tertiary" size="md" disabled={isPending} onClick={onClose}>
             취소
           </CtaButton>
-          <CtaButton variant="primary" size="md" onClick={() => onExit(variant === 'draft' && shouldSaveDraft)}>
+          <CtaButton
+            variant="primary"
+            size="md"
+            disabled={isPending}
+            onClick={() => onExit(variant === 'draft' && shouldSaveDraft)}
+          >
             나가기
           </CtaButton>
         </div>

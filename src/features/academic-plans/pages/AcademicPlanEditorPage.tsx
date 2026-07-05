@@ -1,6 +1,13 @@
+import { useMutation } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
+import {
+  academicPlanApi,
+  isApiError,
+  type AcademicPlanDocumentSectionKey,
+  type CreateAcademicPlanDocumentRequest,
+} from '@/api';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { CtaButton } from '@/components/ui/CtaButton';
 import { AcademicPlanExitModal } from '@/features/academic-plans/components/AcademicPlanExitModal';
@@ -8,7 +15,47 @@ import {
   academicPlanSectionConfigs,
   getAcademicPlanEditorRouteState,
 } from '@/features/academic-plans/academicPlanEditorState';
+import type { AcademicPlanEditorRouteState, AcademicPlanSectionId } from '@/features/academic-plans/types';
 import { useMyPageSummary } from '@/features/mypage/hooks/useMyPageSummary';
+
+const academicPlanDocumentSectionKeyMap: Record<AcademicPlanSectionId, AcademicPlanDocumentSectionKey> = {
+  etc: 'etc',
+  interest: 'interest_field',
+  motivation: 'application_motive',
+  studyPlan: 'study_plan',
+};
+
+const academicPlanDraftDocumentSectionKeyMap: Record<AcademicPlanSectionId, AcademicPlanDocumentSectionKey> = {
+  etc: 'academic_plan_etc',
+  interest: 'interest_field',
+  motivation: 'application_motive',
+  studyPlan: 'study_plan',
+};
+
+function createAcademicPlanDocumentPayload(
+  editorState: AcademicPlanEditorRouteState,
+  sectionKeyMap: Record<AcademicPlanSectionId, AcademicPlanDocumentSectionKey> = academicPlanDocumentSectionKeyMap,
+): CreateAcademicPlanDocumentRequest {
+  return {
+    majorType: editorState.selectedPlanType,
+    sections: academicPlanSectionConfigs
+      .filter((section) => editorState.sections[section.id].isSaved)
+      .map((section) => ({
+        content: editorState.sections[section.id].value.trim(),
+        sectionKey: sectionKeyMap[section.id],
+      }))
+      .filter((section) => section.content.length > 0),
+    targetId: editorState.selectedTargetId,
+  };
+}
+
+function getDraftSaveErrorMessage(error: unknown) {
+  if (isApiError(error) && (error.status === 400 || error.status === 404)) {
+    return '임시 저장할 수 없어요. 선택한 대상과 작성 내용을 확인해주세요.';
+  }
+
+  return '임시 저장에 실패했어요. 잠시 후 다시 시도해주세요.';
+}
 
 export function AcademicPlanEditorPage() {
   const navigate = useNavigate();
@@ -16,6 +63,12 @@ export function AcademicPlanEditorPage() {
   const [isExitModalOpen, setIsExitModalOpen] = useState(false);
   const editorState = getAcademicPlanEditorRouteState(location.state);
   const { data: summary } = useMyPageSummary();
+  const createDocumentMutation = useMutation({
+    mutationFn: academicPlanApi.createDocument,
+  });
+  const saveDraftMutation = useMutation({
+    mutationFn: academicPlanApi.createDocument,
+  });
   const nickname = summary?.nickname?.trim() || '사용자';
 
   useEffect(() => {
@@ -32,8 +85,16 @@ export function AcademicPlanEditorPage() {
     navigate(`/studio/academic-plans/editor/${sectionId}`, { replace: true, state: editorState });
   };
   const handleExit = (shouldSaveDraft: boolean) => {
+    if (saveDraftMutation.isPending) {
+      return;
+    }
+
     if (shouldSaveDraft) {
-      navigate('/studio?tab=documents', { replace: true, state: { showAcademicPlanDraftToast: true } });
+      saveDraftMutation.mutate(createAcademicPlanDocumentPayload(editorState, academicPlanDraftDocumentSectionKeyMap), {
+        onSuccess: () => {
+          navigate('/studio?tab=documents', { replace: true, state: { showAcademicPlanDraftToast: true } });
+        },
+      });
       return;
     }
 
@@ -42,6 +103,19 @@ export function AcademicPlanEditorPage() {
   const isAnalysisCtaEnabled = academicPlanSectionConfigs
     .filter((section) => section.required)
     .every((section) => editorState.sections[section.id].isSaved);
+  const analysisErrorMessage = createDocumentMutation.isError
+    ? '학업계획서 분석을 시작하지 못했어요. 잠시 후 다시 시도해주세요.'
+    : '';
+  const draftSaveErrorMessage = saveDraftMutation.isError
+    ? getDraftSaveErrorMessage(saveDraftMutation.error)
+    : '';
+  const handleAnalysisStart = () => {
+    if (!isAnalysisCtaEnabled || createDocumentMutation.isPending) {
+      return;
+    }
+
+    createDocumentMutation.mutate(createAcademicPlanDocumentPayload(editorState));
+  };
 
   return (
     <main className="min-h-[100svh] bg-white">
@@ -90,11 +164,20 @@ export function AcademicPlanEditorPage() {
         </section>
 
         <div className="fixed bottom-0 left-1/2 z-20 w-full max-w-[393px] -translate-x-1/2 bg-white px-4 pb-[max(36px,env(safe-area-inset-bottom))] pt-3">
-          <CtaButton disabled={!isAnalysisCtaEnabled}>분석 시작</CtaButton>
+          {analysisErrorMessage ? (
+            <p className="mb-2 text-center text-[14px] font-medium leading-5 text-[#FF5E47]">
+              {analysisErrorMessage}
+            </p>
+          ) : null}
+          <CtaButton disabled={!isAnalysisCtaEnabled || createDocumentMutation.isPending} onClick={handleAnalysisStart}>
+            분석 시작
+          </CtaButton>
         </div>
       </div>
       <AcademicPlanExitModal
+        errorMessage={draftSaveErrorMessage}
         isOpen={isExitModalOpen}
+        isPending={saveDraftMutation.isPending}
         onClose={() => setIsExitModalOpen(false)}
         onExit={handleExit}
         variant="draft"
