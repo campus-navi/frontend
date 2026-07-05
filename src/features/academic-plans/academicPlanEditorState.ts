@@ -1,6 +1,8 @@
 import type { AcademicPlanType } from '@/api';
 import type {
   AcademicPlanCompletedSelection,
+  AcademicPlanEditorCreateRouteState,
+  AcademicPlanEditorEditRouteState,
   AcademicPlanEditorRouteState,
   AcademicPlanSectionId,
   AcademicPlanSectionValues,
@@ -90,6 +92,14 @@ function getAcademicPlanCompletedSelection(state: unknown): AcademicPlanComplete
   };
 }
 
+function getAcademicPlanType(value: unknown) {
+  return academicPlanTypes.has(value as AcademicPlanType) ? (value as AcademicPlanType) : null;
+}
+
+function getNullableNumber(value: unknown) {
+  return typeof value === 'number' ? value : null;
+}
+
 function normalizeSectionState(value: unknown) {
   if (!value || typeof value !== 'object') {
     return null;
@@ -107,22 +117,11 @@ function normalizeSectionState(value: unknown) {
   };
 }
 
-export function getAcademicPlanEditorRouteState(state: unknown): AcademicPlanEditorRouteState | null {
-  const selection = getAcademicPlanCompletedSelection(state);
-
-  if (!selection) {
-    return null;
-  }
-
-  const partialState = state as Partial<AcademicPlanEditorRouteState>;
+function normalizeSections(stateSections: unknown) {
   const emptySections = createEmptyAcademicPlanSections();
-  const stateSections = partialState.sections;
 
   if (!stateSections || typeof stateSections !== 'object') {
-    return {
-      ...selection,
-      sections: emptySections,
-    };
+    return emptySections;
   }
 
   const normalizedSections = { ...emptySections };
@@ -135,10 +134,59 @@ export function getAcademicPlanEditorRouteState(state: unknown): AcademicPlanEdi
     }
   }
 
+  return normalizedSections;
+}
+
+function getAcademicPlanEditorEditRouteState(state: unknown): AcademicPlanEditorEditRouteState | null {
+  if (!state || typeof state !== 'object') {
+    return null;
+  }
+
+  const partialState = state as Partial<AcademicPlanEditorEditRouteState>;
+  const selectedPlanType = getAcademicPlanType(partialState.selectedPlanType);
+
+  if (
+    partialState.documentId === undefined ||
+    typeof partialState.documentId !== 'number' ||
+    typeof partialState.selectedCampusName !== 'string' ||
+    selectedPlanType === null ||
+    typeof partialState.selectedTargetName !== 'string'
+  ) {
+    return null;
+  }
+
+  return {
+    documentId: partialState.documentId,
+    mode: 'edit',
+    sections: normalizeSections(partialState.sections),
+    selectedCampusId: getNullableNumber(partialState.selectedCampusId),
+    selectedCampusName: partialState.selectedCampusName,
+    selectedPlanType,
+    selectedTargetId: getNullableNumber(partialState.selectedTargetId),
+    selectedTargetName: partialState.selectedTargetName,
+  };
+}
+
+export function getAcademicPlanEditorRouteState(state: unknown): AcademicPlanEditorRouteState | null {
+  const editState = getAcademicPlanEditorEditRouteState(state);
+
+  if (editState) {
+    return editState;
+  }
+
+  const selection = getAcademicPlanCompletedSelection(state);
+
+  if (!selection) {
+    return null;
+  }
+
+  const partialState = state as Partial<AcademicPlanEditorRouteState>;
+
   return {
     ...selection,
-    sections: normalizedSections,
-  };
+    mode: 'create',
+    sections: normalizeSections(partialState.sections),
+  } satisfies AcademicPlanEditorCreateRouteState;
 }
 
 export function getAcademicPlanSectionConfig(sectionId: string | undefined) {

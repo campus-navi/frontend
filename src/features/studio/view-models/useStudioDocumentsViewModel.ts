@@ -1,15 +1,80 @@
+import { useMutation } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-import type { StudioDocument } from '@/api';
+import { studioApi, type AcademicPlanDocumentSectionKey, type StudioDocument } from '@/api';
+import {
+  ACADEMIC_PLAN_MAX_SECTION_LENGTH,
+  createEmptyAcademicPlanSections,
+} from '@/features/academic-plans/academicPlanEditorState';
+import type {
+  AcademicPlanEditorRouteState,
+  AcademicPlanSectionId,
+  AcademicPlanSectionValues,
+} from '@/features/academic-plans/types';
 import { useStudioDocuments } from '@/features/studio/hooks/useStudioDocuments';
 
 export type StudioDocumentFilter = 'all' | 'completed' | 'draft';
 
 const EMPTY_STUDIO_DOCUMENTS: StudioDocument[] = [];
+const studioSectionKeyMap: Partial<Record<AcademicPlanDocumentSectionKey, AcademicPlanSectionId>> = {
+  academic_plan_etc: 'etc',
+  application_motive: 'motivation',
+  interest_field: 'interest',
+  study_plan: 'studyPlan',
+};
+
+function createEditorRouteStateFromDocument(
+  document: StudioDocument,
+  sections: Awaited<ReturnType<typeof studioApi.getDocumentSections>>['data'],
+): AcademicPlanEditorRouteState {
+  const { campusId, majorType, targetId } = document.metadata;
+
+  if (majorType === undefined) {
+    throw new Error('문서 정보를 불러오지 못했어요. 잠시 후 다시 시도해주세요.');
+  }
+
+  const sectionValues: AcademicPlanSectionValues = createEmptyAcademicPlanSections();
+
+  for (const section of sections) {
+    const sectionId = studioSectionKeyMap[section.sectionKey];
+
+    if (!sectionId) {
+      continue;
+    }
+
+    sectionValues[sectionId] = {
+      isSaved: section.content.trim().length > 0,
+      value: section.content.slice(0, ACADEMIC_PLAN_MAX_SECTION_LENGTH),
+    };
+  }
+
+  return {
+    documentId: document.id,
+    mode: 'edit',
+    sections: sectionValues,
+    selectedCampusId: campusId ?? null,
+    selectedCampusName: document.metadata.campusName,
+    selectedPlanType: majorType,
+    selectedTargetId: targetId ?? null,
+    selectedTargetName: document.metadata.targetName,
+  };
+}
 
 export function useStudioDocumentsViewModel() {
+  const navigate = useNavigate();
   const [selectedFilter, setSelectedFilter] = useState<StudioDocumentFilter>('all');
   const studioDocumentsQuery = useStudioDocuments();
+  const openDraftMutation = useMutation({
+    mutationFn: async (document: StudioDocument) => {
+      const response = await studioApi.getDocumentSections(document.id);
+
+      return createEditorRouteStateFromDocument(document, response.data);
+    },
+    onSuccess: (routeState) => {
+      navigate('/studio/academic-plans/editor', { state: routeState });
+    },
+  });
   const documents = studioDocumentsQuery.data ?? EMPTY_STUDIO_DOCUMENTS;
   const counts = useMemo(
     () => ({
@@ -34,10 +99,23 @@ export function useStudioDocumentsViewModel() {
   }, [documents, selectedFilter]);
 
   return {
+    continueDraftErrorMessage: openDraftMutation.isError
+      ? openDraftMutation.error instanceof Error
+        ? openDraftMutation.error.message
+        : '문서 내용을 불러오지 못했어요. 잠시 후 다시 시도해주세요.'
+      : '',
     counts,
     filteredDocuments,
     isError: studioDocumentsQuery.isError,
     isLoading: studioDocumentsQuery.isLoading,
+    isOpeningDraft: openDraftMutation.isPending,
+    openDocument: (document: StudioDocument) => {
+      if (document.status !== 'DRAFT' || openDraftMutation.isPending) {
+        return;
+      }
+
+      openDraftMutation.mutate(document);
+    },
     retry: () => void studioDocumentsQuery.refetch(),
     selectedFilter,
     setSelectedFilter,

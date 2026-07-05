@@ -63,5 +63,12 @@ export type {
   OfficialPostSummary,
   OfficialPostTagCode,
 } from '@/api/modules/officialPost';
-export type { StudioDocument, StudioDocumentMetadata, StudioDocumentStatus } from '@/api/modules/studio';
+export type {
+  StudioDocument,
+  StudioDocumentMetadata,
+  StudioDocumentSection,
+  StudioDocumentStatus,
+  UpdateStudioDocumentRequest,
+  UpdateStudioDocumentResponse,
+} from '@/api/modules/studio';
 export { tokenStorage } from '@/shared/auth';

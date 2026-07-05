@@ -20,6 +20,12 @@ export function StudioDocumentsView({ viewModel }: { viewModel: StudioDocumentsV
         </RadioChip>
       </div>
 
+      {viewModel.continueDraftErrorMessage ? (
+        <p className="mt-3 text-[14px] font-medium leading-5 text-[#FF5E47]">
+          {viewModel.continueDraftErrorMessage}
+        </p>
+      ) : null}
+
       <div className="mt-4 flex flex-col gap-2">
         {viewModel.isLoading ? (
           <div className="flex min-h-[148px] items-center justify-center rounded-[10px] bg-white px-4 text-center text-[15px] font-medium leading-6 text-[#A0A7AF] shadow-[0_6px_22px_rgba(25,31,40,0.06)]">
@@ -39,7 +45,13 @@ export function StudioDocumentsView({ viewModel }: { viewModel: StudioDocumentsV
           </div>
         ) : null}
         {!viewModel.isLoading && !viewModel.isError
-          ? viewModel.filteredDocuments.map((document) => <StudioDocumentCard key={document.id} document={document} />)
+          ? viewModel.filteredDocuments.map((document) => (
+              <StudioDocumentCard
+                key={document.id}
+                document={document}
+                onClick={document.status === 'DRAFT' ? () => viewModel.openDocument(document) : undefined}
+              />
+            ))
           : null}
         {!viewModel.isLoading && !viewModel.isError && viewModel.filteredDocuments.length === 0 ? (
           <div className="flex min-h-[148px] items-center justify-center rounded-[10px] bg-white px-4 text-center text-[15px] font-medium leading-6 text-[#A0A7AF] shadow-[0_6px_22px_rgba(25,31,40,0.06)]">

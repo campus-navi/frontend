@@ -2,9 +2,14 @@ import type { StudioDocument } from '@/api';
 import { StudioSparkIcon } from '@/features/studio/components/StudioSparkIcon';
 import { formatStudioDocumentUpdatedAt } from '@/features/studio/utils/formatStudioDocumentUpdatedAt';
 
-export function StudioDocumentCard({ document }: { document: StudioDocument }) {
+export function StudioDocumentCard({ document, onClick }: { document: StudioDocument; onClick?: () => void }) {
   return (
-    <article className="flex h-[106px] rounded-[10px] bg-white px-3 py-4 shadow-[0_6px_22px_rgba(25,31,40,0.06)]">
+    <button
+      type="button"
+      disabled={!onClick}
+      onClick={onClick}
+      className="flex h-[106px] w-full rounded-[10px] bg-white px-3 py-4 text-left shadow-[0_6px_22px_rgba(25,31,40,0.06)] disabled:cursor-default"
+    >
       <div className="pt-[17px]">
         <StudioSparkIcon />
       </div>
@@ -48,6 +53,6 @@ export function StudioDocumentCard({ document }: { document: StudioDocument }) {
           </div>
         )}
       </div>
-    </article>
+    </button>
   );
 }
