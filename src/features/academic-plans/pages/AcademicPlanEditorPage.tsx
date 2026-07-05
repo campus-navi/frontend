@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -17,6 +17,7 @@ import {
 } from '@/features/academic-plans/academicPlanEditorState';
 import type { AcademicPlanEditorRouteState, AcademicPlanSectionId } from '@/features/academic-plans/types';
 import { useMyPageSummary } from '@/features/mypage/hooks/useMyPageSummary';
+import { STUDIO_DOCUMENTS_QUERY_KEY } from '@/features/studio/hooks/useStudioDocuments';
 
 const academicPlanDocumentSectionKeyMap: Record<AcademicPlanSectionId, AcademicPlanDocumentSectionKey> = {
   etc: 'academic_plan_etc',
@@ -50,6 +51,7 @@ function getDraftSaveErrorMessage(error: unknown) {
 export function AcademicPlanEditorPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
   const [isExitModalOpen, setIsExitModalOpen] = useState(false);
   const editorState = getAcademicPlanEditorRouteState(location.state);
   const { data: summary } = useMyPageSummary();
@@ -79,6 +81,7 @@ export function AcademicPlanEditorPage() {
     if (shouldSaveDraft) {
       saveDraftMutation.mutate(createAcademicPlanDocumentPayload(editorState), {
         onSuccess: () => {
+          void queryClient.invalidateQueries({ queryKey: STUDIO_DOCUMENTS_QUERY_KEY });
           navigate('/studio?tab=documents', { replace: true, state: { showAcademicPlanDraftToast: true } });
         },
       });
