@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import {
   academicPlanApi,
   isApiError,
+  studioApi,
   type AcademicPlanDocumentSectionKey,
   type CreateAcademicPlanDocumentRequest,
 } from '@/api';
@@ -56,7 +57,13 @@ export function AcademicPlanEditorPage() {
   const editorState = getAcademicPlanEditorRouteState(location.state);
   const { data: summary } = useMyPageSummary();
   const saveDraftMutation = useMutation({
-    mutationFn: academicPlanApi.createDocument,
+    mutationFn: (payload: CreateAcademicPlanDocumentRequest) => {
+      if (editorState?.documentId !== undefined) {
+        return studioApi.updateDocument(editorState.documentId, { sections: payload.sections });
+      }
+
+      return academicPlanApi.createDocument(payload);
+    },
   });
   const nickname = summary?.nickname?.trim() || '사용자';
 

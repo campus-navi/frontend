@@ -117,10 +117,12 @@ export function getAcademicPlanEditorRouteState(state: unknown): AcademicPlanEdi
   const partialState = state as Partial<AcademicPlanEditorRouteState>;
   const emptySections = createEmptyAcademicPlanSections();
   const stateSections = partialState.sections;
+  const documentId = typeof partialState.documentId === 'number' ? partialState.documentId : undefined;
 
   if (!stateSections || typeof stateSections !== 'object') {
     return {
       ...selection,
+      ...(documentId === undefined ? {} : { documentId }),
       sections: emptySections,
     };
   }
@@ -137,6 +139,7 @@ export function getAcademicPlanEditorRouteState(state: unknown): AcademicPlanEdi
 
   return {
     ...selection,
+    ...(documentId === undefined ? {} : { documentId }),
     sections: normalizedSections,
   };
 }

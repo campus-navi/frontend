@@ -26,6 +26,7 @@ export type AcademicPlanSectionState = {
 export type AcademicPlanSectionValues = Record<AcademicPlanSectionId, AcademicPlanSectionState>;
 
 export type AcademicPlanEditorRouteState = AcademicPlanCompletedSelection & {
+  documentId?: number;
   sections: AcademicPlanSectionValues;
 };
 
