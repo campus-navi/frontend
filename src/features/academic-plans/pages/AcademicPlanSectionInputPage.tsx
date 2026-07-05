@@ -15,7 +15,6 @@ export function AcademicPlanSectionInputPage() {
   const { sectionId } = useParams();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isExitModalOpen, setIsExitModalOpen] = useState(false);
-  const [isFocused, setIsFocused] = useState(false);
   const editorState = getAcademicPlanEditorRouteState(location.state);
   const sectionConfig = getAcademicPlanSectionConfig(sectionId);
   const [value, setValue] = useState(() => {
@@ -47,7 +46,7 @@ export function AcademicPlanSectionInputPage() {
 
     textarea.style.height = 'auto';
     textarea.style.height = `${textarea.scrollHeight}px`;
-  }, [isFocused, sectionConfig?.description, value]);
+  }, [sectionConfig?.description, value]);
 
   if (!editorState || !sectionConfig) {
     return null;
@@ -108,9 +107,7 @@ export function AcademicPlanSectionInputPage() {
             value={value}
             maxLength={ACADEMIC_PLAN_MAX_SECTION_LENGTH}
             onChange={(event) => handleChange(event.target.value)}
-            onBlur={() => setIsFocused(false)}
-            onFocus={() => setIsFocused(true)}
-            placeholder={isFocused ? '' : sectionConfig.description}
+            placeholder={sectionConfig.description}
             rows={3}
             className="mt-4 min-h-[84px] resize-none overflow-hidden border-0 bg-transparent text-[17px] font-medium leading-7 text-[#292B2C] outline-none placeholder:text-[#C7CCD1]"
             aria-label={`${sectionConfig.title} 입력`}
