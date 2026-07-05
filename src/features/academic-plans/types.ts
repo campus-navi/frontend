@@ -25,10 +25,26 @@ export type AcademicPlanSectionState = {
 
 export type AcademicPlanSectionValues = Record<AcademicPlanSectionId, AcademicPlanSectionState>;
 
-export type AcademicPlanEditorRouteState = AcademicPlanCompletedSelection & {
-  documentId?: number;
+export type AcademicPlanEditorCreateRouteState = AcademicPlanCompletedSelection & {
+  documentId?: undefined;
+  mode: 'create';
   sections: AcademicPlanSectionValues;
 };
+
+export type AcademicPlanEditorEditRouteState = Omit<
+  AcademicPlanCompletedSelection,
+  'selectedCampusId' | 'selectedTargetId'
+> & {
+  documentId: number;
+  mode: 'edit';
+  sections: AcademicPlanSectionValues;
+  selectedCampusId: number | null;
+  selectedTargetId: number | null;
+};
+
+export type AcademicPlanEditorRouteState =
+  | AcademicPlanEditorCreateRouteState
+  | AcademicPlanEditorEditRouteState;
 
 export type AcademicPlanTypeOption = {
   type: AcademicPlanType;

@@ -16,7 +16,11 @@ import {
   academicPlanSectionConfigs,
   getAcademicPlanEditorRouteState,
 } from '@/features/academic-plans/academicPlanEditorState';
-import type { AcademicPlanEditorRouteState, AcademicPlanSectionId } from '@/features/academic-plans/types';
+import type {
+  AcademicPlanEditorCreateRouteState,
+  AcademicPlanEditorRouteState,
+  AcademicPlanSectionId,
+} from '@/features/academic-plans/types';
 import { useMyPageSummary } from '@/features/mypage/hooks/useMyPageSummary';
 import { STUDIO_DOCUMENTS_QUERY_KEY } from '@/features/studio/hooks/useStudioDocuments';
 
@@ -27,16 +31,22 @@ const academicPlanDocumentSectionKeyMap: Record<AcademicPlanSectionId, AcademicP
   studyPlan: 'study_plan',
 };
 
-function createAcademicPlanDocumentPayload(editorState: AcademicPlanEditorRouteState): CreateAcademicPlanDocumentRequest {
+function createAcademicPlanDocumentSections(editorState: AcademicPlanEditorRouteState) {
+  return academicPlanSectionConfigs
+    .filter((section) => editorState.sections[section.id].isSaved)
+    .map((section) => ({
+      content: editorState.sections[section.id].value.trim(),
+      sectionKey: academicPlanDocumentSectionKeyMap[section.id],
+    }))
+    .filter((section) => section.content.length > 0);
+}
+
+function createAcademicPlanDocumentPayload(
+  editorState: AcademicPlanEditorCreateRouteState,
+): CreateAcademicPlanDocumentRequest {
   return {
     majorType: editorState.selectedPlanType,
-    sections: academicPlanSectionConfigs
-      .filter((section) => editorState.sections[section.id].isSaved)
-      .map((section) => ({
-        content: editorState.sections[section.id].value.trim(),
-        sectionKey: academicPlanDocumentSectionKeyMap[section.id],
-      }))
-      .filter((section) => section.content.length > 0),
+    sections: createAcademicPlanDocumentSections(editorState),
     targetId: editorState.selectedTargetId,
   };
 }
@@ -57,12 +67,18 @@ export function AcademicPlanEditorPage() {
   const editorState = getAcademicPlanEditorRouteState(location.state);
   const { data: summary } = useMyPageSummary();
   const saveDraftMutation = useMutation({
-    mutationFn: (payload: CreateAcademicPlanDocumentRequest) => {
-      if (editorState?.documentId !== undefined) {
-        return studioApi.updateDocument(editorState.documentId, { sections: payload.sections });
+    mutationFn: () => {
+      if (!editorState) {
+        throw new Error('학업계획서 정보를 불러오지 못했어요.');
       }
 
-      return academicPlanApi.createDocument(payload);
+      if (editorState.mode === 'edit') {
+        return studioApi.updateDocument(editorState.documentId, {
+          sections: createAcademicPlanDocumentSections(editorState),
+        });
+      }
+
+      return academicPlanApi.createDocument(createAcademicPlanDocumentPayload(editorState));
     },
   });
   const nickname = summary?.nickname?.trim() || '사용자';
@@ -86,7 +102,7 @@ export function AcademicPlanEditorPage() {
     }
 
     if (shouldSaveDraft) {
-      saveDraftMutation.mutate(createAcademicPlanDocumentPayload(editorState), {
+      saveDraftMutation.mutate(undefined, {
         onSuccess: () => {
           void queryClient.invalidateQueries({ queryKey: STUDIO_DOCUMENTS_QUERY_KEY });
           navigate('/studio?tab=documents', { replace: true, state: { showAcademicPlanDraftToast: true } });

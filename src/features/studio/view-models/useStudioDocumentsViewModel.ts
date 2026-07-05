@@ -51,11 +51,12 @@ function createEditorRouteStateFromDocument(
 
   return {
     documentId: document.id,
+    mode: 'edit',
     sections: sectionValues,
-    selectedCampusId: campusId ?? 0,
+    selectedCampusId: campusId ?? null,
     selectedCampusName: document.metadata.campusName,
     selectedPlanType: majorType,
-    selectedTargetId: targetId ?? document.id,
+    selectedTargetId: targetId ?? null,
     selectedTargetName: document.metadata.targetName,
   };
 }

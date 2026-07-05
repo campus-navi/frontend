@@ -108,6 +108,7 @@ export function useAcademicPlanTargetSelectionViewModel() {
     navigate('/studio/academic-plans/editor', {
       state: {
         ...completedSelection,
+        mode: 'create',
         sections: createEmptyAcademicPlanSections(),
       } satisfies AcademicPlanEditorRouteState,
     });
