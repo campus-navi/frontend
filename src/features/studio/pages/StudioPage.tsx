@@ -77,7 +77,7 @@ export function StudioPage() {
               도구
             </StudioTabButton>
             <StudioTabButton selected={activeTab === 'documents'} onClick={() => setActiveTab('documents')}>
-              내 문서함{' '}
+              내 문서{' '}
               <span className={activeTab === 'documents' ? 'text-[#00C99A]' : ''}>
                 {studioDocumentsViewModel.counts.all}
               </span>
