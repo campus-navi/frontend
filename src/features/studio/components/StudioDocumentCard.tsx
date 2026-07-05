@@ -8,28 +8,28 @@ export function StudioDocumentCard({ document, onClick }: { document: StudioDocu
       type="button"
       disabled={!onClick}
       onClick={onClick}
-      className="flex h-[106px] w-full rounded-[10px] bg-white px-3 py-4 text-left shadow-[0_6px_22px_rgba(25,31,40,0.06)] disabled:cursor-default"
+      className="flex h-[106px] w-full gap-4 rounded-[12px] bg-white px-4 py-3 text-left shadow-[0_0_8px_rgba(0,0,0,0.04)] disabled:cursor-default"
     >
-      <div className="pt-[17px]">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center">
         <StudioSparkIcon />
       </div>
-      <div className="ml-4 flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex items-start justify-between">
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <h3 className="text-[17px] font-bold leading-[22px] text-[#292B2C]">{document.title}</h3>
+              <h3 className="truncate text-[16px] font-semibold leading-[1.4] text-[#292B2C]">{document.title}</h3>
               {document.status !== 'COMPLETED' ? (
-                <span className="rounded-[5px] bg-[#FF5E47] px-1.5 py-0.5 text-[11px] font-bold leading-none text-white">
+                <span className="flex h-4 min-w-4 shrink-0 items-center justify-center rounded-[4px] bg-[#FF5E47] px-1 text-[10px] font-bold leading-none text-white">
                   N
                 </span>
               ) : null}
             </div>
-            <p className="mt-1 text-[13px] font-medium leading-[17px] text-[#7E858C]">
+            <p className="mt-1 text-[12px] font-medium leading-[1.4] text-[#707376]">
               {formatStudioDocumentUpdatedAt(document.updatedAt)}
             </p>
           </div>
           {document.status === 'DRAFT' ? (
-            <span className="rounded-[6px] bg-[#EDF1FF] px-2 py-1 text-[13px] font-semibold leading-none text-[#5576FF]">
+            <span className="shrink-0 rounded-[6px] bg-[rgba(61,99,232,0.1)] px-2 py-1 text-[12px] font-medium leading-none text-[#3D63E8]">
               임시저장
             </span>
           ) : null}
@@ -43,11 +43,11 @@ export function StudioDocumentCard({ document, onClick }: { document: StudioDocu
             <span className="text-[13px] font-semibold leading-none text-[#00B88D]">분석중</span>
           </div>
         ) : (
-          <div className="mt-auto flex gap-1">
-            <span className="rounded-[5px] bg-[#F2F4F6] px-1.5 py-1 text-[12px] font-medium leading-none text-[#59616A]">
+          <div className="mt-auto flex min-w-0 gap-1">
+            <span className="truncate rounded-[6px] bg-[#F3F5FA] px-2 py-1 text-[12px] font-medium leading-none text-[#292B2C]">
               {document.metadata.campusName}
             </span>
-            <span className="rounded-[5px] bg-[#F2F4F6] px-1.5 py-1 text-[12px] font-medium leading-none text-[#59616A]">
+            <span className="truncate rounded-[6px] bg-[#F3F5FA] px-2 py-1 text-[12px] font-medium leading-none text-[#292B2C]">
               {document.metadata.targetName}
             </span>
           </div>

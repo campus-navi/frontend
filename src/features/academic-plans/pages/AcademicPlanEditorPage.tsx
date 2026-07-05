@@ -127,9 +127,9 @@ export function AcademicPlanEditorPage() {
 
         <section className="px-4 pb-[calc(128px+env(safe-area-inset-bottom))] pt-12">
           <h1 className="text-[24px] font-bold leading-[1.42] text-[#292B2C]">
-            {nickname}님의 서류양식을
+            {nickname}님의
             <br />
-            완성해 주세요.
+            서류양식을 완성해 주세요.
           </h1>
 
           <div className="mt-10 flex flex-col gap-2.5">

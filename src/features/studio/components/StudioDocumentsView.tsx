@@ -1,23 +1,29 @@
-import { RadioChip } from '@/components/ui/RadioChip';
 import { StudioDocumentCard } from '@/features/studio/components/StudioDocumentCard';
+import { StudioDocumentFilterChip } from '@/features/studio/components/StudioDocumentFilterChip';
 import type { StudioDocumentsViewModel } from '@/features/studio/view-models/useStudioDocumentsViewModel';
 
 export function StudioDocumentsView({ viewModel }: { viewModel: StudioDocumentsViewModel }) {
   return (
     <section className="flex flex-1 flex-col overflow-y-auto px-4 py-6">
       <div className="flex gap-2">
-        <RadioChip selected={viewModel.selectedFilter === 'all'} onClick={() => viewModel.setSelectedFilter('all')}>
+        <StudioDocumentFilterChip
+          selected={viewModel.selectedFilter === 'all'}
+          onClick={() => viewModel.setSelectedFilter('all')}
+        >
           전체 {viewModel.counts.all}
-        </RadioChip>
-        <RadioChip
+        </StudioDocumentFilterChip>
+        <StudioDocumentFilterChip
           selected={viewModel.selectedFilter === 'completed'}
           onClick={() => viewModel.setSelectedFilter('completed')}
         >
           분석완료 {viewModel.counts.completed}
-        </RadioChip>
-        <RadioChip selected={viewModel.selectedFilter === 'draft'} onClick={() => viewModel.setSelectedFilter('draft')}>
+        </StudioDocumentFilterChip>
+        <StudioDocumentFilterChip
+          selected={viewModel.selectedFilter === 'draft'}
+          onClick={() => viewModel.setSelectedFilter('draft')}
+        >
           임시저장 {viewModel.counts.draft}
-        </RadioChip>
+        </StudioDocumentFilterChip>
       </div>
 
       {viewModel.continueDraftErrorMessage ? (
