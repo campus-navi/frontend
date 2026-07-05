@@ -19,30 +19,20 @@ import type { AcademicPlanEditorRouteState, AcademicPlanSectionId } from '@/feat
 import { useMyPageSummary } from '@/features/mypage/hooks/useMyPageSummary';
 
 const academicPlanDocumentSectionKeyMap: Record<AcademicPlanSectionId, AcademicPlanDocumentSectionKey> = {
-  etc: 'etc',
-  interest: 'interest_field',
-  motivation: 'application_motive',
-  studyPlan: 'study_plan',
-};
-
-const academicPlanDraftDocumentSectionKeyMap: Record<AcademicPlanSectionId, AcademicPlanDocumentSectionKey> = {
   etc: 'academic_plan_etc',
   interest: 'interest_field',
   motivation: 'application_motive',
   studyPlan: 'study_plan',
 };
 
-function createAcademicPlanDocumentPayload(
-  editorState: AcademicPlanEditorRouteState,
-  sectionKeyMap: Record<AcademicPlanSectionId, AcademicPlanDocumentSectionKey> = academicPlanDocumentSectionKeyMap,
-): CreateAcademicPlanDocumentRequest {
+function createAcademicPlanDocumentPayload(editorState: AcademicPlanEditorRouteState): CreateAcademicPlanDocumentRequest {
   return {
     majorType: editorState.selectedPlanType,
     sections: academicPlanSectionConfigs
       .filter((section) => editorState.sections[section.id].isSaved)
       .map((section) => ({
         content: editorState.sections[section.id].value.trim(),
-        sectionKey: sectionKeyMap[section.id],
+        sectionKey: academicPlanDocumentSectionKeyMap[section.id],
       }))
       .filter((section) => section.content.length > 0),
     targetId: editorState.selectedTargetId,
@@ -63,9 +53,6 @@ export function AcademicPlanEditorPage() {
   const [isExitModalOpen, setIsExitModalOpen] = useState(false);
   const editorState = getAcademicPlanEditorRouteState(location.state);
   const { data: summary } = useMyPageSummary();
-  const createDocumentMutation = useMutation({
-    mutationFn: academicPlanApi.createDocument,
-  });
   const saveDraftMutation = useMutation({
     mutationFn: academicPlanApi.createDocument,
   });
@@ -90,7 +77,7 @@ export function AcademicPlanEditorPage() {
     }
 
     if (shouldSaveDraft) {
-      saveDraftMutation.mutate(createAcademicPlanDocumentPayload(editorState, academicPlanDraftDocumentSectionKeyMap), {
+      saveDraftMutation.mutate(createAcademicPlanDocumentPayload(editorState), {
         onSuccess: () => {
           navigate('/studio?tab=documents', { replace: true, state: { showAcademicPlanDraftToast: true } });
         },
@@ -103,19 +90,9 @@ export function AcademicPlanEditorPage() {
   const isAnalysisCtaEnabled = academicPlanSectionConfigs
     .filter((section) => section.required)
     .every((section) => editorState.sections[section.id].isSaved);
-  const analysisErrorMessage = createDocumentMutation.isError
-    ? '학업계획서 분석을 시작하지 못했어요. 잠시 후 다시 시도해주세요.'
-    : '';
   const draftSaveErrorMessage = saveDraftMutation.isError
     ? getDraftSaveErrorMessage(saveDraftMutation.error)
     : '';
-  const handleAnalysisStart = () => {
-    if (!isAnalysisCtaEnabled || createDocumentMutation.isPending) {
-      return;
-    }
-
-    createDocumentMutation.mutate(createAcademicPlanDocumentPayload(editorState));
-  };
 
   return (
     <main className="min-h-[100svh] bg-white">
@@ -164,14 +141,7 @@ export function AcademicPlanEditorPage() {
         </section>
 
         <div className="fixed bottom-0 left-1/2 z-20 w-full max-w-[393px] -translate-x-1/2 bg-white px-4 pb-[max(36px,env(safe-area-inset-bottom))] pt-3">
-          {analysisErrorMessage ? (
-            <p className="mb-2 text-center text-[14px] font-medium leading-5 text-[#FF5E47]">
-              {analysisErrorMessage}
-            </p>
-          ) : null}
-          <CtaButton disabled={!isAnalysisCtaEnabled || createDocumentMutation.isPending} onClick={handleAnalysisStart}>
-            분석 시작
-          </CtaButton>
+          <CtaButton disabled={!isAnalysisCtaEnabled}>분석 시작</CtaButton>
         </div>
       </div>
       <AcademicPlanExitModal

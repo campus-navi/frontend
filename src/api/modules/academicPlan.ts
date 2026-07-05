@@ -18,8 +18,7 @@ export type AcademicPlanDocumentSectionKey =
   | 'application_motive'
   | 'interest_field'
   | 'study_plan'
-  | 'academic_plan_etc'
-  | 'etc';
+  | 'academic_plan_etc';
 
 export interface CreateAcademicPlanDocumentSection extends ApiObjectData {
   content: string;
