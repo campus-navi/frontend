@@ -31,7 +31,9 @@ export interface CreateAcademicPlanDocumentRequest extends ApiObjectData {
   targetId: number;
 }
 
-export type CreateAcademicPlanDocumentResponse = null;
+export interface CreateAcademicPlanDocumentResponse extends ApiObjectData {
+  id?: number;
+}
 
 interface AcademicPlanTargetOptionResponse extends ApiObjectData {
   id?: number | string;
@@ -64,7 +66,7 @@ export function isDepartmentPlanType(type: AcademicPlanType) {
 
 export const academicPlanApi = {
   async createDocument(payload: CreateAcademicPlanDocumentRequest) {
-    return request<CreateAcademicPlanDocumentResponse>({
+    return request<CreateAcademicPlanDocumentResponse | null>({
       data: payload,
       method: 'post',
       url: '/academic-plans/documents',

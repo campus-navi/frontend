@@ -1,23 +1,28 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
-import type { AcademicPlanType } from '@/api';
+import type { AcademicPlanType, StudioDocument } from '@/api';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { MobileGnb } from '@/components/ui/MobileGnb';
 import { academicPlanTypeOptions } from '@/features/academic-plans/view-models/useAcademicPlanTargetSelectionViewModel';
+import { StudioAnalysisInProgressToast } from '@/features/studio/components/StudioAnalysisInProgressToast';
 import { StudioDocumentsView } from '@/features/studio/components/StudioDocumentsView';
 import { StudioDraftToast } from '@/features/studio/components/StudioDraftToast';
 import { StudioTabButton } from '@/features/studio/components/StudioTabButton';
 import { StudioToolsView } from '@/features/studio/components/StudioToolsView';
+import { getMockAnalyzingDocument, setMockAnalyzingDocument } from '@/features/studio/mockAnalyzingDocumentStorage';
 import { useStudioDocumentsViewModel } from '@/features/studio/view-models/useStudioDocumentsViewModel';
 
 type StudioTab = 'tools' | 'documents';
 type StudioRouteState = {
+  analyzingDocument?: StudioDocument;
+  analyzingDocumentId?: number;
+  showAnalysisInProgressToast?: boolean;
   showAcademicPlanDraftToast?: boolean;
 };
 
 function isStudioRouteState(state: unknown): state is StudioRouteState {
-  return typeof state === 'object' && state !== null && 'showAcademicPlanDraftToast' in state;
+  return typeof state === 'object' && state !== null;
 }
 
 export function StudioPage() {
@@ -29,14 +34,30 @@ export function StudioPage() {
   );
   const [isPlanTypeSheetOpen, setIsPlanTypeSheetOpen] = useState(false);
   const [isDraftToastVisible, setIsDraftToastVisible] = useState(false);
-  const studioDocumentsViewModel = useStudioDocumentsViewModel();
+  const [isAnalysisToastVisible, setIsAnalysisToastVisible] = useState(false);
+  const [analyzingDocument, setAnalyzingDocument] = useState<StudioDocument | null>(() => getMockAnalyzingDocument());
+  const studioDocumentsViewModel = useStudioDocumentsViewModel({
+    analyzingDocument: analyzingDocument ?? undefined,
+  });
 
   useEffect(() => {
-    if (!isStudioRouteState(location.state) || location.state.showAcademicPlanDraftToast !== true) {
+    if (!isStudioRouteState(location.state)) {
       return;
     }
 
-    setIsDraftToastVisible(true);
+    if (location.state.showAcademicPlanDraftToast === true) {
+      setIsDraftToastVisible(true);
+    }
+
+    if (location.state.showAnalysisInProgressToast === true) {
+      setIsAnalysisToastVisible(true);
+    }
+
+    if (location.state.analyzingDocument) {
+      setMockAnalyzingDocument(location.state.analyzingDocument);
+      setAnalyzingDocument(location.state.analyzingDocument);
+    }
+
     navigate(
       {
         pathname: location.pathname,
@@ -57,6 +78,18 @@ export function StudioPage() {
 
     return () => window.clearTimeout(timeoutId);
   }, [isDraftToastVisible]);
+
+  useEffect(() => {
+    if (!isAnalysisToastVisible) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setIsAnalysisToastVisible(false);
+    }, 5000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [isAnalysisToastVisible]);
 
   const openAcademicPlanFlow = () => {
     setIsPlanTypeSheetOpen(true);
@@ -94,6 +127,14 @@ export function StudioPage() {
 
       <MobileGnb activeItem="studio" />
       <StudioDraftToast isVisible={isDraftToastVisible} />
+      <StudioAnalysisInProgressToast
+        isVisible={isAnalysisToastVisible}
+        onOpen={() => {
+          if (analyzingDocument) {
+            studioDocumentsViewModel.openDocument(analyzingDocument);
+          }
+        }}
+      />
 
       <BottomSheet
         isOpen={isPlanTypeSheetOpen}

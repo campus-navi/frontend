@@ -2,13 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import {
-  academicPlanApi,
-  isApiError,
-  studioApi,
-  type AcademicPlanDocumentSectionKey,
-  type CreateAcademicPlanDocumentRequest,
-} from '@/api';
+import { isApiError, type StudioDocument } from '@/api';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { CtaButton } from '@/components/ui/CtaButton';
 import { AcademicPlanExitModal } from '@/features/academic-plans/components/AcademicPlanExitModal';
@@ -16,40 +10,11 @@ import {
   academicPlanSectionConfigs,
   getAcademicPlanEditorRouteState,
 } from '@/features/academic-plans/academicPlanEditorState';
-import type {
-  AcademicPlanEditorCreateRouteState,
-  AcademicPlanEditorRouteState,
-  AcademicPlanSectionId,
-} from '@/features/academic-plans/types';
+import { saveAcademicPlanDocument } from '@/features/academic-plans/services/academicPlanDocument';
+import { requestAcademicPlanAnalysisMock } from '@/features/academic-plans/services/requestAcademicPlanAnalysisMock';
 import { useMyPageSummary } from '@/features/mypage/hooks/useMyPageSummary';
 import { STUDIO_DOCUMENTS_QUERY_KEY } from '@/features/studio/hooks/useStudioDocuments';
-
-const academicPlanDocumentSectionKeyMap: Record<AcademicPlanSectionId, AcademicPlanDocumentSectionKey> = {
-  etc: 'academic_plan_etc',
-  interest: 'interest_field',
-  motivation: 'application_motive',
-  studyPlan: 'study_plan',
-};
-
-function createAcademicPlanDocumentSections(editorState: AcademicPlanEditorRouteState) {
-  return academicPlanSectionConfigs
-    .filter((section) => editorState.sections[section.id].isSaved)
-    .map((section) => ({
-      content: editorState.sections[section.id].value.trim(),
-      sectionKey: academicPlanDocumentSectionKeyMap[section.id],
-    }))
-    .filter((section) => section.content.length > 0);
-}
-
-function createAcademicPlanDocumentPayload(
-  editorState: AcademicPlanEditorCreateRouteState,
-): CreateAcademicPlanDocumentRequest {
-  return {
-    majorType: editorState.selectedPlanType,
-    sections: createAcademicPlanDocumentSections(editorState),
-    targetId: editorState.selectedTargetId,
-  };
-}
+import { setMockAnalyzingDocument } from '@/features/studio/mockAnalyzingDocumentStorage';
 
 function getDraftSaveErrorMessage(error: unknown) {
   if (isApiError(error) && (error.status === 400 || error.status === 404)) {
@@ -57,6 +22,22 @@ function getDraftSaveErrorMessage(error: unknown) {
   }
 
   return '임시 저장에 실패했어요. 잠시 후 다시 시도해주세요.';
+}
+
+function createAnalyzingStudioDocument(documentId: number, editorState: NonNullable<ReturnType<typeof getAcademicPlanEditorRouteState>>): StudioDocument {
+  return {
+    id: documentId,
+    metadata: {
+      ...(editorState.selectedCampusId === null ? {} : { campusId: editorState.selectedCampusId }),
+      campusName: editorState.selectedCampusName,
+      majorType: editorState.selectedPlanType,
+      ...(editorState.selectedTargetId === null ? {} : { targetId: editorState.selectedTargetId }),
+      targetName: editorState.selectedTargetName,
+    },
+    status: 'ANALYZING',
+    title: '학업계획서',
+    updatedAt: new Date().toISOString(),
+  };
 }
 
 export function AcademicPlanEditorPage() {
@@ -72,13 +53,18 @@ export function AcademicPlanEditorPage() {
         throw new Error('학업계획서 정보를 불러오지 못했어요.');
       }
 
-      if (editorState.mode === 'edit') {
-        return studioApi.updateDocument(editorState.documentId, {
-          sections: createAcademicPlanDocumentSections(editorState),
-        });
+      return saveAcademicPlanDocument(editorState);
+    },
+  });
+  const requestAnalysisMutation = useMutation({
+    mutationFn: async () => {
+      if (!editorState) {
+        throw new Error('학업계획서 정보를 불러오지 못했어요.');
       }
 
-      return academicPlanApi.createDocument(createAcademicPlanDocumentPayload(editorState));
+      const { documentId } = await saveAcademicPlanDocument(editorState);
+
+      return requestAcademicPlanAnalysisMock(documentId);
     },
   });
   const nickname = summary?.nickname?.trim() || '사용자';
@@ -97,7 +83,7 @@ export function AcademicPlanEditorPage() {
     navigate(`/studio/academic-plans/editor/${sectionId}`, { replace: true, state: editorState });
   };
   const handleExit = (shouldSaveDraft: boolean) => {
-    if (saveDraftMutation.isPending) {
+    if (saveDraftMutation.isPending || requestAnalysisMutation.isPending) {
       return;
     }
 
@@ -112,6 +98,28 @@ export function AcademicPlanEditorPage() {
     }
 
     navigate('/studio', { replace: true });
+  };
+  const handleStartAnalysis = () => {
+    if (!isAnalysisCtaEnabled || saveDraftMutation.isPending || requestAnalysisMutation.isPending) {
+      return;
+    }
+
+    requestAnalysisMutation.mutate(undefined, {
+      onSuccess: ({ documentId }) => {
+        const analyzingDocument = createAnalyzingStudioDocument(documentId, editorState);
+
+        setMockAnalyzingDocument(analyzingDocument);
+        void queryClient.invalidateQueries({ queryKey: STUDIO_DOCUMENTS_QUERY_KEY });
+        navigate('/studio?tab=documents', {
+          replace: true,
+          state: {
+            analyzingDocument,
+            analyzingDocumentId: documentId,
+            showAnalysisInProgressToast: true,
+          },
+        });
+      },
+    });
   };
   const isAnalysisCtaEnabled = academicPlanSectionConfigs
     .filter((section) => section.required)
@@ -167,7 +175,12 @@ export function AcademicPlanEditorPage() {
         </section>
 
         <div className="fixed bottom-0 left-1/2 z-20 w-full max-w-[393px] -translate-x-1/2 bg-white px-4 pb-[max(36px,env(safe-area-inset-bottom))] pt-3">
-          <CtaButton disabled={!isAnalysisCtaEnabled}>분석 시작</CtaButton>
+          <CtaButton
+            disabled={!isAnalysisCtaEnabled || saveDraftMutation.isPending || requestAnalysisMutation.isPending}
+            onClick={handleStartAnalysis}
+          >
+            {requestAnalysisMutation.isPending ? '분석 요청 중' : '분석 시작'}
+          </CtaButton>
         </div>
       </div>
       <AcademicPlanExitModal

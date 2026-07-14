@@ -8,7 +8,7 @@ export function StudioDocumentCard({ document, onClick }: { document: StudioDocu
       type="button"
       disabled={!onClick}
       onClick={onClick}
-      className="flex h-[106px] w-full gap-4 rounded-[12px] bg-white px-4 py-3 text-left shadow-[0_0_8px_rgba(0,0,0,0.04)] disabled:cursor-default"
+      className="flex h-[106px] w-full items-center gap-4 rounded-[12px] bg-white px-4 py-3 text-left shadow-[0_0_8px_rgba(0,0,0,0.04)] disabled:cursor-default"
     >
       <div className="flex h-10 w-10 shrink-0 items-center justify-center">
         <StudioSparkIcon />
