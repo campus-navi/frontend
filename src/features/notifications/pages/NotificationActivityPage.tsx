@@ -58,7 +58,11 @@ export function NotificationActivityPage() {
                   title={formatMissedNoticeTitle(notification.missedDate, memberMe.data?.nickname)}
                   typeLabel="지나친 공지"
                   variant="activity"
-                  onClick={() => navigate(`/notifications/activity/${notification.missedDate}`)}
+                  onClick={() =>
+                    navigate(`/notifications/activity/${notification.missedDate}`, {
+                      state: { fromActivityList: true },
+                    })
+                  }
                 />
               </div>
             ))}

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { isApiError } from '@/api';
 import {
@@ -27,7 +27,17 @@ function toCardNewsItems(posts: NonNullable<ReturnType<typeof useActivityNotific
   }));
 }
 
+function hasActivityListRouteState(state: unknown) {
+  return Boolean(
+    state &&
+      typeof state === 'object' &&
+      'fromActivityList' in state &&
+      state.fromActivityList === true,
+  );
+}
+
 export function NotificationActivityDetailPage() {
+  const location = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { missedDate } = useParams();
@@ -45,6 +55,11 @@ export function NotificationActivityDetailPage() {
   }, [query.isSuccess, queryClient]);
 
   const handleBackClick = () => {
+    if (hasActivityListRouteState(location.state)) {
+      navigate(-1);
+      return;
+    }
+
     navigate('/notifications/activity', { replace: true });
   };
 
