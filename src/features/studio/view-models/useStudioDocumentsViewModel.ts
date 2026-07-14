@@ -62,10 +62,10 @@ function createEditorRouteStateFromDocument(
 }
 
 type UseStudioDocumentsViewModelOptions = {
-  analyzingDocument?: StudioDocument;
+  analyzingDocuments?: StudioDocument[];
 };
 
-export function useStudioDocumentsViewModel({ analyzingDocument }: UseStudioDocumentsViewModelOptions = {}) {
+export function useStudioDocumentsViewModel({ analyzingDocuments = [] }: UseStudioDocumentsViewModelOptions = {}) {
   const navigate = useNavigate();
   const [selectedFilter, setSelectedFilter] = useState<StudioDocumentFilter>('all');
   const studioDocumentsQuery = useStudioDocuments();
@@ -81,27 +81,24 @@ export function useStudioDocumentsViewModel({ analyzingDocument }: UseStudioDocu
   });
   const documents = useMemo(() => {
     const queryDocuments = studioDocumentsQuery.data ?? EMPTY_STUDIO_DOCUMENTS;
+    const analyzingDocumentMap = new Map(
+      analyzingDocuments.map((document) => [document.id, document]),
+    );
 
-    if (!analyzingDocument) {
+    if (analyzingDocumentMap.size === 0) {
       return queryDocuments;
     }
 
-    const hasSameDocument = queryDocuments.some((document) => document.id === analyzingDocument.id);
-
-    if (!hasSameDocument) {
-      return [analyzingDocument, ...queryDocuments];
-    }
-
     return queryDocuments.map((document) =>
-      document.id === analyzingDocument.id && document.status !== 'COMPLETED'
+      analyzingDocumentMap.has(document.id) && document.status !== 'COMPLETED'
         ? {
             ...document,
             status: 'ANALYZING' as const,
-            updatedAt: analyzingDocument.updatedAt,
+            updatedAt: analyzingDocumentMap.get(document.id)?.updatedAt ?? document.updatedAt,
           }
         : document,
     );
-  }, [analyzingDocument, studioDocumentsQuery.data]);
+  }, [analyzingDocuments, studioDocumentsQuery.data]);
   const counts = useMemo(
     () => ({
       all: documents.length,

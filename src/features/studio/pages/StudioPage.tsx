@@ -10,13 +10,16 @@ import { StudioDocumentsView } from '@/features/studio/components/StudioDocument
 import { StudioDraftToast } from '@/features/studio/components/StudioDraftToast';
 import { StudioTabButton } from '@/features/studio/components/StudioTabButton';
 import { StudioToolsView } from '@/features/studio/components/StudioToolsView';
-import { getMockAnalyzingDocument, setMockAnalyzingDocument } from '@/features/studio/mockAnalyzingDocumentStorage';
+import {
+  getMockAnalyzingDocuments,
+  upsertMockAnalyzingDocument,
+} from '@/features/studio/mockAnalyzingDocumentStorage';
 import { useStudioDocumentsViewModel } from '@/features/studio/view-models/useStudioDocumentsViewModel';
 
 type StudioTab = 'tools' | 'documents';
 type StudioRouteState = {
   analyzingDocument?: StudioDocument;
-  analyzingDocumentId?: number;
+  analyzingDocuments?: StudioDocument[];
   showAnalysisInProgressToast?: boolean;
   showAcademicPlanDraftToast?: boolean;
 };
@@ -35,9 +38,9 @@ export function StudioPage() {
   const [isPlanTypeSheetOpen, setIsPlanTypeSheetOpen] = useState(false);
   const [isDraftToastVisible, setIsDraftToastVisible] = useState(false);
   const [isAnalysisToastVisible, setIsAnalysisToastVisible] = useState(false);
-  const [analyzingDocument, setAnalyzingDocument] = useState<StudioDocument | null>(() => getMockAnalyzingDocument());
+  const [analyzingDocuments, setAnalyzingDocuments] = useState<StudioDocument[]>(() => getMockAnalyzingDocuments());
   const studioDocumentsViewModel = useStudioDocumentsViewModel({
-    analyzingDocument: analyzingDocument ?? undefined,
+    analyzingDocuments,
   });
 
   useEffect(() => {
@@ -54,8 +57,10 @@ export function StudioPage() {
     }
 
     if (location.state.analyzingDocument) {
-      setMockAnalyzingDocument(location.state.analyzingDocument);
-      setAnalyzingDocument(location.state.analyzingDocument);
+      const nextDocuments = upsertMockAnalyzingDocument(location.state.analyzingDocument);
+      setAnalyzingDocuments(nextDocuments);
+    } else if (location.state.analyzingDocuments && location.state.analyzingDocuments.length > 0) {
+      setAnalyzingDocuments(location.state.analyzingDocuments);
     }
 
     navigate(
@@ -130,8 +135,10 @@ export function StudioPage() {
       <StudioAnalysisInProgressToast
         isVisible={isAnalysisToastVisible}
         onOpen={() => {
-          if (analyzingDocument) {
-            studioDocumentsViewModel.openDocument(analyzingDocument);
+          const latestAnalyzingDocument = analyzingDocuments[0];
+
+          if (latestAnalyzingDocument) {
+            studioDocumentsViewModel.openDocument(latestAnalyzingDocument);
           }
         }}
       />

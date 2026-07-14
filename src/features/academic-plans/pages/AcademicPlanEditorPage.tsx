@@ -14,7 +14,7 @@ import { saveAcademicPlanDocument } from '@/features/academic-plans/services/aca
 import { requestAcademicPlanAnalysisMock } from '@/features/academic-plans/services/requestAcademicPlanAnalysisMock';
 import { useMyPageSummary } from '@/features/mypage/hooks/useMyPageSummary';
 import { STUDIO_DOCUMENTS_QUERY_KEY } from '@/features/studio/hooks/useStudioDocuments';
-import { setMockAnalyzingDocument } from '@/features/studio/mockAnalyzingDocumentStorage';
+import { upsertMockAnalyzingDocument } from '@/features/studio/mockAnalyzingDocumentStorage';
 
 const ANALYSIS_REQUEST_ERROR_MESSAGE = '분석을 시작하지 못했어요. 잠시 후 다시 시도해주세요.';
 
@@ -127,15 +127,15 @@ export function AcademicPlanEditorPage() {
       },
       onSuccess: ({ documentId }) => {
         const analyzingDocument = createAnalyzingStudioDocument(documentId, editorState);
+        const analyzingDocuments = upsertMockAnalyzingDocument(analyzingDocument);
 
         setAnalysisRequestErrorMessage('');
-        setMockAnalyzingDocument(analyzingDocument);
         void queryClient.invalidateQueries({ queryKey: STUDIO_DOCUMENTS_QUERY_KEY });
         navigate('/studio?tab=documents', {
           replace: true,
           state: {
             analyzingDocument,
-            analyzingDocumentId: documentId,
+            analyzingDocuments,
             showAnalysisInProgressToast: true,
           },
         });
