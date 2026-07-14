@@ -22,6 +22,7 @@ type StudioRouteState = {
   analyzingDocuments?: StudioDocument[];
   showAnalysisInProgressToast?: boolean;
   showAcademicPlanDraftToast?: boolean;
+  showAcademicPlanSavedWithoutAnalysisToast?: boolean;
 };
 
 function isStudioRouteState(state: unknown): state is StudioRouteState {
@@ -37,6 +38,7 @@ export function StudioPage() {
   );
   const [isPlanTypeSheetOpen, setIsPlanTypeSheetOpen] = useState(false);
   const [isDraftToastVisible, setIsDraftToastVisible] = useState(false);
+  const [isSavedWithoutAnalysisToastVisible, setIsSavedWithoutAnalysisToastVisible] = useState(false);
   const [isAnalysisToastVisible, setIsAnalysisToastVisible] = useState(false);
   const [analyzingDocuments, setAnalyzingDocuments] = useState<StudioDocument[]>(() => getMockAnalyzingDocuments());
   const studioDocumentsViewModel = useStudioDocumentsViewModel({
@@ -50,6 +52,10 @@ export function StudioPage() {
 
     if (location.state.showAcademicPlanDraftToast === true) {
       setIsDraftToastVisible(true);
+    }
+
+    if (location.state.showAcademicPlanSavedWithoutAnalysisToast === true) {
+      setIsSavedWithoutAnalysisToastVisible(true);
     }
 
     if (location.state.showAnalysisInProgressToast === true) {
@@ -83,6 +89,18 @@ export function StudioPage() {
 
     return () => window.clearTimeout(timeoutId);
   }, [isDraftToastVisible]);
+
+  useEffect(() => {
+    if (!isSavedWithoutAnalysisToastVisible) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setIsSavedWithoutAnalysisToastVisible(false);
+    }, 5000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [isSavedWithoutAnalysisToastVisible]);
 
   useEffect(() => {
     if (!isAnalysisToastVisible) {
@@ -132,6 +150,10 @@ export function StudioPage() {
 
       <MobileGnb activeItem="studio" />
       <StudioDraftToast isVisible={isDraftToastVisible} />
+      <StudioDraftToast
+        isVisible={isSavedWithoutAnalysisToastVisible}
+        message="문서는 저장됐지만 분석을 시작할 수 없어요. 문서함에서 다시 시도해주세요."
+      />
       <StudioAnalysisInProgressToast
         isVisible={isAnalysisToastVisible}
         onOpen={() => {

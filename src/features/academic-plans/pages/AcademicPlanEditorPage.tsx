@@ -18,6 +18,15 @@ import { upsertMockAnalyzingDocument } from '@/features/studio/mockAnalyzingDocu
 
 const ANALYSIS_REQUEST_ERROR_MESSAGE = '분석을 시작하지 못했어요. 잠시 후 다시 시도해주세요.';
 
+type RequestAnalysisMutationResult =
+  | {
+      documentId: number;
+      type: 'analysis-started';
+    }
+  | {
+      type: 'saved-without-document-id';
+    };
+
 function getDraftSaveErrorMessage(error: unknown) {
   if (isApiError(error) && (error.status === 400 || error.status === 404)) {
     return '임시 저장할 수 없어요. 선택한 대상과 작성 내용을 확인해주세요.';
@@ -68,7 +77,7 @@ export function AcademicPlanEditorPage() {
     },
   });
   const requestAnalysisMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (): Promise<RequestAnalysisMutationResult> => {
       if (!editorState) {
         throw new Error('학업계획서 정보를 불러오지 못했어요.');
       }
@@ -76,10 +85,15 @@ export function AcademicPlanEditorPage() {
       const { documentId } = await saveAcademicPlanDocument(editorState);
 
       if (typeof documentId !== 'number') {
-        throw new Error('저장된 문서 id를 확인할 수 없어요. 잠시 후 다시 시도해주세요.');
+        return { type: 'saved-without-document-id' };
       }
 
-      return requestAcademicPlanAnalysisMock(documentId);
+      const response = await requestAcademicPlanAnalysisMock(documentId);
+
+      return {
+        documentId: response.documentId,
+        type: 'analysis-started',
+      };
     },
   });
   const nickname = summary?.nickname?.trim() || '사용자';
@@ -125,7 +139,18 @@ export function AcademicPlanEditorPage() {
       onError: (error) => {
         setAnalysisRequestErrorMessage(getAnalysisRequestErrorMessage(error));
       },
-      onSuccess: ({ documentId }) => {
+      onSuccess: (result) => {
+        if (result.type === 'saved-without-document-id') {
+          setAnalysisRequestErrorMessage('');
+          void queryClient.invalidateQueries({ queryKey: STUDIO_DOCUMENTS_QUERY_KEY });
+          navigate('/studio?tab=documents', {
+            replace: true,
+            state: { showAcademicPlanSavedWithoutAnalysisToast: true },
+          });
+          return;
+        }
+
+        const { documentId } = result;
         const analyzingDocument = createAnalyzingStudioDocument(documentId, editorState);
         const analyzingDocuments = upsertMockAnalyzingDocument(analyzingDocument);
 
