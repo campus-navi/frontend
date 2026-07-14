@@ -96,6 +96,7 @@ export function useHomeViewModel(): HomeViewModel {
     onFeaturedNoticeCardClick: handleOpenCardNews,
     onFeaturedNoticeDetailClick: (postId: number) => navigate(`/info/posts/${postId}`),
     onFeaturedNoticeTabChange: setFeaturedNoticeTab,
+    onNotificationClick: () => navigate('/notifications/activity'),
     onOpenDeadlineList: () => navigate('/deadlines'),
     onOpenNoticeInterests: () => navigate('/notice-interests'),
     shouldShowDeadlinePreviewEmpty:

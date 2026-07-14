@@ -25,6 +25,7 @@ export type HomeViewModel = {
   onFeaturedNoticeCardClick: (post: FeedCardPost) => void;
   onFeaturedNoticeDetailClick: (postId: number) => void;
   onFeaturedNoticeTabChange: (tab: FeaturedNoticeTab) => void;
+  onNotificationClick: () => void;
   onOpenDeadlineList: () => void;
   onOpenNoticeInterests: () => void;
   shouldShowDeadlinePreviewEmpty: boolean;
