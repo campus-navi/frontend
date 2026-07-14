@@ -1,23 +1,32 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
-import type { AcademicPlanType } from '@/api';
+import type { AcademicPlanType, StudioDocument } from '@/api';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { MobileGnb } from '@/components/ui/MobileGnb';
 import { academicPlanTypeOptions } from '@/features/academic-plans/view-models/useAcademicPlanTargetSelectionViewModel';
+import { StudioAnalysisInProgressToast } from '@/features/studio/components/StudioAnalysisInProgressToast';
 import { StudioDocumentsView } from '@/features/studio/components/StudioDocumentsView';
 import { StudioDraftToast } from '@/features/studio/components/StudioDraftToast';
 import { StudioTabButton } from '@/features/studio/components/StudioTabButton';
 import { StudioToolsView } from '@/features/studio/components/StudioToolsView';
+import {
+  getMockAnalyzingDocuments,
+  upsertMockAnalyzingDocument,
+} from '@/features/studio/mockAnalyzingDocumentStorage';
 import { useStudioDocumentsViewModel } from '@/features/studio/view-models/useStudioDocumentsViewModel';
 
 type StudioTab = 'tools' | 'documents';
 type StudioRouteState = {
+  analyzingDocument?: StudioDocument;
+  analyzingDocuments?: StudioDocument[];
+  showAnalysisInProgressToast?: boolean;
   showAcademicPlanDraftToast?: boolean;
+  showAcademicPlanSavedWithoutAnalysisToast?: boolean;
 };
 
 function isStudioRouteState(state: unknown): state is StudioRouteState {
-  return typeof state === 'object' && state !== null && 'showAcademicPlanDraftToast' in state;
+  return typeof state === 'object' && state !== null;
 }
 
 export function StudioPage() {
@@ -29,14 +38,37 @@ export function StudioPage() {
   );
   const [isPlanTypeSheetOpen, setIsPlanTypeSheetOpen] = useState(false);
   const [isDraftToastVisible, setIsDraftToastVisible] = useState(false);
-  const studioDocumentsViewModel = useStudioDocumentsViewModel();
+  const [isSavedWithoutAnalysisToastVisible, setIsSavedWithoutAnalysisToastVisible] = useState(false);
+  const [isAnalysisToastVisible, setIsAnalysisToastVisible] = useState(false);
+  const [analyzingDocuments, setAnalyzingDocuments] = useState<StudioDocument[]>(() => getMockAnalyzingDocuments());
+  const studioDocumentsViewModel = useStudioDocumentsViewModel({
+    analyzingDocuments,
+  });
 
   useEffect(() => {
-    if (!isStudioRouteState(location.state) || location.state.showAcademicPlanDraftToast !== true) {
+    if (!isStudioRouteState(location.state)) {
       return;
     }
 
-    setIsDraftToastVisible(true);
+    if (location.state.showAcademicPlanDraftToast === true) {
+      setIsDraftToastVisible(true);
+    }
+
+    if (location.state.showAcademicPlanSavedWithoutAnalysisToast === true) {
+      setIsSavedWithoutAnalysisToastVisible(true);
+    }
+
+    if (location.state.showAnalysisInProgressToast === true) {
+      setIsAnalysisToastVisible(true);
+    }
+
+    if (location.state.analyzingDocument) {
+      const nextDocuments = upsertMockAnalyzingDocument(location.state.analyzingDocument);
+      setAnalyzingDocuments(nextDocuments);
+    } else if (location.state.analyzingDocuments && location.state.analyzingDocuments.length > 0) {
+      setAnalyzingDocuments(location.state.analyzingDocuments);
+    }
+
     navigate(
       {
         pathname: location.pathname,
@@ -57,6 +89,30 @@ export function StudioPage() {
 
     return () => window.clearTimeout(timeoutId);
   }, [isDraftToastVisible]);
+
+  useEffect(() => {
+    if (!isSavedWithoutAnalysisToastVisible) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setIsSavedWithoutAnalysisToastVisible(false);
+    }, 5000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [isSavedWithoutAnalysisToastVisible]);
+
+  useEffect(() => {
+    if (!isAnalysisToastVisible) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setIsAnalysisToastVisible(false);
+    }, 5000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [isAnalysisToastVisible]);
 
   const openAcademicPlanFlow = () => {
     setIsPlanTypeSheetOpen(true);
@@ -94,6 +150,20 @@ export function StudioPage() {
 
       <MobileGnb activeItem="studio" />
       <StudioDraftToast isVisible={isDraftToastVisible} />
+      <StudioDraftToast
+        isVisible={isSavedWithoutAnalysisToastVisible}
+        message="문서는 저장됐지만 분석을 시작할 수 없어요. 문서함에서 다시 시도해주세요."
+      />
+      <StudioAnalysisInProgressToast
+        isVisible={isAnalysisToastVisible}
+        onOpen={() => {
+          const latestAnalyzingDocument = analyzingDocuments[0];
+
+          if (latestAnalyzingDocument) {
+            studioDocumentsViewModel.openDocument(latestAnalyzingDocument);
+          }
+        }}
+      />
 
       <BottomSheet
         isOpen={isPlanTypeSheetOpen}

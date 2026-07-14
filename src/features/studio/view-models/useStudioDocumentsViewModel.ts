@@ -61,7 +61,11 @@ function createEditorRouteStateFromDocument(
   };
 }
 
-export function useStudioDocumentsViewModel() {
+type UseStudioDocumentsViewModelOptions = {
+  analyzingDocuments?: StudioDocument[];
+};
+
+export function useStudioDocumentsViewModel({ analyzingDocuments = [] }: UseStudioDocumentsViewModelOptions = {}) {
   const navigate = useNavigate();
   const [selectedFilter, setSelectedFilter] = useState<StudioDocumentFilter>('all');
   const studioDocumentsQuery = useStudioDocuments();
@@ -75,7 +79,26 @@ export function useStudioDocumentsViewModel() {
       navigate('/studio/academic-plans/editor', { state: routeState });
     },
   });
-  const documents = studioDocumentsQuery.data ?? EMPTY_STUDIO_DOCUMENTS;
+  const documents = useMemo(() => {
+    const queryDocuments = studioDocumentsQuery.data ?? EMPTY_STUDIO_DOCUMENTS;
+    const analyzingDocumentMap = new Map(
+      analyzingDocuments.map((document) => [document.id, document]),
+    );
+
+    if (analyzingDocumentMap.size === 0) {
+      return queryDocuments;
+    }
+
+    return queryDocuments.map((document) =>
+      analyzingDocumentMap.has(document.id) && document.status !== 'COMPLETED'
+        ? {
+            ...document,
+            status: 'ANALYZING' as const,
+            updatedAt: analyzingDocumentMap.get(document.id)?.updatedAt ?? document.updatedAt,
+          }
+        : document,
+    );
+  }, [analyzingDocuments, studioDocumentsQuery.data]);
   const counts = useMemo(
     () => ({
       all: documents.length,
@@ -110,6 +133,11 @@ export function useStudioDocumentsViewModel() {
     isLoading: studioDocumentsQuery.isLoading,
     isOpeningDraft: openDraftMutation.isPending,
     openDocument: (document: StudioDocument) => {
+      if (document.status === 'ANALYZING') {
+        navigate(`/studio/documents/${document.id}/analyzing`, { state: { document } });
+        return;
+      }
+
       if (document.status !== 'DRAFT' || openDraftMutation.isPending) {
         return;
       }

@@ -8,7 +8,7 @@ export function StudioDocumentCard({ document, onClick }: { document: StudioDocu
       type="button"
       disabled={!onClick}
       onClick={onClick}
-      className="flex h-[106px] w-full gap-4 rounded-[12px] bg-white px-4 py-3 text-left shadow-[0_0_8px_rgba(0,0,0,0.04)] disabled:cursor-default"
+      className="flex h-[106px] w-full items-center gap-4 rounded-[12px] bg-white px-4 py-3 text-left shadow-[0_0_8px_rgba(0,0,0,0.04)] disabled:cursor-default"
     >
       <div className="flex h-10 w-10 shrink-0 items-center justify-center">
         <StudioSparkIcon />
@@ -38,9 +38,9 @@ export function StudioDocumentCard({ document, onClick }: { document: StudioDocu
         {document.status === 'ANALYZING' ? (
           <div className="mt-auto flex items-center gap-2">
             <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#E8F8F5]">
-              <div className="h-full w-[86%] rounded-full bg-[#31E7BC]" />
+              <div className="analysis-shimmer-bar h-full w-[86%] rounded-full" />
             </div>
-            <span className="text-[13px] font-semibold leading-none text-[#00B88D]">분석중</span>
+            <span className="text-[12px] font-medium leading-none text-[#0BC798]">분석중</span>
           </div>
         ) : (
           <div className="mt-auto flex min-w-0 gap-1">

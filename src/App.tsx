@@ -24,6 +24,7 @@ import OnboardingPage from '@/pages/OnboardingPage';
 import LoginPage from '@/pages/LoginPage';
 import SignupCompletePage from '@/pages/SignupCompletePage';
 import SignupPage from '@/pages/SignupPage';
+import StudioDocumentAnalyzingPage from '@/pages/StudioDocumentAnalyzingPage';
 import StudioPage from '@/pages/StudioPage';
 
 export default function App() {
@@ -74,6 +75,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <AcademicPlanEditorPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/studio/documents/:documentId/analyzing"
+        element={
+          <ProtectedRoute>
+            <StudioDocumentAnalyzingPage />
           </ProtectedRoute>
         }
       />

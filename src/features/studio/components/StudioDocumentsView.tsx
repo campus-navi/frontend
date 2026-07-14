@@ -55,7 +55,11 @@ export function StudioDocumentsView({ viewModel }: { viewModel: StudioDocumentsV
               <StudioDocumentCard
                 key={document.id}
                 document={document}
-                onClick={document.status === 'DRAFT' ? () => viewModel.openDocument(document) : undefined}
+                onClick={
+                  document.status === 'DRAFT' || document.status === 'ANALYZING'
+                    ? () => viewModel.openDocument(document)
+                    : undefined
+                }
               />
             ))
           : null}
