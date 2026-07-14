@@ -16,6 +16,8 @@ import { useMyPageSummary } from '@/features/mypage/hooks/useMyPageSummary';
 import { STUDIO_DOCUMENTS_QUERY_KEY } from '@/features/studio/hooks/useStudioDocuments';
 import { setMockAnalyzingDocument } from '@/features/studio/mockAnalyzingDocumentStorage';
 
+const ANALYSIS_REQUEST_ERROR_MESSAGE = '분석을 시작하지 못했어요. 잠시 후 다시 시도해주세요.';
+
 function getDraftSaveErrorMessage(error: unknown) {
   if (isApiError(error) && (error.status === 400 || error.status === 404)) {
     return '임시 저장할 수 없어요. 선택한 대상과 작성 내용을 확인해주세요.';
@@ -25,11 +27,11 @@ function getDraftSaveErrorMessage(error: unknown) {
 }
 
 function getAnalysisRequestErrorMessage(error: unknown) {
-  if (error instanceof Error && error.message) {
+  if (error instanceof Error && error.message.includes('문서 id')) {
     return error.message;
   }
 
-  return '분석 요청에 실패했어요. 잠시 후 다시 시도해주세요.';
+  return ANALYSIS_REQUEST_ERROR_MESSAGE;
 }
 
 function createAnalyzingStudioDocument(documentId: number, editorState: NonNullable<ReturnType<typeof getAcademicPlanEditorRouteState>>): StudioDocument {
@@ -53,6 +55,7 @@ export function AcademicPlanEditorPage() {
   const location = useLocation();
   const queryClient = useQueryClient();
   const [isExitModalOpen, setIsExitModalOpen] = useState(false);
+  const [analysisRequestErrorMessage, setAnalysisRequestErrorMessage] = useState('');
   const editorState = getAcademicPlanEditorRouteState(location.state);
   const { data: summary } = useMyPageSummary();
   const saveDraftMutation = useMutation({
@@ -116,10 +119,16 @@ export function AcademicPlanEditorPage() {
       return;
     }
 
+    requestAnalysisMutation.reset();
+    setAnalysisRequestErrorMessage('');
     requestAnalysisMutation.mutate(undefined, {
+      onError: (error) => {
+        setAnalysisRequestErrorMessage(getAnalysisRequestErrorMessage(error));
+      },
       onSuccess: ({ documentId }) => {
         const analyzingDocument = createAnalyzingStudioDocument(documentId, editorState);
 
+        setAnalysisRequestErrorMessage('');
         setMockAnalyzingDocument(analyzingDocument);
         void queryClient.invalidateQueries({ queryKey: STUDIO_DOCUMENTS_QUERY_KEY });
         navigate('/studio?tab=documents', {
@@ -138,9 +147,6 @@ export function AcademicPlanEditorPage() {
     .every((section) => editorState.sections[section.id].isSaved);
   const draftSaveErrorMessage = saveDraftMutation.isError
     ? getDraftSaveErrorMessage(saveDraftMutation.error)
-    : '';
-  const analysisRequestErrorMessage = requestAnalysisMutation.isError
-    ? getAnalysisRequestErrorMessage(requestAnalysisMutation.error)
     : '';
 
   return (
