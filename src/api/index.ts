@@ -8,6 +8,7 @@ export { departmentApi } from '@/api/modules/department';
 export { feedApi } from '@/api/modules/feed';
 export { memberApi } from '@/api/modules/member';
 export { mypageApi } from '@/api/modules/mypage';
+export { notificationApi } from '@/api/modules/notification';
 export { officialPostApi } from '@/api/modules/officialPost';
 export { postApi } from '@/api/modules/post';
 export { studioApi } from '@/api/modules/studio';
@@ -32,6 +33,11 @@ export type {
   CreateAcademicPlanDocumentSection,
 } from '@/api/modules/academicPlan';
 export type { DeadlinePost, DeadlinePosts, FeedCardPost, FeedCards } from '@/api/modules/feed';
+export type {
+  ActivityNotification,
+  ActivityNotificationPost,
+  ReminderNotification,
+} from '@/api/modules/notification';
 export type {
   MemberMe,
   UpdateGradeRequest,

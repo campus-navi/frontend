@@ -2,14 +2,17 @@ import { SvgIcon } from '@/components/ui/SvgIcon';
 
 export function HomeNotificationButton({
   hasNewNotification,
+  onClick,
 }: {
   hasNewNotification: boolean;
+  onClick?: () => void;
 }) {
   return (
     <button
       type="button"
       className="relative flex h-7 w-7 items-center justify-center text-[#BFC4C8]"
       aria-label="알림"
+      onClick={onClick}
     >
       <SvgIcon size={28} viewBox="0 0 28 28">
         <path

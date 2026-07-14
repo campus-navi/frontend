@@ -20,6 +20,9 @@ import MyPageScrapFolderPage from '@/pages/MyPageScrapFolderPage';
 import MyPageScrapsPage from '@/pages/MyPageScrapsPage';
 import NoticeInterestsCompletePage from '@/pages/NoticeInterestsCompletePage';
 import NoticeInterestsPage from '@/pages/NoticeInterestsPage';
+import NotificationActivityDetailPage from '@/pages/NotificationActivityDetailPage';
+import NotificationActivityPage from '@/pages/NotificationActivityPage';
+import NotificationRemindPage from '@/pages/NotificationRemindPage';
 import OnboardingPage from '@/pages/OnboardingPage';
 import LoginPage from '@/pages/LoginPage';
 import SignupCompletePage from '@/pages/SignupCompletePage';
@@ -83,6 +86,30 @@ export default function App() {
         element={
           <ProtectedRoute>
             <StudioDocumentAnalyzingPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/notifications/activity"
+        element={
+          <ProtectedRoute>
+            <NotificationActivityPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/notifications/remind"
+        element={
+          <ProtectedRoute>
+            <NotificationRemindPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/notifications/activity/:missedDate"
+        element={
+          <ProtectedRoute>
+            <NotificationActivityDetailPage />
           </ProtectedRoute>
         }
       />

@@ -324,4 +324,10 @@ export const officialPostApi = {
       data: normalizeAttachmentDownload(response.data),
     };
   },
+  async disableNotification(postId: number) {
+    return request<string>({
+      method: 'delete',
+      url: `/official-posts/${postId}/notification`,
+    });
+  },
 };

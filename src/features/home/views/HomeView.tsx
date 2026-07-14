@@ -29,6 +29,7 @@ export function HomeView({
   onFeaturedNoticeCardClick,
   onFeaturedNoticeDetailClick,
   onFeaturedNoticeTabChange,
+  onNotificationClick,
   onOpenDeadlineList,
   onOpenNoticeInterests,
   shouldShowDeadlinePreviewEmpty,
@@ -39,7 +40,7 @@ export function HomeView({
       <div className="mx-auto flex min-h-[100svh] w-full max-w-[393px] flex-col bg-white pb-[calc(54px+max(32px,env(safe-area-inset-bottom)))]">
         <AppHeader
           variant="main"
-          rightSlot={<HomeNotificationButton hasNewNotification={HAS_NEW_NOTIFICATION} />}
+          rightSlot={<HomeNotificationButton hasNewNotification={HAS_NEW_NOTIFICATION} onClick={onNotificationClick} />}
           className="fixed left-1/2 top-0 z-40 w-full max-w-[393px] -translate-x-1/2 bg-white"
         />
         <div className="h-[calc(60px+max(20px,env(safe-area-inset-top)))] shrink-0" aria-hidden="true" />
