@@ -24,6 +24,14 @@ function getDraftSaveErrorMessage(error: unknown) {
   return '임시 저장에 실패했어요. 잠시 후 다시 시도해주세요.';
 }
 
+function getAnalysisRequestErrorMessage(error: unknown) {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return '분석 요청에 실패했어요. 잠시 후 다시 시도해주세요.';
+}
+
 function createAnalyzingStudioDocument(documentId: number, editorState: NonNullable<ReturnType<typeof getAcademicPlanEditorRouteState>>): StudioDocument {
   return {
     id: documentId,
@@ -63,6 +71,10 @@ export function AcademicPlanEditorPage() {
       }
 
       const { documentId } = await saveAcademicPlanDocument(editorState);
+
+      if (typeof documentId !== 'number') {
+        throw new Error('저장된 문서 id를 확인할 수 없어요. 잠시 후 다시 시도해주세요.');
+      }
 
       return requestAcademicPlanAnalysisMock(documentId);
     },
@@ -127,6 +139,9 @@ export function AcademicPlanEditorPage() {
   const draftSaveErrorMessage = saveDraftMutation.isError
     ? getDraftSaveErrorMessage(saveDraftMutation.error)
     : '';
+  const analysisRequestErrorMessage = requestAnalysisMutation.isError
+    ? getAnalysisRequestErrorMessage(requestAnalysisMutation.error)
+    : '';
 
   return (
     <main className="min-h-[100svh] bg-white">
@@ -172,6 +187,9 @@ export function AcademicPlanEditorPage() {
               );
             })}
           </div>
+          {analysisRequestErrorMessage ? (
+            <p className="mt-4 text-[14px] font-medium leading-5 text-[#FF5E47]">{analysisRequestErrorMessage}</p>
+          ) : null}
         </section>
 
         <div className="fixed bottom-0 left-1/2 z-20 w-full max-w-[393px] -translate-x-1/2 bg-white px-4 pb-[max(36px,env(safe-area-inset-bottom))] pt-3">
