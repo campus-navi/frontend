@@ -34,7 +34,14 @@ export function NotificationListItem({
       <div className="flex h-5 items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-1">
           <NotificationIcon variant={variant} />
-          <span className="truncate text-[14px] font-semibold leading-5 text-[#292B2C]">{typeLabel}</span>
+          <span
+            className={[
+              'truncate text-[14px] font-semibold leading-5',
+              variant === 'activity' ? 'text-[#BFC4C8]' : 'text-[#292B2C]',
+            ].join(' ')}
+          >
+            {typeLabel}
+          </span>
         </div>
         {meta && metaPlacement === 'header' ? (
           <span className="shrink-0 text-[12px] font-medium leading-[17px] text-[#8F969D]">{meta}</span>
@@ -45,17 +52,24 @@ export function NotificationListItem({
         <p
           className={[
             'text-[16px] font-semibold leading-[22px] text-[#292B2C]',
-            variant === 'remind' ? 'truncate' : 'line-clamp-2',
+            variant === 'activity' || variant === 'remind' ? 'truncate' : 'line-clamp-2',
           ].join(' ')}
         >
           {title}
         </p>
-        <p className="mt-0.5 text-[16px] font-medium leading-[22px] text-[#707376]">{description}</p>
+        {description ? (
+          <p className="mt-0.5 text-[16px] font-medium leading-[22px] text-[#707376]">{description}</p>
+        ) : null}
         {meta && metaPlacement === 'footer' ? (
           <p className="mt-1 text-[14px] font-semibold leading-5 text-[#0BC798]">{meta}</p>
         ) : null}
         {actionLabel ? (
-          <span className="mt-1 inline-flex items-center text-[14px] font-semibold leading-5 text-[#00B88D]">
+          <span
+            className={[
+              'mt-1 inline-flex items-center text-[14px] font-semibold leading-5',
+              variant === 'activity' ? 'text-[#292B2C]' : 'text-[#00B88D]',
+            ].join(' ')}
+          >
             {actionLabel}
             <SvgIcon size={20} viewBox="0 0 20 20">
               <path
@@ -75,7 +89,7 @@ export function NotificationListItem({
 
   const className = [
     'flex w-full flex-col gap-2 text-left',
-    variant === 'remind' ? 'py-0' : 'py-5',
+    variant === 'activity' || variant === 'remind' ? 'py-0' : 'py-5',
     onClick
       ? 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#0BC798]'
       : '',
@@ -191,12 +205,12 @@ function NotificationIcon({ variant }: { variant: 'activity' | 'remind' }) {
   return (
     <SvgIcon size={20} viewBox="0 0 20 20">
       <path
-        d="M5.5 4.5h9M5.5 8.5h9M5.5 12.5h5.5M4.2 2.8h11.6A1.2 1.2 0 0 1 17 4v12l-3-2H4.2A1.2 1.2 0 0 1 3 12.8V4a1.2 1.2 0 0 1 1.2-1.2Z"
+        d="M7.1 5.8H3.5v-3.6M3.75 5.65A6.25 6.25 0 1 1 4 14.1"
         fill="none"
-        stroke="#707376"
+        stroke="#0BC798"
         strokeLinecap="round"
         strokeLinejoin="round"
-        strokeWidth="1.4"
+        strokeWidth="1.5"
       />
     </SvgIcon>
   );

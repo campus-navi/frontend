@@ -4,14 +4,26 @@ import { isApiError } from '@/api';
 import { NotificationListItem } from '@/features/notifications/components/NotificationListItem';
 import { NotificationStateMessage } from '@/features/notifications/components/NotificationStateMessage';
 import { NotificationsShell } from '@/features/notifications/components/NotificationsShell';
+import { useMemberMe } from '@/features/home/hooks/useMemberMe';
 import { useActivityNotifications } from '@/features/notifications/hooks/useActivityNotifications';
-import { formatMissedDateLabel } from '@/features/notifications/utils/notificationDate';
+import {
+  formatMissedDateLabel,
+  formatMissedNoticeTitle,
+  getMissedDateDayDiff,
+} from '@/features/notifications/utils/notificationDate';
 
 export function NotificationActivityPage() {
   const navigate = useNavigate();
   const { data, error, isError, isLoading, refetch } = useActivityNotifications();
+  const memberMe = useMemberMe();
   const notifications = data ?? [];
   const isUnauthorized = isApiError(error) && error.status === 401;
+  const latestBoundaryIndex = notifications.findIndex((notification) => {
+    const dayDiff = getMissedDateDayDiff(notification.missedDate);
+
+    return dayDiff !== null && dayDiff > 1;
+  });
+  const shouldShowLatestBoundary = latestBoundaryIndex > 0;
 
   return (
     <NotificationsShell activeTab="activity">
@@ -31,18 +43,24 @@ export function NotificationActivityPage() {
           <NotificationStateMessage message="확인할 활동 알림이 없어요." />
         ) : null}
         {!isLoading && !isError && notifications.length > 0 ? (
-          <div className="divide-y divide-[#EEF0F2]">
-            {notifications.map((notification) => (
-              <NotificationListItem
-                key={notification.missedDate}
-                actionLabel={`${notification.count}건 확인하기`}
-                description="놓친 추천 공지가 있어요"
-                meta={formatMissedDateLabel(notification.missedDate)}
-                title="추천 공지를 놓치셨어요."
-                typeLabel="활동 알림"
-                variant="activity"
-                onClick={() => navigate(`/notifications/activity/${notification.missedDate}`)}
-              />
+          <div className="flex flex-col gap-6 pt-5">
+            {notifications.map((notification, index) => (
+              <div key={notification.missedDate} className="contents">
+                {shouldShowLatestBoundary && index === latestBoundaryIndex ? (
+                  <div className="flex h-[66px] items-center justify-center text-[12px] font-normal leading-[18px] text-[#BFC4C8]">
+                    여기까지가 최신 알림이에요.
+                  </div>
+                ) : null}
+                <NotificationListItem
+                  actionLabel={`${notification.count}건 확인하기`}
+                  description=""
+                  meta={formatMissedDateLabel(notification.missedDate)}
+                  title={formatMissedNoticeTitle(notification.missedDate, memberMe.data?.nickname)}
+                  typeLabel="지나친 공지"
+                  variant="activity"
+                  onClick={() => navigate(`/notifications/activity/${notification.missedDate}`)}
+                />
+              </div>
             ))}
           </div>
         ) : null}

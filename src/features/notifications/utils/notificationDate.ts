@@ -44,6 +44,31 @@ export function formatMissedDateLabel(missedDate: string, now = new Date()) {
   return `${dayDiff}일전`;
 }
 
+export function getMissedDateDayDiff(missedDate: string, now = new Date()) {
+  const date = parseDateOnly(missedDate);
+
+  if (!date) {
+    return null;
+  }
+
+  return Math.max(0, Math.floor((getDateOnlyStart(now) - getDateOnlyStart(date)) / DAY_IN_MS));
+}
+
+export function formatMissedNoticeTitle(missedDate: string, nickname?: string, now = new Date()) {
+  const dayDiff = getMissedDateDayDiff(missedDate, now);
+  const displayName = nickname?.trim() || '회원';
+
+  if (dayDiff === null) {
+    return `${displayName}님이 놓친 중요한 공지가 있어요.`;
+  }
+
+  if (dayDiff <= 1) {
+    return `어제 ${displayName}님이 놓친 중요한 공지가 있어요`;
+  }
+
+  return `${dayDiff}일전, ${displayName}님이 놓친 중요한 공지가 있어요.`;
+}
+
 export function formatReminderDDay(endDate: string, now = new Date()) {
   const date = parseDateOnly(endDate);
 
