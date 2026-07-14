@@ -51,7 +51,8 @@ export function NotificationListItem({
       <div className="min-w-0 pl-6">
         <p
           className={[
-            'text-[16px] font-semibold leading-[22px] text-[#292B2C]',
+            'text-[16px] leading-[22px]',
+            variant === 'activity' ? 'font-medium text-[#4B5157]' : 'font-semibold text-[#292B2C]',
             variant === 'activity' || variant === 'remind' ? 'truncate' : 'line-clamp-2',
           ].join(' ')}
         >

@@ -45,7 +45,7 @@ export function NotificationActivityDetailPage() {
   }, [query.isSuccess, queryClient]);
 
   const handleBackClick = () => {
-    navigate('/notifications/activity');
+    navigate('/notifications/activity', { replace: true });
   };
 
   if (!normalizedMissedDate) {
